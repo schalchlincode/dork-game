@@ -61,3 +61,19 @@ Fresh states were loaded in the actual Edge page. The first reply below was obse
 | Archives | `go down stairs` | Parser rejected a natural route phrase | Descends when a lit candle is carried; the existing darkness rule still applies. |
 
 `read drawings` was also checked in Occult Compliance: it describes the drawings and then prints an archive update. No change was needed. More fresh and progressed puzzle states remain to be sampled; this is still not an exhaustive response count.
+
+### Fresh-room Edge sample, 2026-10-04
+
+Entered 31 commands in Edge across ten rooms with the named room loaded. Each reply and room state was inspected. The existing full-route regression was replayed after the changes below.
+
+| Room | Input | Observed problem | Resolution |
+|---|---|---|---|
+| Meeting | `go out the door`; `take water`; `sit at table` | Exit rejected; glass gave a generic refusal; sitting gave a generic line | Exit goes east; glass and table replies reflect visible scene. |
+| Records lobby | `open gate` | Generic failure even when Jorge had moved | Uses the gate's normal blocked or clear movement rule. |
+| Legal Annex | `refuse to sign`; `take stamp` | Refusal missed waiver clue; locked stamp was reported absent | Both now point to the waiver stamp and acrylic box. |
+| Procurement | `read sign` | Nonspecific reply | Explains documented necessity and the machine's two required inputs. |
+| Occult Compliance | `open inbox` | Generic failure | Describes Salem and the tray. |
+| Archives | `look at cabinets` | Nonspecific reply | Describes the mortared cabinets and points to the ledger. |
+| Sub-Basement | `go to parking`; `look at arrow`; `turn on lights` | Route and scenery replies missed the visible blockade or failed lights | Names the black roots, eastern route, and candle. |
+
+The sampled commands that already made sense were left alone. The browser regression now asserts these corrected replies and both blocked and clear gate states. This is another observed sample, not exhaustive parser coverage or evidence of hundreds of distinct coherent replies.

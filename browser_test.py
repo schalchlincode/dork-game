@@ -384,6 +384,28 @@ async def run():
             await fix_page.reload()
             await command(fix_page, "go down stairs")
             assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "subbasement"
+            # Fresh player wording observed in Edge, with the reply and room checked.
+            for room, phrase, expected in (
+                ("meeting", "take water", "skin on the water"),
+                ("meeting", "sit at table", "sit at the conference table"),
+                ("legal_annex", "refuse to sign", "Waiver Stamp 4C"),
+                ("legal_annex", "take stamp", "locked in the acrylic box"),
+                ("procurement", "read sign", "documented business necessity"),
+                ("occult_compliance", "open inbox", "Salem sleeps"),
+                ("archives", "look at cabinets", "mortared"),
+                ("subbasement", "go to parking", "Black roots"),
+                ("subbasement", "look at arrow", "points east"),
+                ("subbasement", "turn on lights", "emergency lights have failed"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected.lower() in (await fix_page.locator("#output p").last.inner_text()).lower(), (room, phrase)
+            for room, flags, expected_room in (("meeting", {}, "executive_corridor"), ("records_lobby", {}, "records_lobby"), ("records_lobby", {"jorgeMoved": True}, "records_stacks")):
+                await fix_page.evaluate("data => localStorage.setItem('dork_run_v1', JSON.stringify({room:data.room, inventory:[], taken:[], dropped:{}, flags:data.flags, visited:[data.room], dead:false, won:false}))", {"room": room, "flags": flags})
+                await fix_page.reload()
+                await command(fix_page, "go out the door" if room == "meeting" else "open gate")
+                assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == expected_room, room
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:

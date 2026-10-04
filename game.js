@@ -133,7 +133,7 @@
     if (/^(?:look around|look room|look here|look at room|examine room|survey)$/.test(cleaned)) return {verb:'look', objectText:'', targetText:'', raw};
     if (/^(?:check inventory|look in bag|check my stuff)$/.test(cleaned)) return {verb:'inventory', objectText:'', targetText:'', raw};
     if (/^(?:take all items|grab all of it)$/.test(cleaned)) return {verb:'take', objectText:'all', targetText:'', raw};
-    if (/^(?:get out(?: of here)?|go out(?:side)?|walk out|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
+    if (/^(?:get out(?: of here)?|go out(?:side)?|go out (?:the )?door|walk out(?: (?:the )?door)?|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
     const through = cleaned.match(/^(?:go|walk|move|head)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
     if (through) {
       const route = through[1].replace(/\s+(?:door|passage|exit|way)$/,'');
@@ -180,6 +180,7 @@
     exitAlias: (c) => {
       const direction = roomNow().exitAliases?.[c.objectText];
       if (direction) move(direction);
+      else if (state.room === 'subbasement' && hasWord(c.objectText, 'parking')) print('Black roots have collapsed the parking passage. The marked route east leads to the Continuity Chamber.');
       else print(`There is no ${c.objectText} route from here.`);
     },
     open: (c) => openThing(c.objectText),
@@ -203,7 +204,7 @@
       print("You decline to make that signature binding. Legal seems disappointed to retain only your attention.");
     },
     refuse: (c) => {
-      if (state.room === 'legal_annex' && hasWord(c.objectText, 'contract'))
+      if (state.room === 'legal_annex' && (hasWord(c.objectText, 'contract') || /\brefuse to sign\b/i.test(c.raw)))
         return print('You refuse the contract. Legal requires Waiver Stamp 4C to record that refusal; the stamp is locked in the acrylic box.');
       print(`You decline ${c.objectText || 'the offer'}. The Agency records your lack of enthusiasm.`);
     },
@@ -242,11 +243,11 @@
       records_lobby: { placard: 'JORGE — RECORDS MANAGEMENT SPECIALIST III. His desk blocks the southern gate to the stacks.' },
       records_stacks: { shelves: 'The shelves hold files dated years into the future. Shelf 20 bears a scratched warning beside Ash.', 'shelf 20': DORK_DATA.items.ash_note.desc },
       legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
-      procurement: { slots: 'The brass machine has a FORM slot and a WAIVER slot. Its SOUL slot is taped over.' },
+      procurement: { slots: 'The brass machine has a FORM slot and a WAIVER slot. Its SOUL slot is taped over.', sign: 'The sign requires documented business necessity for every purchase, including exorcisms. The brass machine wants a form and a waiver.' },
       hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.' },
       occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.' },
-      archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.' },
-      subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.' },
+      archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.', cabinets: 'Filing cabinets are mortared into the limestone walls. The ledger on the pedestal is the record you can actually read.' },
+      subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.', arrow: 'The painted arrow points east to the Continuity Chamber. The parking passage is still blocked by black roots.' },
       continuity_chamber: { door: state.flags.finalOpen ? 'The eastern door stands open. You can leave.' : state.flags.keyUsed ? 'The key has woken five seals, but the eastern door still waits for their names.' : 'Five seals surround the eastern door. A silver key slot waits beneath them.' }
     };
     const detail = Object.entries(scenery[state.room] || {}).find(([phrase]) => hasWord(text, phrase));
@@ -262,9 +263,11 @@
 
   function take(text) {
     const id = findItem(text, true);
+    if (state.room === 'legal_annex' && hasWord(text, 'stamp') && !state.flags.stampTaken) return print('Waiver Stamp 4C is locked in the acrylic box. Your visitor badge might pry it open.');
     if (!id) return print(`You cannot find ${text || 'that'} here. This is one of your better outcomes tonight.`);
     const item = DORK_DATA.items[id];
     if (id === 'jorge') return print('You cannot take Jorge. Records has already tried transferring him. The forms came back bitten.');
+    if (!item.portable && id === 'water') return print('You lift the glass, but the skin on the water stirs. You set it back on the table.');
     if (!item.portable) return print(`You attempt to take ${item.name}. It declines the transfer.`);
     if (state.inventory.includes(id)) return print(`You already have ${item.name}. Hoarding is not leadership.`);
     state.inventory.push(id); if (!state.taken.includes(id)) state.taken.push(id);
@@ -313,6 +316,8 @@
     if (state.room === 'executive_corridor' && hasWord(text, 'elevator')) return print('The elevator doors open east, but the car is out of service. You can step in; it will not take you to another floor.');
     if (state.room === 'records_stacks' && hasWord(text, 'file')) return examine('file');
     if (state.room === 'archives' && hasWord(text, 'ledger')) return examine('ledger');
+    if (state.room === 'occult_compliance' && hasWord(text, 'inbox')) return examine('inbox');
+    if (state.room === 'records_lobby' && hasWord(text, 'gate')) return move('south');
     if (state.room === 'continuity_chamber' && hasWord(text, 'door')) return examine('door');
     if (/box|stamp/.test(text) && state.room === 'legal_annex') {
       if (state.flags.stampTaken) return print('The acrylic box is already open and, like most safeguards, retrospectively decorative.');
@@ -407,6 +412,9 @@
     // direct puzzle phrases / natural-language easter eggs
     const r = c.raw.toLowerCase();
     if (state.room === 'meeting' && c.verb === 'drink' && hasWord(c.objectText, 'water')) return print('You lift the glass. The skin on the water moves against the rim. You put it down without drinking.');
+    if (state.room === 'meeting' && c.verb === 'sit' && hasWord(c.objectText, 'table')) return print('You sit at the conference table. The agenda and badge remain in reach; the east door is the only exit.');
+    if (state.room === 'subbasement' && c.verb === 'use' && hasWord(c.objectText, 'lights')) return print('The emergency lights have failed. Your black candle is the light that still works.');
+    if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
     if (state.room === 'executive_corridor' && c.verb === 'push' && /elevator|button/.test(c.objectText)) return print('You press the elevator call button. Nothing lights up. The car is out of service.');
     if (state.room === 'continuity_chamber' && c.verb === 'touch' && hasWord(c.objectText, 'seals')) return print(state.flags.keyUsed ? 'The seals glow under your fingers. Their five poses are a naming clue, not buttons.' : 'The brass seals are cold. The silver key slot beneath them is still empty.');
