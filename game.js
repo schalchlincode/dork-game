@@ -522,6 +522,27 @@
       };
       return print(lines[id]);
     }
+    if (c.verb === 'touch') {
+      const lines = {
+        agenda: 'The leather folder is cool and stiff. Five blank signature lines wait inside; touching them signs nothing.',
+        badge: 'The plastic badge warms in your hand. SCOTT is still printed beneath your photograph.',
+        water: 'The skin on the water clings to your fingertip for a moment. You wipe it on the table.',
+        mug: 'The chipped rim is rough beneath your thumb. The government slogan has worn down to almost nothing.',
+        creamer: 'The creamer bottle is cold. JORGE ONLY is written across the label in a firm hand.',
+        napkin: 'Purple marker has bled through the napkin. The three stick figures still hold hands around a door.',
+        memo: 'The memo curls at the corner. Its rule about feeding Records staff remains unpleasantly specific.',
+        form66b: 'The form is thin enough to feel the printed boxes through the paper. Procurement has a slot for it.',
+        ash_note: 'The warning is scratched into Shelf 20, not written on paper. Ash keeps watch above it.',
+        records_file: 'The personnel file is dusty, but its impossible creation date is clear on the cover.',
+        contract: 'Page sixty-four is tucked under the contract. The signature line above it is still blank.',
+        stamp_box: state.flags.stampTaken ? 'The acrylic box is open and empty; the cheap lock hangs loose.' : 'The acrylic is smooth and the lock is cheap. Waiver Stamp 4C is still inside.',
+        requisition_machine: 'The brass is cold. Its FORM and WAIVER slots are open; the SOUL slot is taped shut.',
+        compliance_manual: 'The manual has stiff pages and a worn spine. Section 8.4 is marked for a reason.',
+        ledger: 'The ledger is heavy and dry beneath your fingers. Luna stays hidden under its pedestal.',
+        final_plaque: 'The letters are cut into cold metal. The plaque gives advice, but no way to open the door.'
+      };
+      if (lines[id]) return print(lines[id]);
+    }
     if (generic[c.verb]) {
       const arr = generic[c.verb]; const line = arr[Math.abs(hash(c.raw)) % arr.length];
       const name = id ? (DORK_DATA.items[id].article || (['boo','salem','ash','luna','merlin'].includes(id) ? DORK_DATA.items[id].name : `the ${DORK_DATA.items[id].name}`)) : (c.objectText || 'the situation');

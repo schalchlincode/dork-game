@@ -47,7 +47,7 @@
       "room": "meeting",
       "item": "agenda folder",
       "command": "touch agenda folder",
-      "reply": "The agenda folder tolerates this briefly.",
+      "reply": "The leather folder is cool and stiff. Five blank signature lines wait inside; touching them signs nothing.",
       "room_after": "meeting",
       "dead": false
     },
@@ -103,7 +103,7 @@
       "room": "meeting",
       "item": "visitor badge",
       "command": "touch visitor badge",
-      "reply": "You touch the visitor badge. It does not improve the situation.",
+      "reply": "The plastic badge warms in your hand. SCOTT is still printed beneath your photograph.",
       "room_after": "meeting",
       "dead": false
     },
@@ -159,7 +159,7 @@
       "room": "meeting",
       "item": "glass of water",
       "command": "touch glass of water",
-      "reply": "The glass of water tolerates this briefly.",
+      "reply": "The skin on the water clings to your fingertip for a moment. You wipe it on the table.",
       "room_after": "meeting",
       "dead": false
     },
@@ -215,7 +215,7 @@
       "room": "break_room",
       "item": "government mug",
       "command": "touch government mug",
-      "reply": "The government mug tolerates this briefly.",
+      "reply": "The chipped rim is rough beneath your thumb. The government slogan has worn down to almost nothing.",
       "room_after": "break_room",
       "dead": false
     },
@@ -271,7 +271,7 @@
       "room": "break_room",
       "item": "hazelnut creamer",
       "command": "touch hazelnut creamer",
-      "reply": "The hazelnut creamer tolerates this briefly.",
+      "reply": "The creamer bottle is cold. JORGE ONLY is written across the label in a firm hand.",
       "room_after": "break_room",
       "dead": false
     },
@@ -327,7 +327,7 @@
       "room": "break_room",
       "item": "napkin drawing",
       "command": "touch napkin drawing",
-      "reply": "You touch the napkin drawing. It does not improve the situation.",
+      "reply": "Purple marker has bled through the napkin. The three stick figures still hold hands around a door.",
       "room_after": "break_room",
       "dead": false
     },
@@ -383,7 +383,7 @@
       "room": "break_room",
       "item": "break-room memo",
       "command": "touch break-room memo",
-      "reply": "You touch the break-room memo. It does not improve the situation.",
+      "reply": "The memo curls at the corner. Its rule about feeding Records staff remains unpleasantly specific.",
       "room_after": "break_room",
       "dead": false
     },
@@ -495,7 +495,7 @@
       "room": "records_stacks",
       "item": "Form 66-B",
       "command": "touch Form 66-B",
-      "reply": "You touch the Form 66-B. It does not improve the situation.",
+      "reply": "The form is thin enough to feel the printed boxes through the paper. Procurement has a slot for it.",
       "room_after": "records_stacks",
       "dead": false
     },
@@ -551,7 +551,7 @@
       "room": "records_stacks",
       "item": "scratched shelf note",
       "command": "touch scratched shelf note",
-      "reply": "You touch the scratched shelf note. It does not improve the situation.",
+      "reply": "The warning is scratched into Shelf 20, not written on paper. Ash keeps watch above it.",
       "room_after": "records_stacks",
       "dead": false
     },
@@ -607,7 +607,7 @@
       "room": "records_stacks",
       "item": "continuity personnel file",
       "command": "touch continuity personnel file",
-      "reply": "The continuity personnel file tolerates this briefly.",
+      "reply": "The personnel file is dusty, but its impossible creation date is clear on the cover.",
       "room_after": "records_stacks",
       "dead": false
     },
@@ -719,7 +719,7 @@
       "room": "legal_annex",
       "item": "continuity contract",
       "command": "touch continuity contract",
-      "reply": "The continuity contract tolerates this briefly.",
+      "reply": "Page sixty-four is tucked under the contract. The signature line above it is still blank.",
       "room_after": "legal_annex",
       "dead": false
     },
@@ -775,7 +775,7 @@
       "room": "legal_annex",
       "item": "waiver stamp box",
       "command": "touch waiver stamp box",
-      "reply": "The waiver stamp box tolerates this briefly.",
+      "reply": "The acrylic is smooth and the lock is cheap. Waiver Stamp 4C is still inside.",
       "room_after": "legal_annex",
       "dead": false
     },
@@ -831,7 +831,7 @@
       "room": "procurement",
       "item": "requisition machine",
       "command": "touch requisition machine",
-      "reply": "You touch the requisition machine. It does not improve the situation.",
+      "reply": "The brass is cold. Its FORM and WAIVER slots are open; the SOUL slot is taped shut.",
       "room_after": "procurement",
       "dead": false
     },
@@ -1279,7 +1279,7 @@
       "room": "occult_compliance",
       "item": "Occult Compliance Manual",
       "command": "touch Occult Compliance Manual",
-      "reply": "You touch the Occult Compliance Manual. It does not improve the situation.",
+      "reply": "The manual has stiff pages and a worn spine. Section 8.4 is marked for a reason.",
       "room_after": "occult_compliance",
       "dead": false
     },
@@ -1335,7 +1335,7 @@
       "room": "archives",
       "item": "continuity ledger",
       "command": "touch continuity ledger",
-      "reply": "You touch the continuity ledger. It does not improve the situation.",
+      "reply": "The ledger is heavy and dry beneath your fingers. Luna stays hidden under its pedestal.",
       "room_after": "archives",
       "dead": false
     },
@@ -1559,7 +1559,7 @@
       "room": "continuity_chamber",
       "item": "continuity plaque",
       "command": "touch continuity plaque",
-      "reply": "The continuity plaque tolerates this briefly.",
+      "reply": "The letters are cut into cold metal. The plaque gives advice, but no way to open the door.",
       "room_after": "continuity_chamber",
       "dead": false
     },
