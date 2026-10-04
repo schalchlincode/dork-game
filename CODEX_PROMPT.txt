@@ -1,0 +1,51 @@
+You are maintaining and expanding a small static web game called DORK — A Scott Adventure.
+
+PROJECT GOAL
+DORK is a deeply personalized, brutally difficult, Zork-inspired parser adventure built for Scott. It is a dark supernatural government-agency dungeon with very dry, cruel humor. The static GitHub Pages version must remain fully playable without any server, API, database, build system, or external dependency.
+
+READ FIRST
+Before changing anything, read README.md, DESIGN.md, index.html, style.css, game-data.js, and game.js in full. Treat DESIGN.md as the governing design specification unless the owner explicitly overrides it.
+
+NON-NEGOTIABLES
+1. Preserve the existing CRT/old-monitor visual identity.
+2. iPhone is a first-class target. Test narrow portrait widths and landscape heights.
+3. Preserve static GitHub Pages compatibility.
+4. Preserve permadeath semantics: run state resets on death; meta death/lore memory may persist.
+5. Preserve one clear true ending.
+6. Do not convert the game into conventional RPG combat.
+7. Keep the narrator dry, cruel, insulting, and unfazed.
+8. Keep Scott player-directed. Do not constantly script his feelings or dialogue.
+9. Parser breadth is a major feature. Prefer adding understood actions/responses over rejecting input.
+10. Do not remove existing content merely to simplify implementation.
+11. Avoid unnecessary frameworks, package managers, build steps, services, or architectural rewrites.
+12. Do not add AI/API dependencies unless the owner explicitly asks for the adaptive-AI phase.
+
+YOUR FIRST TASK
+Perform a full audit of the current game. Then improve it into a polished release while respecting all rules above.
+
+Priorities, in order:
+A. Fix any functional parser, state, persistence, mobile-layout, or progression bugs that could prevent completion.
+B. Make sure a complete new player can reach the true ending through discoverable clues.
+C. Greatly expand parser coverage, synonyms, novelty actions, and object-specific responses. The desired feeling is that the player repeatedly tries ridiculous commands and is surprised DORK understands them.
+D. Expand rooms, puzzles, lore, deaths, environmental responses, and personalized Scott/family/cat material while keeping the core path learnable and coherent.
+E. Improve replay value with harmless variation that never randomizes away required knowledge or makes permadeath unfair.
+F. Preserve performance and readability on iPhone.
+
+TESTING
+Do not claim completion based only on source inspection. Exercise the game through a real completion path and representative failure paths. At minimum verify:
+- start -> true ending is possible
+- all required items can be obtained and used
+- every room is reachable as intended
+- at least several lethal paths correctly reset only run state
+- death log and lore persist correctly
+- RESTART works
+- current-run autosave/resume works
+- mobile viewport does not hide the command input
+- parser accepts several synonym and weird-action forms
+- no console errors during normal play
+
+CHANGE DISCIPLINE
+Make focused changes. Do not refactor working systems without a concrete reason. If you discover a design ambiguity, make the smallest reasonable decision consistent with DESIGN.md rather than stopping to ask, unless it materially changes the owner's intent.
+
+DELIVERABLE
+Leave the repository in a GitHub Pages-ready state. Update README.md when behavior or publishing steps change. Summarize what changed, what you tested, the exact true-ending path used for validation, and any remaining optional expansion ideas.
