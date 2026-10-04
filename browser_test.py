@@ -465,6 +465,12 @@ async def run():
                 await fix_page.reload()
                 await command(fix_page, "enter gate")
                 assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == expected_room
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'occult_compliance', inventory:[], taken:[], dropped:{}, flags:{}, visited:['occult_compliance'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "look at elevator")
+            assert "freight elevator waits to the south" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "go down elevator")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "archives"
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:
