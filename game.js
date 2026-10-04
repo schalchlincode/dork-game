@@ -332,6 +332,19 @@
   }
 
   function openThing(text) {
+    const id = findInventory(text) || findItem(text);
+    if (['ash','merlin','salem','luna','boo','jorge'].includes(id)) return print(`${DORK_DATA.items[id].name} is a living being, not a container. Try talking instead.`);
+    if (['memo','ash_note','contract','compliance_manual','drawings','final_plaque','form66b','napkin'].includes(id)) return examine(text);
+    if (id === 'badge') return print('The visitor badge is a solid plastic card. It may still be useful as a pry tool.');
+    if (id === 'water') return print('The glass is already open. The skin across the water makes drinking it a separate bad idea.');
+    if (id === 'mug') return print('The mug has no lid. Its chipped rim is the least alarming thing in this room.');
+    if (id === 'creamer') return print('The creamer cup has a peel-back seal. Jorge in Records is its intended recipient.');
+    if (id === 'tarot_spread') return print('The three cards are already laid out. Choose one; Merlin keeps pointing at The Tower.');
+    if (id === 'requisition_machine') return print(state.flags.procured ? 'The requisition drawer stands open and empty. The machine has issued everything it intends to.' : 'The requisition drawer is shut. Feed the FORM and WAIVER slots before expecting a candle or key.');
+    if (id === 'fool') return print('The Fool is a flat card, not a door. Its traveler approaches a cliff without reading the signage.');
+    if (id === 'tower') return print('The Tower is a flat card. Its lightning-struck building is marked CHANGE MANAGEMENT.');
+    if (id === 'sun') return print('The Sun is a flat card. Its cheerful radiance is precisely why it should worry you.');
+    if (id === 'seals') return print(state.flags.keyUsed ? 'The five brass seals are lit, but each remains fixed in the door. Name the cats in the order their poses show.' : 'The five brass seals are fixed in the door. A silver key slot sits beneath them.');
     if (state.room === 'meeting' && hasWord(text, 'west door')) return print('The west door is gone. The only exit is east, beneath the red sign.');
     if (state.room === 'meeting' && hasWord(text, 'east door')) return print('The east door opens onto the Executive Corridor. Go east to leave the meeting room.');
     if (state.room === 'meeting' && hasWord(text, 'agenda')) return examine('agenda');
@@ -398,6 +411,32 @@
     if (a === 'black_candle' || hasWord(c.objectText, 'candle')) {
       if (!state.inventory.includes('black_candle')) return print('There is no candle in your inventory to light.');
       state.flags.candleLit = true; print("You light the black candle. Its flame is green. The tunnel ahead becomes visible enough to regret."); return;
+    }
+
+    if (a && !c.targetText) {
+      const replies = {
+        agenda: 'The agenda is for reading, not signing. Its five empty lines are the warning.',
+        badge: 'The badge might pry open the acrylic stamp box in Legal. It will not open any electronic door.',
+        water: 'The water has formed a skin. Drinking it would be a management decision, and you are not management here.',
+        mug: 'The mug is empty. The break room has a coffee machine, but Jorge wants the hazelnut creamer.',
+        creamer: 'The creamer is marked JORGE ONLY. Bring it to him at the Records gate.',
+        memo: 'Read the memo. Its feeding policy is more useful than it deserves to be.',
+        napkin: 'The napkin drawing says HOME IS A PASSWORD. Keep that in mind when you reach the final door.',
+        jorge: state.flags.jorgeMoved ? 'Jorge has moved aside. The Records gate is clear; go south.' : 'Jorge is blocking the Records gate. He might accept the creamer from the break room.',
+        form66b: 'Form 66-B belongs in the FORM slot of the Procurement machine, alongside Waiver Stamp 4C.',
+        ash_note: 'Read the scratched warning on Shelf 20. Ash may know when to leave.',
+        records_file: 'The personnel file is evidence, not equipment. Read what the Agency wrote about Scott.',
+        contract: 'The contract wants a signature. Refuse it, then find Waiver Stamp 4C to document that refusal.',
+        stamp_box: state.flags.stampTaken ? 'The acrylic box is open and empty.' : 'The acrylic box can be pried open with the visitor badge.',
+        tarot_spread: 'Choose a card from the spread. Merlin keeps his paw by The Tower.',
+        drawings: 'Read the three signatures. The drawings show the final door and its five cat-shaped marks.',
+        compliance_manual: 'Read section 8.4 of the manual. It explains what wakes the final seals.',
+        ledger: 'Read the ledger. The margin gives a clue about leaving the Agency.',
+        seals: state.flags.keyUsed ? 'The five seals are awake. Read their poses and name the cats in order.' : 'The seals are dark. Put the silver key in the slot beneath them first.',
+        final_plaque: 'Read the plaque. It offers a clue, though no escape authorization.'
+      };
+      if (replies[a]) return print(replies[a]);
+      if (['ash','merlin','salem','luna','boo'].includes(a)) return print(`${DORK_DATA.items[a].name} is a cat, not a tool. Observe the cat; its pose may matter later.`);
     }
 
     if (a) return print(`You ${c.verbToken || 'use'} ${DORK_DATA.items[a].name}${b ? ` on ${typeof b === 'string' && DORK_DATA.items[b] ? DORK_DATA.items[b].name : c.targetText}` : ''}. The universe declines to recognize this workflow.`);

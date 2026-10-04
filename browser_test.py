@@ -145,6 +145,21 @@ async def run():
             assert "waiver_stamp" in await parser_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
             await command(parser_page, "smell contract")
             assert "smell" in (await parser_page.locator("#output p").last.inner_text()).lower()
+            for room, phrase, expected in (
+                ("meeting", "use agenda folder", "five empty lines"),
+                ("meeting", "open visitor badge", "solid plastic card"),
+                ("break_room", "use hazelnut creamer", "Bring it to him"),
+                ("records_lobby", "open Jorge", "living being"),
+                ("records_stacks", "use Ash", "cat, not a tool"),
+                ("legal_annex", "open continuity contract", "Refusal must be documented"),
+                ("hr_reliquary", "use tarot spread", "Choose a card"),
+                ("continuity_chamber", "use five brass seals", "silver key"),
+            ):
+                await parser_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await parser_page.reload()
+                await command(parser_page, phrase)
+                replies = await parser_page.locator("#output p").all_inner_texts()
+                assert expected in " ".join(replies[-3:]), (room, phrase, replies[-3:])
             assert not errors, errors
             boundary_page = await browser.new_page(viewport={"width": 390, "height": 844})
             boundary_page.on("pageerror", lambda error: errors.append(str(error)))

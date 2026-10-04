@@ -9,6 +9,12 @@ Run the browser regression check from the MechaJeeves root with
 `.venv\Scripts\python.exe projects\dork_release\browser_test.py`.
 It uses the installed Playwright and Edge browser; the game itself needs neither.
 
+For a reproducible sample of player-facing replies, run
+`.venv\Scripts\python.exe projects\dork_release\response_inventory.py`.
+The generated `RESPONSE_INVENTORY.json` records actual Edge input and replies
+for seven verbs against each listed room item in a fresh isolated room state.
+It is a sample, not a count of every possible command or authored response.
+
 ## True ending path
 See `SOLUTION.md` for the spoiler walkthrough.
 

@@ -1,0 +1,1575 @@
+{
+  "method": "Fresh isolated room state; seven verbs per visible room item; actual Edge input and output.",
+  "source": "index.html",
+  "distinct_reply_count": 123,
+  "rows": [
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "look at agenda folder",
+      "reply": "The agenda contains one item: '1. Establish continuity.' Five blank signature lines follow. The footer says: 'Attendance constitutes consent unless otherwise documented.'",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "read agenda folder",
+      "reply": "The agenda contains one item: '1. Establish continuity.' Five blank signature lines follow. The footer says: 'Attendance constitutes consent unless otherwise documented.'",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "open agenda folder",
+      "reply": "The agenda contains one item: '1. Establish continuity.' Five blank signature lines follow. The footer says: 'Attendance constitutes consent unless otherwise documented.'",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "take agenda folder",
+      "reply": "Taken: agenda folder.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "use agenda folder",
+      "reply": "The agenda is for reading, not signing. Its five empty lines are the warning.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "touch agenda folder",
+      "reply": "The agenda folder tolerates this briefly.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "search agenda folder",
+      "reply": "The agenda contains one item: '1. Establish continuity.' Five blank signature lines follow. The footer says: 'Attendance constitutes consent unless otherwise documented.'",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "look at visitor badge",
+      "reply": "VISITOR: SCOTT. ACCESS LEVEL: TEMPORARILY ADEQUATE. The photo is surprisingly flattering. Scott would probably agree.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "read visitor badge",
+      "reply": "VISITOR: SCOTT. ACCESS LEVEL: TEMPORARILY ADEQUATE. The photo is surprisingly flattering. Scott would probably agree.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "open visitor badge",
+      "reply": "The visitor badge is a solid plastic card. It may still be useful as a pry tool.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "take visitor badge",
+      "reply": "Taken: visitor badge.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "use visitor badge",
+      "reply": "The badge might pry open the acrylic stamp box in Legal. It will not open any electronic door.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "touch visitor badge",
+      "reply": "You touch the visitor badge. It does not improve the situation.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "search visitor badge",
+      "reply": "VISITOR: SCOTT. ACCESS LEVEL: TEMPORARILY ADEQUATE. The photo is surprisingly flattering. Scott would probably agree.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "look at glass of water",
+      "reply": "The water is room temperature and somehow looks judgmental.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "read glass of water",
+      "reply": "The water is room temperature and somehow looks judgmental.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "open glass of water",
+      "reply": "The glass is already open. The skin across the water makes drinking it a separate bad idea.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "take glass of water",
+      "reply": "You lift the glass, but the skin on the water stirs. You set it back on the table.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "use glass of water",
+      "reply": "The water has formed a skin. Drinking it would be a management decision, and you are not management here.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "touch glass of water",
+      "reply": "The glass of water tolerates this briefly.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "search glass of water",
+      "reply": "The water is room temperature and somehow looks judgmental.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "look at government mug",
+      "reply": "A chipped mug reading WORLD'S MOST ESSENTIAL DEPUTY SOMETHING. The last word has worn off.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "read government mug",
+      "reply": "A chipped mug reading WORLD'S MOST ESSENTIAL DEPUTY SOMETHING. The last word has worn off.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "open government mug",
+      "reply": "The mug has no lid. Its chipped rim is the least alarming thing in this room.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "take government mug",
+      "reply": "Taken: government mug.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "use government mug",
+      "reply": "The mug is empty. The break room has a coffee machine, but Jorge wants the hazelnut creamer.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "touch government mug",
+      "reply": "The government mug tolerates this briefly.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "search government mug",
+      "reply": "A chipped mug reading WORLD'S MOST ESSENTIAL DEPUTY SOMETHING. The last word has worn off.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "look at hazelnut creamer",
+      "reply": "JORGE ONLY. Apparently policy.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "read hazelnut creamer",
+      "reply": "JORGE ONLY. Apparently policy.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "open hazelnut creamer",
+      "reply": "The creamer cup has a peel-back seal. Jorge in Records is its intended recipient.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "take hazelnut creamer",
+      "reply": "Taken: hazelnut creamer.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "use hazelnut creamer",
+      "reply": "The creamer is marked JORGE ONLY. Bring it to him at the Records gate.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "touch hazelnut creamer",
+      "reply": "The hazelnut creamer tolerates this briefly.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "search hazelnut creamer",
+      "reply": "JORGE ONLY. Apparently policy.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "look at napkin drawing",
+      "reply": "Three stick figures labeled Angela, Julia, and Audrey hold hands around a badly drawn door. One has written HOME IS A PASSWORD in purple marker.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "read napkin drawing",
+      "reply": "Three stick figures labeled Angela, Julia, and Audrey hold hands around a badly drawn door. One has written HOME IS A PASSWORD in purple marker.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "open napkin drawing",
+      "reply": "Three stick figures labeled Angela, Julia, and Audrey hold hands around a badly drawn door. One has written HOME IS A PASSWORD in purple marker.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "take napkin drawing",
+      "reply": "Taken: napkin drawing.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "use napkin drawing",
+      "reply": "The napkin drawing says HOME IS A PASSWORD. Keep that in mind when you reach the final door.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "touch napkin drawing",
+      "reply": "You touch the napkin drawing. It does not improve the situation.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "search napkin drawing",
+      "reply": "Three stick figures labeled Angela, Julia, and Audrey hold hands around a badly drawn door. One has written HOME IS A PASSWORD in purple marker.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "look at break-room memo",
+      "reply": "MEMO: Records staff are not to be fed after 5:00 PM except approved flavored creamers. This policy supersedes the 2019 incident.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "read break-room memo",
+      "reply": "MEMO: Records staff are not to be fed after 5:00 PM except approved flavored creamers. This policy supersedes the 2019 incident.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "open break-room memo",
+      "reply": "MEMO: Records staff are not to be fed after 5:00 PM except approved flavored creamers. This policy supersedes the 2019 incident.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "take break-room memo",
+      "reply": "Taken: break-room memo.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "use break-room memo",
+      "reply": "Read the memo. Its feeding policy is more useful than it deserves to be.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "touch break-room memo",
+      "reply": "You touch the break-room memo. It does not improve the situation.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "search break-room memo",
+      "reply": "MEMO: Records staff are not to be fed after 5:00 PM except approved flavored creamers. This policy supersedes the 2019 incident.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "look at Jorge",
+      "reply": "Jorge is at least seven feet tall while seated. His suit is immaculate, his proportions are not, and his clipboard appears to require its own clearance.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "read Jorge",
+      "reply": "Jorge is at least seven feet tall while seated. His suit is immaculate, his proportions are not, and his clipboard appears to require its own clearance.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "open Jorge",
+      "reply": "Jorge is a living being, not a container. Try talking instead.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "take Jorge",
+      "reply": "You cannot take Jorge. Records has already tried transferring him. The forms came back bitten.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "use Jorge",
+      "reply": "Jorge is blocking the Records gate. He might accept the creamer from the break room.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "touch Jorge",
+      "reply": "Jorge permits one finger on his sleeve. The fabric is warm. He was not.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "search Jorge",
+      "reply": "Jorge is at least seven feet tall while seated. His suit is immaculate, his proportions are not, and his clipboard appears to require its own clearance.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "look at Form 66-B",
+      "reply": "FORM 66-B: Emergency Acquisition of Ritual, Infernal, or Otherwise Noncompetitive Goods.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "read Form 66-B",
+      "reply": "FORM 66-B: Emergency Acquisition of Ritual, Infernal, or Otherwise Noncompetitive Goods.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "open Form 66-B",
+      "reply": "FORM 66-B: Emergency Acquisition of Ritual, Infernal, or Otherwise Noncompetitive Goods.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "take Form 66-B",
+      "reply": "Taken: Form 66-B.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "use Form 66-B",
+      "reply": "Form 66-B belongs in the FORM slot of the Procurement machine, alongside Waiver Stamp 4C.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "touch Form 66-B",
+      "reply": "You touch the Form 66-B. It does not improve the situation.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "search Form 66-B",
+      "reply": "FORM 66-B: Emergency Acquisition of Ritual, Infernal, or Otherwise Noncompetitive Goods.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "look at scratched shelf note",
+      "reply": "Scratched into Shelf 20: ASH HIDES BEFORE IT ARRIVES. IF THE CAT LEAVES, YOU SHOULD HAVE ALREADY LEFT.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "read scratched shelf note",
+      "reply": "Scratched into Shelf 20: ASH HIDES BEFORE IT ARRIVES. IF THE CAT LEAVES, YOU SHOULD HAVE ALREADY LEFT.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "open scratched shelf note",
+      "reply": "Scratched into Shelf 20: ASH HIDES BEFORE IT ARRIVES. IF THE CAT LEAVES, YOU SHOULD HAVE ALREADY LEFT.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "take scratched shelf note",
+      "reply": "You attempt to take scratched shelf note. It declines the transfer.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "use scratched shelf note",
+      "reply": "Read the scratched warning on Shelf 20. Ash may know when to leave.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "touch scratched shelf note",
+      "reply": "You touch the scratched shelf note. It does not improve the situation.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "search scratched shelf note",
+      "reply": "Scratched into Shelf 20: ASH HIDES BEFORE IT ARRIVES. IF THE CAT LEAVES, YOU SHOULD HAVE ALREADY LEFT.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "look at continuity personnel file",
+      "reply": "The file is stamped SCOTT — CANDIDATE, though the creation date predates Scott's law-school graduation. A handwritten note says: 'Humor response remains intact. Useful.'\n[ARCHIVE UPDATED]",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "read continuity personnel file",
+      "reply": "The file is stamped SCOTT — CANDIDATE, though the creation date predates Scott's law-school graduation. A handwritten note says: 'Humor response remains intact. Useful.'\n[ARCHIVE UPDATED]",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "open continuity personnel file",
+      "reply": "The file is stamped SCOTT — CANDIDATE, though the creation date predates Scott's law-school graduation. A handwritten note says: 'Humor response remains intact. Useful.'\n[ARCHIVE UPDATED]",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "take continuity personnel file",
+      "reply": "Taken: continuity personnel file.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "use continuity personnel file",
+      "reply": "The personnel file is evidence, not equipment. Read what the Agency wrote about Scott.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "touch continuity personnel file",
+      "reply": "The continuity personnel file tolerates this briefly.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "search continuity personnel file",
+      "reply": "The file is stamped SCOTT — CANDIDATE, though the creation date predates Scott's law-school graduation. A handwritten note says: 'Humor response remains intact. Useful.'\n[ARCHIVE UPDATED]",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "look at Ash",
+      "reply": "Ash crouches high on Shelf 20, grey fur pressed low. He has correctly assessed the workplace.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "read Ash",
+      "reply": "Ash crouches high on Shelf 20, grey fur pressed low. He has correctly assessed the workplace.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "open Ash",
+      "reply": "Ash is a living being, not a container. Try talking instead.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "take Ash",
+      "reply": "You attempt to take Ash. It declines the transfer.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "use Ash",
+      "reply": "Ash is a cat, not a tool. Observe the cat; its pose may matter later.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "touch Ash",
+      "reply": "Ash accepts one careful touch from Shelf 20, then resumes supervising your survival from a safer altitude.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "search Ash",
+      "reply": "Ash crouches high on Shelf 20, grey fur pressed low. He has correctly assessed the workplace.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "look at continuity contract",
+      "reply": "The signature page grants the Agency 'continued use of identity, likeness, memory, and post-mortem administrative capacity.' The fine print says: 'Refusal must be documented using Waiver Stamp 4C.'\n[ARCHIVE UPDATED]",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "read continuity contract",
+      "reply": "The signature page grants the Agency 'continued use of identity, likeness, memory, and post-mortem administrative capacity.' The fine print says: 'Refusal must be documented using Waiver Stamp 4C.'\n[ARCHIVE UPDATED]",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "open continuity contract",
+      "reply": "The signature page grants the Agency 'continued use of identity, likeness, memory, and post-mortem administrative capacity.' The fine print says: 'Refusal must be documented using Waiver Stamp 4C.'\n[ARCHIVE UPDATED]",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "take continuity contract",
+      "reply": "You attempt to take continuity contract. It declines the transfer.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "use continuity contract",
+      "reply": "The contract wants a signature. Refuse it, then find Waiver Stamp 4C to document that refusal.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "touch continuity contract",
+      "reply": "The continuity contract tolerates this briefly.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "search continuity contract",
+      "reply": "The signature page grants the Agency 'continued use of identity, likeness, memory, and post-mortem administrative capacity.' The fine print says: 'Refusal must be documented using Waiver Stamp 4C.'\n[ARCHIVE UPDATED]",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "look at waiver stamp box",
+      "reply": "A locked acrylic box contains WAIVER STAMP 4C. The lock is cheap. Law school has prepared you for almost none of this.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "read waiver stamp box",
+      "reply": "A locked acrylic box contains WAIVER STAMP 4C. The lock is cheap. Law school has prepared you for almost none of this.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "open waiver stamp box",
+      "reply": "The box needs a thin pry tool. Your visitor badge might survive the job.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "take waiver stamp box",
+      "reply": "Waiver Stamp 4C is locked in the acrylic box. Your visitor badge might pry it open.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "use waiver stamp box",
+      "reply": "The acrylic box can be pried open with the visitor badge.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "touch waiver stamp box",
+      "reply": "The waiver stamp box tolerates this briefly.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "search waiver stamp box",
+      "reply": "A locked acrylic box contains WAIVER STAMP 4C. The lock is cheap. Law school has prepared you for almost none of this.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "look at requisition machine",
+      "reply": "Two slots labeled FORM and WAIVER. A third slot labeled SOUL has been taped over.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "read requisition machine",
+      "reply": "Two slots labeled FORM and WAIVER. A third slot labeled SOUL has been taped over.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "open requisition machine",
+      "reply": "The requisition drawer is shut. Feed the FORM and WAIVER slots before expecting a candle or key.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "take requisition machine",
+      "reply": "You attempt to take requisition machine. It declines the transfer.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "use requisition machine",
+      "reply": "The requisition machine has FORM and WAIVER slots. Insert Form 66-B and Waiver Stamp 4C to request the candle and key.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "touch requisition machine",
+      "reply": "You touch the requisition machine. It does not improve the situation.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "search requisition machine",
+      "reply": "Two slots labeled FORM and WAIVER. A third slot labeled SOUL has been taped over.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "look at The Fool",
+      "reply": "A traveler steps cheerfully toward a cliff. Management potential.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "read The Fool",
+      "reply": "A traveler steps cheerfully toward a cliff. Management potential.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "open The Fool",
+      "reply": "The Fool is a flat card, not a door. Its traveler approaches a cliff without reading the signage.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "take The Fool",
+      "reply": "Choose a card. Do not pocket it.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "use The Fool",
+      "reply": "\nYou select THE FOOL. HR appreciates your self-identification. The floor opens beneath you.\n\n*** EMPLOYMENT STATUS: TERMINATED ***\n\nType RESTART to begin a new run. The narrator will remember this.",
+      "room_after": null,
+      "dead": null
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "touch The Fool",
+      "reply": "\nYou select THE FOOL. HR appreciates your self-identification. The floor opens beneath you.\n\n*** EMPLOYMENT STATUS: TERMINATED ***\n\nType RESTART to begin a new run. The narrator will remember this.",
+      "room_after": null,
+      "dead": null
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "search The Fool",
+      "reply": "A traveler steps cheerfully toward a cliff. Management potential.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "look at The Tower",
+      "reply": "A tower is struck by lightning while people fall from it. HR has marked this card 'CHANGE MANAGEMENT.'",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "read The Tower",
+      "reply": "A tower is struck by lightning while people fall from it. HR has marked this card 'CHANGE MANAGEMENT.'",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "open The Tower",
+      "reply": "The Tower is a flat card. Its lightning-struck building is marked CHANGE MANAGEMENT.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "take The Tower",
+      "reply": "You select THE TOWER. Merlin purrs.\n\nThe east wall splits down the middle with the sound of a building reconsidering its benefits package. A passage appears.\n\nHR has successfully facilitated change.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "use The Tower",
+      "reply": "You select THE TOWER. Merlin purrs.\n\nThe east wall splits down the middle with the sound of a building reconsidering its benefits package. A passage appears.\n\nHR has successfully facilitated change.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "touch The Tower",
+      "reply": "You select THE TOWER. Merlin purrs.\n\nThe east wall splits down the middle with the sound of a building reconsidering its benefits package. A passage appears.\n\nHR has successfully facilitated change.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "search The Tower",
+      "reply": "A tower is struck by lightning while people fall from it. HR has marked this card 'CHANGE MANAGEMENT.'",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "look at The Sun",
+      "reply": "Radiance, joy, success. Obviously suspicious.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "read The Sun",
+      "reply": "Radiance, joy, success. Obviously suspicious.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "open The Sun",
+      "reply": "The Sun is a flat card. Its cheerful radiance is precisely why it should worry you.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "take The Sun",
+      "reply": "Choose a card. Do not pocket it.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "use The Sun",
+      "reply": "\nYou select THE SUN. It is not the sun. Your shadow notices first.\n\n*** EMPLOYMENT STATUS: TERMINATED ***\n\nType RESTART to begin a new run. The narrator will remember this.",
+      "room_after": null,
+      "dead": null
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "touch The Sun",
+      "reply": "\nYou select THE SUN. It is not the sun. Your shadow notices first.\n\n*** EMPLOYMENT STATUS: TERMINATED ***\n\nType RESTART to begin a new run. The narrator will remember this.",
+      "room_after": null,
+      "dead": null
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "search The Sun",
+      "reply": "Radiance, joy, success. Obviously suspicious.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "look at Merlin",
+      "reply": "Merlin is sweet, grey, and looking at The Tower card with aggressive patience.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "read Merlin",
+      "reply": "Merlin is sweet, grey, and looking at The Tower card with aggressive patience.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "open Merlin",
+      "reply": "Merlin is a living being, not a container. Try talking instead.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "take Merlin",
+      "reply": "You attempt to take Merlin. It declines the transfer.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "use Merlin",
+      "reply": "Merlin is a cat, not a tool. Observe the cat; its pose may matter later.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "touch Merlin",
+      "reply": "Merlin leans into your hand and raises one paw. Even the cat is giving clearer direction than HR.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "search Merlin",
+      "reply": "Merlin is sweet, grey, and looking at The Tower card with aggressive patience.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "look at tarot spread",
+      "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "read tarot spread",
+      "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "open tarot spread",
+      "reply": "The three cards are already laid out. Choose one; Merlin keeps pointing at The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "take tarot spread",
+      "reply": "The tarot spread stays on the orientation table. Choose a card; Merlin favors The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "use tarot spread",
+      "reply": "Choose a card from the spread. Merlin keeps his paw by The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "touch tarot spread",
+      "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "search tarot spread",
+      "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "look at Salem",
+      "reply": "Salem is asleep in an inbox labeled ITEMS REQUIRING IMMEDIATE ACTION.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "read Salem",
+      "reply": "Salem is asleep in an inbox labeled ITEMS REQUIRING IMMEDIATE ACTION.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "open Salem",
+      "reply": "Salem is a living being, not a container. Try talking instead.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "take Salem",
+      "reply": "You attempt to take Salem. It declines the transfer.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "use Salem",
+      "reply": "Salem is a cat, not a tool. Observe the cat; its pose may matter later.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "touch Salem",
+      "reply": "Salem purrs without opening his eyes. Your performance review remains less favorable.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "search Salem",
+      "reply": "Salem is asleep in an inbox labeled ITEMS REQUIRING IMMEDIATE ACTION.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "look at children's drawings",
+      "reply": "Three drawings, three signatures: Angela, Julia, Audrey. Each child drew the same door from a different angle. Together, the drawings show five cat-shaped marks around its frame.\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "read children's drawings",
+      "reply": "Three drawings, three signatures: Angela, Julia, Audrey. Each child drew the same door from a different angle. Together, the drawings show five cat-shaped marks around its frame.\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "open children's drawings",
+      "reply": "Three drawings, three signatures: Angela, Julia, Audrey. Each child drew the same door from a different angle. Together, the drawings show five cat-shaped marks around its frame.\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "take children's drawings",
+      "reply": "The children's drawings are fixed to the wall. Read their signatures here; the three witnesses matter later.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "use children's drawings",
+      "reply": "Read the three signatures. The drawings show the final door and its five cat-shaped marks.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "touch children's drawings",
+      "reply": "The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same door; their signatures are the three witnesses.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "search children's drawings",
+      "reply": "Three drawings, three signatures: Angela, Julia, Audrey. Each child drew the same door from a different angle. Together, the drawings show five cat-shaped marks around its frame.\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "look at Occult Compliance Manual",
+      "reply": "Section 8.4: 'Continuity seals respond to household anchors. Where five anchors exist, all five must be named in sequence.'\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "read Occult Compliance Manual",
+      "reply": "Section 8.4: 'Continuity seals respond to household anchors. Where five anchors exist, all five must be named in sequence.'\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "open Occult Compliance Manual",
+      "reply": "Section 8.4: 'Continuity seals respond to household anchors. Where five anchors exist, all five must be named in sequence.'\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "take Occult Compliance Manual",
+      "reply": "Taken: Occult Compliance Manual.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "use Occult Compliance Manual",
+      "reply": "Read section 8.4 of the manual. It explains what wakes the final seals.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "touch Occult Compliance Manual",
+      "reply": "You touch the Occult Compliance Manual. It does not improve the situation.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "search Occult Compliance Manual",
+      "reply": "Section 8.4: 'Continuity seals respond to household anchors. Where five anchors exist, all five must be named in sequence.'\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "look at continuity ledger",
+      "reply": "The ledger lists thousands of state employees. Most names are crossed out. Scott's is not. In the margin: 'Invited by authority; retained by consent; released by anchor.'\n[ARCHIVE UPDATED]",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "read continuity ledger",
+      "reply": "The ledger lists thousands of state employees. Most names are crossed out. Scott's is not. In the margin: 'Invited by authority; retained by consent; released by anchor.'\n[ARCHIVE UPDATED]",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "open continuity ledger",
+      "reply": "The ledger lists thousands of state employees. Most names are crossed out. Scott's is not. In the margin: 'Invited by authority; retained by consent; released by anchor.'\n[ARCHIVE UPDATED]",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "take continuity ledger",
+      "reply": "The ledger is chained to its pedestal. Read it here before taking the eastern stair.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "use continuity ledger",
+      "reply": "Read the ledger. The margin gives a clue about leaving the Agency.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "touch continuity ledger",
+      "reply": "You touch the continuity ledger. It does not improve the situation.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "search continuity ledger",
+      "reply": "The ledger lists thousands of state employees. Most names are crossed out. Scott's is not. In the margin: 'Invited by authority; retained by consent; released by anchor.'\n[ARCHIVE UPDATED]",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "look at Luna",
+      "reply": "Luna is very, very afraid of the stairway. This is the strongest evidence you have received all evening.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "read Luna",
+      "reply": "Luna is very, very afraid of the stairway. This is the strongest evidence you have received all evening.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "open Luna",
+      "reply": "Luna is a living being, not a container. Try talking instead.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "take Luna",
+      "reply": "You attempt to take Luna. It declines the transfer.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "use Luna",
+      "reply": "Luna is a cat, not a tool. Observe the cat; its pose may matter later.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "touch Luna",
+      "reply": "Luna allows a brief touch, then retreats beneath the ledger. She has better instincts than you.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "search Luna",
+      "reply": "Luna is very, very afraid of the stairway. This is the strongest evidence you have received all evening.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "look at Boo",
+      "reply": "Boo is an enormous white cat. He appears to have been appointed to something.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "read Boo",
+      "reply": "Boo is an enormous white cat. He appears to have been appointed to something.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "open Boo",
+      "reply": "Boo is a living being, not a container. Try talking instead.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "take Boo",
+      "reply": "You attempt to take Boo. It declines the transfer.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "use Boo",
+      "reply": "Boo is a cat, not a tool. Observe the cat; its pose may matter later.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "touch Boo",
+      "reply": "Boo accepts your attention as tribute. The door remains unimpressed.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "search Boo",
+      "reply": "Boo is an enormous white cat. He appears to have been appointed to something.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "look at five brass seals",
+      "reply": "Left to right: a huge white cat sitting upright as if it outranks the door; a black cat curled asleep; a small grey cat crouched high, as if on a shelf; a black cat with only its eyes showing; a grey cat with one paw raised.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "read five brass seals",
+      "reply": "Left to right: a huge white cat sitting upright as if it outranks the door; a black cat curled asleep; a small grey cat crouched high, as if on a shelf; a black cat with only its eyes showing; a grey cat with one paw raised.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "open five brass seals",
+      "reply": "The five brass seals are fixed in the door. A silver key slot sits beneath them.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "take five brass seals",
+      "reply": "You attempt to take five brass seals. It declines the transfer.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "use five brass seals",
+      "reply": "The seals are dark. Put the silver key in the slot beneath them first.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "touch five brass seals",
+      "reply": "The brass seals are cold. The silver key slot beneath them is still empty.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "search five brass seals",
+      "reply": "Left to right: a huge white cat sitting upright as if it outranks the door; a black cat curled asleep; a small grey cat crouched high, as if on a shelf; a black cat with only its eyes showing; a grey cat with one paw raised.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "look at continuity plaque",
+      "reply": "'WHAT YOU RETURN TO IS WHAT RETURNS YOU.' Below that, in smaller type: 'Do not submit a ticket for this door.'",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "read continuity plaque",
+      "reply": "'WHAT YOU RETURN TO IS WHAT RETURNS YOU.' Below that, in smaller type: 'Do not submit a ticket for this door.'",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "open continuity plaque",
+      "reply": "'WHAT YOU RETURN TO IS WHAT RETURNS YOU.' Below that, in smaller type: 'Do not submit a ticket for this door.'",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "take continuity plaque",
+      "reply": "You attempt to take continuity plaque. It declines the transfer.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "use continuity plaque",
+      "reply": "Read the plaque. It offers a clue, though no escape authorization.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "touch continuity plaque",
+      "reply": "The continuity plaque tolerates this briefly.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "search continuity plaque",
+      "reply": "'WHAT YOU RETURN TO IS WHAT RETURNS YOU.' Below that, in smaller type: 'Do not submit a ticket for this door.'",
+      "room_after": "continuity_chamber",
+      "dead": false
+    }
+  ]
+}
