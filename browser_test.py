@@ -14,6 +14,10 @@ async def command(page, text):
 
 
 async def run():
+    readme = (Path(__file__).parent / "README.md").read_text(encoding="utf-8")
+    solution = (Path(__file__).parent / "SOLUTION.md").read_text(encoding="utf-8")
+    assert "See `SOLUTION.md`" in readme and "Boo, Salem, Ash, Luna, Merlin" not in readme
+    assert "Boo, Salem, Ash, Luna, Merlin" in solution
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True, channel="msedge")
         try:
@@ -141,6 +145,176 @@ async def run():
             assert "waiver_stamp" in await parser_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
             await command(parser_page, "smell contract")
             assert "smell" in (await parser_page.locator("#output p").last.inner_text()).lower()
+            assert not errors, errors
+            boundary_page = await browser.new_page(viewport={"width": 390, "height": 844})
+            boundary_page.on("pageerror", lambda error: errors.append(str(error)))
+            await boundary_page.goto(URL)
+            await boundary_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:['badge'], taken:['badge'], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
+            await boundary_page.reload()
+            await command(boundary_page, "look inside fridge")
+            assert "VISITOR: SCOTT" not in (await boundary_page.locator("#output").inner_text())
+            await boundary_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'hr_reliquary', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting','procurement','hr_reliquary'], dead:false, won:false}))")
+            await boundary_page.reload()
+            await command(boundary_page, "attack application")
+            assert len(await boundary_page.evaluate("(JSON.parse(localStorage.getItem('dork_meta_v1') || '{}').deaths || [])")) == 0
+            await boundary_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting','executive_corridor','records_lobby'], dead:false, won:false}))")
+            await boundary_page.reload()
+            await command(boundary_page, "hit manual")
+            assert len(await boundary_page.evaluate("(JSON.parse(localStorage.getItem('dork_meta_v1') || '{}').deaths || [])")) == 0
+            await boundary_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'legal_annex', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting','executive_corridor','records_lobby','records_stacks','legal_annex'], dead:false, won:false}))")
+            await boundary_page.reload()
+            await command(boundary_page, "examine inbox")
+            assert "locked acrylic box" not in (await boundary_page.locator("#output p").last.inner_text())
+            await boundary_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'occult_compliance', inventory:['napkin'], taken:['napkin'], dropped:{}, flags:{}, visited:['meeting','executive_corridor','break_room','records_lobby','records_stacks','legal_annex','procurement','hr_reliquary','occult_compliance'], dead:false, won:false}))")
+            await boundary_page.reload()
+            await command(boundary_page, "examine drawing")
+            assert "five cat-shaped marks" in (await boundary_page.locator("#output").inner_text()), await boundary_page.locator("#output").inner_text()
+
+            fix_page = await browser.new_page()
+            fix_page.on("pageerror", lambda error: errors.append(str(error)))
+            await fix_page.goto(URL)
+            await command(fix_page, "reset machine")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "meeting"
+            await command(fix_page, "restart")
+            assert "Type RESTART again" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "look")
+            await command(fix_page, "restart")
+            assert "Type RESTART again" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "restart")
+            assert "NEW RUN" in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "<span class=x>hi</span>")
+            assert await fix_page.locator("#output span.x").count() == 0
+            assert "<span class=x>hi</span>" in await fix_page.locator("#output").inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'legal_annex', inventory:[], taken:[], dropped:{}, flags:{}, visited:['legal_annex'], dead:false, won:false}))")
+            await fix_page.reload()
+            for phrase in ("refuse to sign contract", "don't sign contract", "smell contract signature", "tear up contract instead of signing"):
+                await command(fix_page, phrase)
+                assert len(await fix_page.evaluate("(JSON.parse(localStorage.getItem('dork_meta_v1') || '{}').deaths || [])")) == 0, phrase
+            await command(fix_page, "sign contract")
+            assert len(await fix_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 1
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'parking_exit', inventory:[], taken:[], dropped:{}, flags:{}, visited:['parking_exit'], dead:false, won:true}))")
+            await fix_page.reload()
+            await command(fix_page, "east")
+            assert "already left" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "look")
+            assert "PARKING" in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "restart")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "meeting"
+
+            await command(fix_page, "leave meeting")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "executive_corridor"
+            await command(fix_page, "go back")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "meeting"
+            await command(fix_page, "get out")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "executive_corridor"
+            await command(fix_page, "take elevator")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "elevator"
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', previousRoom:'legal_annex', inventory:['black_candle'], taken:['black_candle'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "light candle")
+            assert (await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("candleLit")
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'archives', previousRoom:'occult_compliance', inventory:['black_candle'], taken:['black_candle'], dropped:{}, flags:{candleLit:true}, visited:['archives'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "go down")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "subbasement"
+            await command(fix_page, "go up")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "archives"
+            await command(fix_page, "drop candle")
+            await command(fix_page, "descend")
+            assert len(await fix_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 2
+            assert await fix_page.evaluate("localStorage.getItem('dork_run_v1')") is None
+
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "look around")
+            assert "Exits: east" in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "take all items")
+            assert {"badge", "agenda"}.issubset(set(await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")))
+            await command(fix_page, "check inventory")
+            assert "visitor badge" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "drop everything")
+            assert not await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(fix_page, "?")
+            assert "DORK understands" in await fix_page.locator("#output p").last.inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'hr_reliquary', inventory:[], taken:[], dropped:{}, flags:{}, visited:['hr_reliquary'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "take the fool")
+            assert "Do not pocket it" in await fix_page.locator("#output p").last.inner_text()
+            assert len(await fix_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 2
+            await command(fix_page, "examine tarot spread")
+            assert "Three cards" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "pick the tower")
+            assert (await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("tarotSolved")
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['badge','form66b','waiver_stamp'], taken:['badge','form66b','waiver_stamp'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "show badge to machine")
+            assert "You show" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "insert form into machine")
+            await command(fix_page, "insert form into machine")
+            assert "already has that" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "insert stamp into machine")
+            inventory = await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            assert "form66b" not in inventory and "waiver_stamp" not in inventory and inventory.count("silver_key") == 1
+            # Batch 5: entry information, seal poses, key placement, geography, articles.
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
+            await fix_page.reload()
+            assert "Visible: agenda folder, visitor badge, glass of water." in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "lick water")
+            assert "the glass of water" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "east")
+            assert "Exits: west, north, south, east." in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "east")
+            assert "PENDING PROCUREMENT" not in await fix_page.locator("#output").inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'archives', inventory:['black_candle'], taken:['black_candle'], dropped:{}, flags:{candleLit:true}, visited:['archives'], dead:false, won:false}))")
+            await fix_page.reload()
+            assert "silver continuity key" not in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "hint")
+            assert "Take anything useful" not in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "east")
+            assert "West, the stair leads back up" in await fix_page.locator("#output").inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:['silver_key'], taken:['silver_key'], dropped:{}, flags:{keyUsed:true}, visited:['continuity_chamber'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "examine seals")
+            seal_text = await fix_page.locator("#output p").last.inner_text()
+            assert all(pose in seal_text for pose in ("sitting upright", "curled asleep", "crouched high", "eyes showing", "one paw raised"))
+            await command(fix_page, "say merlin luna ash salem boo")
+            assert "poses" in await fix_page.locator("#output p").last.inner_text()
+            # Batch 6: descriptions follow the run's puzzle flags.
+            for room, flags, room_line, item_command, item_line in (
+                ("legal_annex", {"stampTaken": True}, "open and empty", "examine box", "open and empty"),
+                ("hr_reliquary", {"tarotSolved": True}, "split open into a passage", "examine cards", "Three cards"),
+                ("records_lobby", {"jorgeMoved": True}, "chair aside", "look", "chair aside"),
+                ("continuity_chamber", {"keyUsed": True}, "key rests in its slot", "look", "key rests in its slot"),
+                ("continuity_chamber", {"keyUsed": True, "finalOpen": True}, "door stands open", "look", "door stands open"),
+            ):
+                await fix_page.evaluate("data => localStorage.setItem('dork_run_v1', JSON.stringify({room:data.room, inventory:[], taken:[], dropped:{}, flags:data.flags, visited:[data.room], dead:false, won:false}))", {"room": room, "flags": flags})
+                await fix_page.reload()
+                assert room_line in await fix_page.locator("#output").inner_text(), (room, room_line)
+                await command(fix_page, item_command)
+                assert item_line in await fix_page.locator("#output").inner_text(), (room, item_line)
+            # Batch 7: Ash and Jorge are room objects; each cat has its own touch response.
+            for room, cat, expected in (
+                ("records_stacks", "Ash", "safer altitude"),
+                ("hr_reliquary", "Merlin", "clearer direction"),
+                ("occult_compliance", "Salem", "performance review"),
+                ("archives", "Luna", "better instincts"),
+                ("continuity_chamber", "Boo", "tribute"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, f"hug {cat}")
+                assert expected in await fix_page.locator("#output p").last.inner_text(), cat
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_stacks', inventory:[], taken:[], dropped:{}, flags:{}, visited:['records_stacks'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "examine ash")
+            assert "Shelf 20" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "talk to ash")
+            assert "watches from Shelf 20" in await fix_page.locator("#output p").last.inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await fix_page.reload()
+            for phrase, expected in (("touch jorge", "sleeve"), ("lick jorge", "femur"), ("smell jorge", "toner"), ("take jorge", "cannot take"), ("flatter jorge", "compliment"), ("threaten jorge", "clipboard"), ("hide behind jorge", "crouch"), ("examine jorge", "seven feet")):
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), phrase
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:
