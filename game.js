@@ -168,9 +168,10 @@
     return { verb, objectText: split[0] || '', targetText: split[1] || '', raw, verbToken };
   }
 
-  const actions = {
+    const actions = {
     look: (c) => c.objectText ? examine(c.objectText) : describeRoom(true),
     examine: (c) => examine(c.objectText),
+    search: (c) => genericAction(c),
     inventory: inventory,
     take: (c) => c.objectText === 'all' || c.objectText === 'everything' ? takeAll() : chooseCard(c) || take(c.objectText),
     drop: (c) => ['all','everything'].includes(c.objectText) ? dropAll() : drop(c.objectText),
@@ -248,9 +249,11 @@
     if (state.room === 'records_lobby' && hasWord(text, 'gate')) return print(state.flags.jorgeMoved ? 'Jorge has rolled aside. The southern gate into the stacks is clear.' : 'Jorge and his desk block the southern gate into the stacks. He keeps glancing toward the break room.');
     if (state.room === 'records_lobby' && hasWord(text, 'clipboard')) return print(state.flags.jorgeMoved ? 'Jorge has resumed his clipboard duties. The southern gate is clear.' : "Jorge's clipboard lists a break-room delivery. He glances toward the creamer whenever you look at it.");
     if (state.room === 'meeting' && /\b(?:under table|beneath table)\b/.test(text)) return print('Beneath the table: polished legs, immaculate carpet, and no hidden exit. The red EXIT sign points east.');
+    if (state.room === 'meeting' && hasWord(text, 'table')) return print('The polished table holds the agenda folder, visitor badge, and a glass of water with a skin. Nothing useful is hidden beneath it.');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
     if (state.room === 'break_room' && /\b(?:warning|note on fridge)\b/.test(text)) return print("The warning reserves the hazelnut creamer for Jorge. The fridge contains expired lunches and no useful substitute.");
     if (state.room === 'break_room' && /\b(?:vending machine|machine button)\b/.test(text)) return print('The vending machine lists one black candle as OUT OF STOCK. Procurement handles emergency supplies now.');
+    if (state.room === 'legal_annex' && /\b(?:page 64|page sixty four|page sixty-four)\b/.test(text)) return print("Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. The stamp is locked in the acrylic box.");
     const scenery = {
       executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.', lights: 'The fluorescent lights buzz overhead. They illuminate the corridor but offer no route out; Records lies south.' },
       records_lobby: { placard: 'JORGE — RECORDS MANAGEMENT SPECIALIST III. His desk blocks the southern gate to the stacks.' },
@@ -258,7 +261,7 @@
       legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
       procurement: { slots: 'The brass machine has a FORM slot and a WAIVER slot. Its SOUL slot is taped over.', sign: 'The sign requires documented business necessity for every purchase, including exorcisms. The brass machine wants a form and a waiver.' },
       hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.', table: 'The orientation table holds THE FOOL, THE TOWER, and THE SUN. Merlin keeps one paw near The Tower.' },
-      occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.', elevator: 'The freight elevator waits to the south. Its doors are open; the Archives are below.' },
+      occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.', desk: 'The desk holds Salem in the empty inbox. The compliance manual and three witness drawings carry the useful clues.', elevator: 'The freight elevator waits to the south. Its doors are open; the Archives are below.' },
       archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.', cabinets: 'Filing cabinets are mortared into the limestone walls. The ledger on the pedestal is the record you can actually read.' },
       subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.', arrow: 'The painted arrow points east to the Continuity Chamber. The parking passage is still blocked by black roots.', sign: 'There is no sign here. A painted arrow points east to the Continuity Chamber; black roots block the parking passage.' },
       continuity_chamber: { door: state.flags.finalOpen ? 'The eastern door stands open. You can leave.' : state.flags.keyUsed ? 'The key has woken five seals, but the eastern door still waits for their names.' : 'Five seals surround the eastern door. A silver key slot waits beneath them.' }
@@ -403,6 +406,7 @@
 
   function talkThing(c) {
     const t = `${c.objectText} ${c.targetText}`.trim();
+    if (state.room === 'break_room' && hasWord(t, 'jorge')) return print('Jorge is at his Records desk to the south. His creamer is here beneath the JORGE ONLY warning.');
     if (state.room === 'subbasement' && /^(?:for )?(?:directions|way out|exit)$/.test(t)) return print('The painted arrow points east to the Continuity Chamber. Black roots block the parking passage.');
     if (state.room === 'continuity_chamber' && /^(?:for )?names$|^(?:the )?room about seals$/.test(t)) return print(state.flags.keyUsed ? 'Read the five lit seals from left to right. Their poses match the five cats you met; name each in that order.' : 'The five seals are dark. Use the silver key in the slot beneath them, then read their poses.');
     const names = ['boo','salem','ash','luna','merlin'];
@@ -443,6 +447,7 @@
     if (state.room === 'subbasement' && /^(?:follow|take) (?:the )?(?:painted )?arrow$/.test(r)) return move('east');
     if (state.room === 'occult_compliance' && c.verb === 'touch' && hasWord(c.objectText, 'drawings')) return print("The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same door; their signatures are the three witnesses.");
     if (state.room === 'archives' && c.verb === 'search' && hasWord(c.objectText, 'cabinets')) return print('The cabinets are mortared shut. The ledger on its pedestal is the record you can actually read.');
+    if (c.verb === 'search') return examine(c.objectText);
     if (state.room === 'subbasement' && c.verb === 'listen' && hasWord(c.objectText, 'breathing')) return print('The breathing comes from beyond the collapsed parking passage. The painted arrow points east, away from it.');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
     if (state.room === 'procurement' && c.verb === 'buy' && hasWord(c.objectText, 'candle')) return print('The requisition machine does not take money. Feed it Form 66-B and Waiver Stamp 4C to receive the black candle.');

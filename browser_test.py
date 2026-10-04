@@ -520,6 +520,12 @@ async def run():
                 ("archives", "search cabinets", "mortared shut"),
                 ("subbasement", "listen to breathing", "breathing comes from beyond"),
                 ("subbasement", "go through roots", "Black roots have collapsed"),
+                ("meeting", "search the table", "agenda folder, visitor badge"),
+                ("break_room", "ask jorge about creamer", "at his Records desk"),
+                ("records_stacks", "search the shelves", "Shelf 20"),
+                ("legal_annex", "read page 64", "refusal clause"),
+                ("occult_compliance", "search the desk", "compliance manual"),
+                ("subbasement", "search the roots", "Black roots have collapsed"),
             ):
                 await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:['black_candle'], taken:[], dropped:{}, flags:{candleLit:true}, visited:[room], dead:false, won:false}))", room)
                 await fix_page.reload()
