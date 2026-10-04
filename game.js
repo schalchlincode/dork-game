@@ -135,6 +135,8 @@
     if (/^(?:ask for help|ask for a hint)$/.test(cleaned)) return {verb:cleaned.endsWith('hint') ? 'hint' : 'help', objectText:'', targetText:'', raw};
     if (/^(?:take all items|grab all of it)$/.test(cleaned)) return {verb:'take', objectText:'all', targetText:'', raw};
     if (/^(?:get out(?: of here)?|go out(?:side)?|go out (?:the )?door|walk out(?: (?:the )?door)?|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
+    if (/^(?:enter|step through) (?:the )?gate$/.test(cleaned)) return {verb:'exitAlias', objectText:'gate', targetText:'', raw};
+    if (/^(?:call|summon) (?:the )?elevator$/.test(cleaned)) return {verb:'push', objectText:'elevator button', targetText:'', raw};
     const through = cleaned.match(/^(?:go|walk|move|head)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
     if (through) {
       const route = through[1].replace(/\s+(?:door|passage|exit|way)$/,'');
@@ -182,6 +184,7 @@
     exitAlias: (c) => {
       const direction = roomNow().exitAliases?.[c.objectText];
       if (direction) move(direction);
+      else if (state.room === 'records_lobby' && c.objectText === 'gate') move('south');
       else if (state.room === 'elevator' && c.objectText === 'elevator') print('You are already in the elevator. The buttons are dead; west returns to the corridor.');
       else if (state.room === 'subbasement' && hasWord(c.objectText, 'parking')) print('Black roots have collapsed the parking passage. The marked route east leads to the Continuity Chamber.');
       else print(`There is no ${c.objectText} route from here.`);
@@ -237,14 +240,17 @@
   function examine(text) {
     if (!text) return describeRoom(true);
     if (state.room === 'hr_reliquary' && /^(?:the )?wall$/.test(text)) return examine('east wall');
+    if (state.room === 'meeting' && /\bwest door\b/.test(text)) return print('There is no west door anymore. The red EXIT sign points east to the corridor.');
+    if (state.room === 'meeting' && /\b(?:calendar invitation|invitation)\b/.test(text)) return print("The invitation bore the Governor's name and called this an Executive Continuity Review. It said nothing about the missing west door.");
     if (state.room === 'meeting' && /\b(?:exit sign|east door)\b/.test(text)) return print('The red EXIT sign points east. The door beneath it leads to the corridor; the west door you entered through is gone.');
     if (state.room === 'records_lobby' && hasWord(text, 'gate')) return print(state.flags.jorgeMoved ? 'Jorge has rolled aside. The southern gate into the stacks is clear.' : 'Jorge and his desk block the southern gate into the stacks. He keeps glancing toward the break room.');
+    if (state.room === 'records_lobby' && hasWord(text, 'clipboard')) return print(state.flags.jorgeMoved ? 'Jorge has resumed his clipboard duties. The southern gate is clear.' : "Jorge's clipboard lists a break-room delivery. He glances toward the creamer whenever you look at it.");
     if (state.room === 'meeting' && /\b(?:under table|beneath table)\b/.test(text)) return print('Beneath the table: polished legs, immaculate carpet, and no hidden exit. The red EXIT sign points east.');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
     if (state.room === 'break_room' && /\b(?:warning|note on fridge)\b/.test(text)) return print("The warning reserves the hazelnut creamer for Jorge. The fridge contains expired lunches and no useful substitute.");
     if (state.room === 'break_room' && /\b(?:vending machine|machine button)\b/.test(text)) return print('The vending machine lists one black candle as OUT OF STOCK. Procurement handles emergency supplies now.');
     const scenery = {
-      executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.' },
+      executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.', lights: 'The fluorescent lights buzz overhead. They illuminate the corridor but offer no route out; Records lies south.' },
       records_lobby: { placard: 'JORGE — RECORDS MANAGEMENT SPECIALIST III. His desk blocks the southern gate to the stacks.' },
       records_stacks: { shelves: 'The shelves hold files dated years into the future. Shelf 20 bears a scratched warning beside Ash.', 'shelf 20': DORK_DATA.items.ash_note.desc },
       legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
@@ -317,6 +323,7 @@
   }
 
   function openThing(text) {
+    if (state.room === 'meeting' && hasWord(text, 'west door')) return print('The west door is gone. The only exit is east, beneath the red sign.');
     if (state.room === 'meeting' && hasWord(text, 'east door')) return print('The east door opens onto the Executive Corridor. Go east to leave the meeting room.');
     if (state.room === 'meeting' && hasWord(text, 'agenda')) return examine('agenda');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("You open the refrigerator. Expired lunches crowd around Jorge's hazelnut creamer; the warning on the door is apparently for your benefit.");
@@ -425,7 +432,7 @@
     if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
     if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');
-    if (state.room === 'executive_corridor' && c.verb === 'push' && /elevator|button/.test(c.objectText)) return print('You press the elevator call button. Nothing lights up. The car is out of service.');
+    if ((state.room === 'executive_corridor' || state.room === 'elevator') && c.verb === 'push' && /elevator|button|floor\s*\d|\b(?:b|sb|below)\b/.test(c.objectText)) return print('You press the elevator button. Nothing lights up. The car is out of service.');
     if (state.room === 'continuity_chamber' && c.verb === 'touch' && hasWord(c.objectText, 'seals')) return print(state.flags.keyUsed ? 'The seals glow under your fingers. Their five poses are a naming clue, not buttons.' : 'The brass seals are cold. The silver key slot beneath them is still empty.');
     if (state.room === 'break_room' && c.verb === 'push' && /vending|button/.test(c.objectText)) return print('You press the vending machine button. OUT OF STOCK stays lit. Procurement has the candle now.');
     if (state.room === 'continuity_chamber' && /boo.*salem.*ash.*luna.*merlin/.test(r) && state.flags.keyUsed) return talkThing({objectText:r,targetText:''});

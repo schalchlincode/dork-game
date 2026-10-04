@@ -446,6 +446,25 @@ async def run():
             assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "elevator"
             await command(fix_page, "ride elevator")
             assert "already in the elevator" in await fix_page.locator("#output p").last.inner_text()
+            # Fresh player wording observed in the published game before this review.
+            for room, phrase, expected in (
+                ("meeting", "look at west door", "no west door"),
+                ("meeting", "open west door", "only exit is east"),
+                ("meeting", "read calendar invitation", "Executive Continuity Review"),
+                ("executive_corridor", "call elevator", "out of service"),
+                ("executive_corridor", "press floor 1", "out of service"),
+                ("executive_corridor", "look at lights", "fluorescent lights"),
+                ("records_lobby", "look at clipboard", "creamer"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected.lower() in (await fix_page.locator("#output p").last.inner_text()).lower(), (room, phrase)
+            for moved, expected_room in ((False, "records_lobby"), (True, "records_stacks")):
+                await fix_page.evaluate("moved => localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{jorgeMoved:moved}, visited:['records_lobby'], dead:false, won:false}))", moved)
+                await fix_page.reload()
+                await command(fix_page, "enter gate")
+                assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == expected_room
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:
