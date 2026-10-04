@@ -107,3 +107,7 @@ After confirming the preceding Dork update on GitHub Pages, entered 32 commands 
 ### Later-room command follow-up, 2026-10-04
 
 The prior elevator fix was published as `220e557`; GitHub Pages reported that build complete, its shipped JavaScript and HTML matched local bytes, and the full Edge regression passed against the public URL. A new isolated-state Edge sample across five later rooms found five response gaps: taking or shuffling the tarot spread, examining HR's table, taking the Occult Compliance inbox, and calling its already-present freight elevator. Focused replies and browser assertions now cover those inputs. Other observed responses remain for review, including the nonexistent Sub-Basement sign; this sample does not establish a distinct-response total.
+
+### Published build and another player command sample, 2026-10-04
+
+The published `game.js` matched local bytes before this update, and the full Edge regression passed against the published URL. In a fresh twelve-command Edge sample spanning Records Stacks through the Continuity Chamber, three replies were confusing: `buy candle` and `knock on door` fell into parser scolding, while `read sign` in the Sub-Basement described a nonexistent sign. These now explain the requisition requirements, the door's current puzzle state, and the painted arrow. The local full-route Edge regression passes with assertions for all three and the key-used door state. The other nine sampled replies were coherent; this sample does not establish exhaustive coverage or a distinct authored-response count.
