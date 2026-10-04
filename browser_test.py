@@ -337,6 +337,35 @@ async def run():
             for phrase, expected in (("touch jorge", "sleeve"), ("lick jorge", "femur"), ("smell jorge", "toner"), ("take jorge", "cannot take"), ("flatter jorge", "compliment"), ("threaten jorge", "clipboard"), ("hide behind jorge", "crouch"), ("examine jorge", "seven feet")):
                 await command(fix_page, phrase)
                 assert expected in await fix_page.locator("#output p").last.inner_text(), phrase
+            # Player-style probes for scenery and physical interactions in later rooms.
+            for room, phrase, expected in (
+                ("executive_corridor", "read directory", "Records lies south"),
+                ("executive_corridor", "press elevator button", "out of service"),
+                ("records_stacks", "look at shelves", "Shelf 20"),
+                ("records_stacks", "open file", "CANDIDATE"),
+                ("legal_annex", "read sign", "Waiver Stamp 4C"),
+                ("procurement", "look at slots", "FORM slot"),
+                ("hr_reliquary", "look at east wall", "Merlin"),
+                ("occult_compliance", "look at inbox", "Salem"),
+                ("archives", "look at stair", "lit candle"),
+                ("archives", "open ledger", "Invited by authority"),
+                ("subbasement", "look at roots", "parking passage"),
+                ("subbasement", "look at lights", "black candle"),
+                ("continuity_chamber", "look at door", "silver key slot"),
+                ("continuity_chamber", "touch seals", "silver key slot"),
+                ("continuity_chamber", "open door", "silver key slot"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                replies = await fix_page.locator("#output p").all_inner_texts()
+                assert expected in " ".join(replies[-2:]), (room, phrase, replies[-2:])
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'executive_corridor', inventory:[], taken:[], dropped:{}, flags:{}, visited:['executive_corridor'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "open elevator")
+            assert "out of service" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "go to records")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:

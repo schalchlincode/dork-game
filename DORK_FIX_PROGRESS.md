@@ -28,3 +28,21 @@ Method: entered commands in Edge against the local page, read each reply, then r
 | Legal Annex | `refuse contract` | Parser rejection | Now explains that the waiver stamp records refusal. |
 
 The route to the true ending, deaths, autosave, restart, parser boundaries, and narrow layouts still pass in the browser regression. This pass samples seven confusing input patterns; it does not establish that every possible command or room response is coherent. Continue with a room-by-room command matrix, logging each command, state, actual reply, expected behavior, and any remaining generic fallback. Prioritize puzzle objects and common English phrasing before adding novelty lines.
+
+### Wider Edge command matrix
+
+Method: each input was entered through the actual Edge page in the named room with late-game puzzle items available. The initial reply was recorded before code changes. The corrected cases are covered by `browser_test.py`; the true-ending route and mobile checks pass too.
+
+| Room | Input | Initial reply problem | Resolution |
+|---|---|---|---|
+| Executive Corridor | `read directory`; `press elevator button`; `open elevator`; `go to records` | Nonspecific or generic reply; named route rejected | Directory, dead button, and elevator now explain the route; Records is a south exit alias. |
+| Records Stacks | `look at shelves`; `open file` | Nonspecific shelves; file did not open | Shelves describe Shelf 20; opening the file reads it. |
+| Legal Annex | `read sign` | Nonspecific sign | Sign points to the waiver stamp. |
+| Procurement | `look at slots` | Nonspecific slots | Describes both required slots and the taped-over third. |
+| HR Reliquary | `look at east wall` | Nonspecific wall | Describes the blocked or opened passage based on tarot state. |
+| Occult Compliance | `look at inbox` | Nonspecific inbox | Describes Salem and the empty tray. |
+| Archives | `look at stair`; `open ledger` | Nonspecific stair; ledger did not open | Stair warns of darkness; opening ledger reads it. |
+| Sub-Basement | `look at roots`; `look at lights` | Nonspecific replies | Explains the blocked parking passage and failed lights. |
+| Continuity Chamber | `look at door`; `touch seals`; `open door` | Nonspecific door; ungrammatical seal reply; generic opening response | Replies track the key and door state and point to the five-name clue. |
+
+Remaining review: test more natural phrasings and novelty verbs per room in both fresh and progressed states. This matrix verifies observed commands, not a count of distinct authored responses or exhaustive parser coverage.

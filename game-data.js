@@ -13,7 +13,7 @@ const DORK_DATA = {
       name: "Executive Corridor",
       desc: "A government corridor extends north and south beneath fluorescent lights that buzz with the confidence of people who cannot be fired. West returns to the meeting room. East is an elevator with brass doors. A BREAK ROOM sign points north. RECORDS lies south.\n\nThe directory lists Floor 6, Floor 5, Floor 4, Floor 3, Floor 2, Floor 1, Basement, Sub-Basement, and 'Below.'",
       exits: { west: "meeting", north: "break_room", south: "records_lobby", east: "elevator" },
-      exitAliases: { elevator: "east" }
+      exitAliases: { elevator: "east", records: "south", "break room": "north", "meeting room": "west" }
     },
     break_room: {
       name: "Employee Break Room",

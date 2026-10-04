@@ -233,6 +233,19 @@
     if (state.room === 'meeting' && /\b(?:exit sign|east door)\b/.test(text)) return print('The red EXIT sign points east. The door beneath it leads to the corridor; the west door you entered through is gone.');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
     if (state.room === 'break_room' && /\b(?:vending machine|machine button)\b/.test(text)) return print('The vending machine lists one black candle as OUT OF STOCK. Procurement handles emergency supplies now.');
+    const scenery = {
+      executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.' },
+      records_stacks: { shelves: 'The shelves hold files dated years into the future. Shelf 20 bears a scratched warning beside Ash.' },
+      legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
+      procurement: { slots: 'The brass machine has a FORM slot and a WAIVER slot. Its SOUL slot is taped over.' },
+      hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.' },
+      occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.' },
+      archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.' },
+      subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.' },
+      continuity_chamber: { door: state.flags.finalOpen ? 'The eastern door stands open. You can leave.' : state.flags.keyUsed ? 'The key has woken five seals, but the eastern door still waits for their names.' : 'Five seals surround the eastern door. A silver key slot waits beneath them.' }
+    };
+    const detail = Object.entries(scenery[state.room] || {}).find(([phrase]) => hasWord(text, phrase));
+    if (detail) return print(detail[1]);
     const id = findItem(text);
     if (!id) {
       if (/jorge/.test(text) && state.room === 'records_lobby') return print("Jorge is at least seven feet tall when seated, which raises questions you do not have clearance to ask. His smile contains excellent dental benefits.");
@@ -291,6 +304,10 @@
 
   function openThing(text) {
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("You open the refrigerator. Expired lunches crowd around Jorge's hazelnut creamer; the warning on the door is apparently for your benefit.");
+    if (state.room === 'executive_corridor' && hasWord(text, 'elevator')) return print('The elevator doors open east, but the car is out of service. You can step in; it will not take you to another floor.');
+    if (state.room === 'records_stacks' && hasWord(text, 'file')) return examine('file');
+    if (state.room === 'archives' && hasWord(text, 'ledger')) return examine('ledger');
+    if (state.room === 'continuity_chamber' && hasWord(text, 'door')) return examine('door');
     if (/box|stamp/.test(text) && state.room === 'legal_annex') {
       if (state.flags.stampTaken) return print('The acrylic box is already open and, like most safeguards, retrospectively decorative.');
       if (!state.inventory.includes('badge')) return print('The box needs a thin pry tool. Your visitor badge might survive the job.');
@@ -383,6 +400,8 @@
     // direct puzzle phrases / natural-language easter eggs
     const r = c.raw.toLowerCase();
     if (state.room === 'meeting' && c.verb === 'drink' && hasWord(c.objectText, 'water')) return print('You lift the glass. The skin on the water moves against the rim. You put it down without drinking.');
+    if (state.room === 'executive_corridor' && c.verb === 'push' && /elevator|button/.test(c.objectText)) return print('You press the elevator call button. Nothing lights up. The car is out of service.');
+    if (state.room === 'continuity_chamber' && c.verb === 'touch' && hasWord(c.objectText, 'seals')) return print(state.flags.keyUsed ? 'The seals glow under your fingers. Their five poses are a naming clue, not buttons.' : 'The brass seals are cold. The silver key slot beneath them is still empty.');
     if (state.room === 'break_room' && c.verb === 'push' && /vending|button/.test(c.objectText)) return print('You press the vending machine button. OUT OF STOCK stays lit. Procurement has the candle now.');
     if (state.room === 'continuity_chamber' && /boo.*salem.*ash.*luna.*merlin/.test(r) && state.flags.keyUsed) return talkThing({objectText:r,targetText:''});
     if (/read/.test(r)) return examine(c.objectText);
