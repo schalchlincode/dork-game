@@ -515,6 +515,16 @@ async def run():
             await fix_page.reload()
             await command(fix_page, "follow arrow")
             assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "continuity_chamber"
+            for room, phrase, expected in (
+                ("occult_compliance", "touch drawings", "three witnesses"),
+                ("archives", "search cabinets", "mortared shut"),
+                ("subbasement", "listen to breathing", "breathing comes from beyond"),
+                ("subbasement", "go through roots", "Black roots have collapsed"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:['black_candle'], taken:[], dropped:{}, flags:{candleLit:true}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:

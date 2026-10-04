@@ -114,3 +114,7 @@ The published `game.js` matched local bytes before this update, and the full Edg
 ### Later-room natural command sample, 2026-10-04
 
 Entered 15 commands in the actual local Edge page across HR Reliquary, Occult Compliance, Archives, Sub-Basement, and Continuity Chamber. Eight replies were misleading, generic, or failed to follow a visible route: `take drawings`, `take ledger`, `open cabinets`, `ask for directions`, `follow arrow`, `open parking passage`, `ask for names`, and `ask the room about seals`. These now have scene-aware or state-aware replies. `follow arrow` moves east. The browser regression asserts the changed replies, both key states at the final seals, and movement; the full route passes. The other seven observed commands were coherent or out of scope for a new reply. This is a sampled review, not exhaustive command coverage. A reproducible distinct-response inventory and more fresh and progressed-state samples remain.
+
+### Published-room command sample, 2026-10-04
+
+The preceding release was published as `cb04da1`; Pages reported it built, the shipped `game.js` matched local bytes, and the full Edge regression passed at the public URL. A ten-command Edge sample in five later rooms then found four gaps: `touch drawings` gave an unrelated generic touch line, `search cabinets` was rejected, `listen to breathing` said "to to," and `go through roots` denied the visible collapsed passage. Focused responses and browser assertions now cover those commands. The other six sampled replies were coherent. This remains sampled coverage.

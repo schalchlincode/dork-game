@@ -188,7 +188,7 @@
       if (direction) move(direction);
       else if (state.room === 'records_lobby' && c.objectText === 'gate') move('south');
       else if (state.room === 'elevator' && c.objectText === 'elevator') print('You are already in the elevator. The buttons are dead; west returns to the corridor.');
-      else if (state.room === 'subbasement' && hasWord(c.objectText, 'parking')) print('Black roots have collapsed the parking passage. The marked route east leads to the Continuity Chamber.');
+      else if (state.room === 'subbasement' && /parking|roots/.test(c.objectText)) print('Black roots have collapsed the parking passage. The marked route east leads to the Continuity Chamber.');
       else print(`There is no ${c.objectText} route from here.`);
     },
     open: (c) => openThing(c.objectText),
@@ -441,6 +441,9 @@
     if (state.room === 'subbasement' && c.verb === 'use' && hasWord(c.objectText, 'lights')) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'subbasement' && /^(?:follow|take) (?:the )?(?:painted )?arrow$/.test(r)) return move('east');
+    if (state.room === 'occult_compliance' && c.verb === 'touch' && hasWord(c.objectText, 'drawings')) return print("The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same door; their signatures are the three witnesses.");
+    if (state.room === 'archives' && c.verb === 'search' && hasWord(c.objectText, 'cabinets')) return print('The cabinets are mortared shut. The ledger on its pedestal is the record you can actually read.');
+    if (state.room === 'subbasement' && c.verb === 'listen' && hasWord(c.objectText, 'breathing')) return print('The breathing comes from beyond the collapsed parking passage. The painted arrow points east, away from it.');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
     if (state.room === 'procurement' && c.verb === 'buy' && hasWord(c.objectText, 'candle')) return print('The requisition machine does not take money. Feed it Form 66-B and Waiver Stamp 4C to receive the black candle.');
     if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');
