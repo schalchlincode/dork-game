@@ -103,3 +103,7 @@ Source inventory for planning: 14 rooms, 31 items, 51 room/item description vari
 ### Later-room live Edge sample, 2026-10-04
 
 After confirming the preceding Dork update on GitHub Pages, entered 32 commands in Edge across HR Reliquary, Occult Compliance, Archives, Sub-Basement, and Continuity Chamber with fresh room states. The Occult Compliance freight elevator gave a vague `look at elevator` reply and rejected `go down elevator`; both are now corrected and covered by browser assertions. Descending from Archives without a lit candle caused a death as designed. Other generic or awkward replies remain, including taking the tarot spread, reading a nonexistent Sub-Basement sign, and asking for unnamed people in the chamber. These observations need a further state-aware review, not an assertion that every response is coherent.
+
+### Later-room command follow-up, 2026-10-04
+
+The prior elevator fix was published as `220e557`; GitHub Pages reported that build complete, its shipped JavaScript and HTML matched local bytes, and the full Edge regression passed against the public URL. A new isolated-state Edge sample across five later rooms found five response gaps: taking or shuffling the tarot spread, examining HR's table, taking the Occult Compliance inbox, and calling its already-present freight elevator. Focused replies and browser assertions now cover those inputs. Other observed responses remain for review, including the nonexistent Sub-Basement sign; this sample does not establish a distinct-response total.

@@ -137,6 +137,7 @@
     if (/^(?:get out(?: of here)?|go out(?:side)?|go out (?:the )?door|walk out(?: (?:the )?door)?|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
     if (/^(?:enter|step through) (?:the )?gate$/.test(cleaned)) return {verb:'exitAlias', objectText:'gate', targetText:'', raw};
     if (/^(?:call|summon) (?:the )?elevator$/.test(cleaned)) return {verb:'push', objectText:'elevator button', targetText:'', raw};
+    if (/^(?:shuffle|mix) (?:the )?(?:cards|tarot|tarot spread)$/.test(cleaned)) return {verb:'shuffle', objectText:'tarot spread', targetText:'', raw};
     const through = cleaned.match(/^(?:go|walk|move|head)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
     if (through) {
       const route = through[1].replace(/\s+(?:door|passage|exit|way)$/,'');
@@ -256,7 +257,7 @@
       records_stacks: { shelves: 'The shelves hold files dated years into the future. Shelf 20 bears a scratched warning beside Ash.', 'shelf 20': DORK_DATA.items.ash_note.desc },
       legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
       procurement: { slots: 'The brass machine has a FORM slot and a WAIVER slot. Its SOUL slot is taped over.', sign: 'The sign requires documented business necessity for every purchase, including exorcisms. The brass machine wants a form and a waiver.' },
-      hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.' },
+      hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.', table: 'The orientation table holds THE FOOL, THE TOWER, and THE SUN. Merlin keeps one paw near The Tower.' },
       occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.', elevator: 'The freight elevator waits to the south. Its doors are open; the Archives are below.' },
       archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.', cabinets: 'Filing cabinets are mortared into the limestone walls. The ledger on the pedestal is the record you can actually read.' },
       subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.', arrow: 'The painted arrow points east to the Continuity Chamber. The parking passage is still blocked by black roots.' },
@@ -275,11 +276,13 @@
 
   function take(text) {
     const id = findItem(text, true);
+    if (state.room === 'occult_compliance' && hasWord(text, 'inbox')) return print('The inbox is fixed to the desk, and Salem is asleep inside it. The tray contains no useful paperwork.');
     if (state.room === 'legal_annex' && hasWord(text, 'stamp') && state.flags.stampTaken) return print(state.inventory.includes('waiver_stamp') ? 'You already carry Waiver Stamp 4C. The acrylic box is empty.' : 'The acrylic box is open and empty. Waiver Stamp 4C is no longer here.');
     if (state.room === 'legal_annex' && hasWord(text, 'stamp') && !state.flags.stampTaken) return print('Waiver Stamp 4C is locked in the acrylic box. Your visitor badge might pry it open.');
     if (!id) return print(`You cannot find ${text || 'that'} here. This is one of your better outcomes tonight.`);
     const item = DORK_DATA.items[id];
     if (id === 'jorge') return print('You cannot take Jorge. Records has already tried transferring him. The forms came back bitten.');
+    if (id === 'tarot_spread') return print('The tarot spread stays on the orientation table. Choose a card; Merlin favors The Tower.');
     if (!item.portable && id === 'water') return print('You lift the glass, but the skin on the water stirs. You set it back on the table.');
     if (!item.portable) return print(`You attempt to take ${item.name}. It declines the transfer.`);
     if (state.inventory.includes(id)) return print(`You already have ${item.name}. Hoarding is not leadership.`);
@@ -433,6 +436,8 @@
     if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
     if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');
+    if (state.room === 'hr_reliquary' && c.verb === 'shuffle') return print('You shuffle the three cards. Merlin puts a paw on The Tower again. HR calls this a randomized process.');
+    if (state.room === 'occult_compliance' && c.verb === 'push' && hasWord(c.objectText, 'elevator button')) return print('The freight elevator is already here with its doors open. Go south or down to reach the Archives.');
     if ((state.room === 'executive_corridor' || state.room === 'elevator') && c.verb === 'push' && /elevator|button|floor\s*\d|\b(?:b|sb|below)\b/.test(c.objectText)) return print('You press the elevator button. Nothing lights up. The car is out of service.');
     if (state.room === 'continuity_chamber' && c.verb === 'touch' && hasWord(c.objectText, 'seals')) return print(state.flags.keyUsed ? 'The seals glow under your fingers. Their five poses are a naming clue, not buttons.' : 'The brass seals are cold. The silver key slot beneath them is still empty.');
     if (state.room === 'break_room' && c.verb === 'push' && /vending|button/.test(c.objectText)) return print('You press the vending machine button. OUT OF STOCK stays lit. Procurement has the candle now.');
