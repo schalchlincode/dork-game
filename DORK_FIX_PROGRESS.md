@@ -77,3 +77,16 @@ Entered 31 commands in Edge across ten rooms with the named room loaded. Each re
 | Sub-Basement | `go to parking`; `look at arrow`; `turn on lights` | Route and scenery replies missed the visible blockade or failed lights | Names the black roots, eastern route, and candle. |
 
 The sampled commands that already made sense were left alone. The browser regression now asserts these corrected replies and both blocked and clear gate states. This is another observed sample, not exhaustive parser coverage or evidence of hundreds of distinct coherent replies.
+
+### Progressed-state Edge sample, 2026-10-04
+
+Entered commands through the Edge page after loading puzzle states with Jorge moved, the stamp taken, the tarot solved, and the final door open. Recorded the actual reply and room before making changes; the corrected cases have browser assertions.
+
+| State / room | Input | Observed problem | Resolution |
+|---|---|---|---|
+| Jorge moved / Records lobby | `push gate` | Generic push line, no movement | Opens the clear gate and enters the stacks. |
+| Stamp carried / Legal Annex | `take stamp` | Claimed the stamp could not be found | Says it is already carried and the box is empty. |
+| Tarot solved / HR Reliquary | `look at wall`; `go through passage` | Vague wall description; visible passage rejected | Describes the open wall and follows the passage east. |
+| Final door open / Continuity Chamber | `go through door` | Visible exit rejected | Enters the parking garage. |
+
+Other sampled replies were coherent or gave a fair clue: Jorge's dialogue after moving, the open acrylic box, the chamber seals and door, and the final door's open description. `say the five names` does not solve the puzzle without names; that is expected. This review is still sampled rather than exhaustive, and it does not establish hundreds of distinct authored responses.

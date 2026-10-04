@@ -54,6 +54,7 @@ const DORK_DATA = {
       desc: "The carpet is mauve. The walls are bone. A tarot spread lies on an orientation table: THE FOOL, THE TOWER, and THE SUN. A sweet grey cat sits beside the cards with one paw raised, as though waiting for you to embarrass yourself. His tag says MERLIN.\n\nThe east wall has no door, although cold air is coming through it.",
       descByFlag: { tarotSolved: "The carpet is mauve. The walls are bone. The tarot spread remains on the table, and Merlin watches from beside it with one paw raised. The east wall has split open into a passage." },
       exits: { west: "procurement", east: "occult_compliance" },
+      exitAliases: { passage: "east" },
       blocked: { east: "tarot" },
       items: ["fool", "tower", "sun", "merlin", "tarot_spread"]
     },
@@ -88,6 +89,7 @@ const DORK_DATA = {
       desc: "The chamber is circular and much larger than the building should permit. Five brass seals surround a central door. Each bears the silhouette of a cat.\n\nA huge white cat sits in front of the door. BOO looks up at you with the expression of an animal who has never once doubted his own authority.\n\nAbove the door: CONTINUITY IS NOT THE PRESERVATION OF GOVERNMENT. IT IS THE PRESERVATION OF RETURN.",
       descByFlag: { finalOpen: "The chamber is circular and the five brass seals are lit. The eastern door stands open. Boo has moved aside with the generosity of a monarch granting a narrow pardon.", keyUsed: "The chamber is circular. The silver key rests in its slot beneath five waking seals. The eastern door remains shut, waiting for five names. Boo sits beside it, apparently supervising." },
       exits: { west: "subbasement", east: "parking_exit" },
+      exitAliases: { door: "east" },
       blocked: { east: "final_seal" },
       items: ["boo", "seals", "final_plaque"]
     },

@@ -406,6 +406,25 @@ async def run():
                 await fix_page.reload()
                 await command(fix_page, "go out the door" if room == "meeting" else "open gate")
                 assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == expected_room, room
+            # Progressed puzzle states: common verbs must follow the visible exit and inventory state.
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{jorgeMoved:true}, visited:['records_lobby'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "push gate")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_stacks"
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'legal_annex', inventory:['waiver_stamp'], taken:['waiver_stamp'], dropped:{}, flags:{stampTaken:true}, visited:['legal_annex'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "take stamp")
+            assert "already carry Waiver Stamp 4C" in await fix_page.locator("#output p").last.inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'hr_reliquary', inventory:[], taken:[], dropped:{}, flags:{tarotSolved:true}, visited:['hr_reliquary'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "look at wall")
+            assert "passage leads into Occult Compliance" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "go through passage")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "occult_compliance"
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:[], taken:[], dropped:{}, flags:{keyUsed:true,finalOpen:true}, visited:['continuity_chamber'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "go through door")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "parking_exit"
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:

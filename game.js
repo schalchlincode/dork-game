@@ -233,6 +233,7 @@
 
   function examine(text) {
     if (!text) return describeRoom(true);
+    if (state.room === 'hr_reliquary' && /^(?:the )?wall$/.test(text)) return examine('east wall');
     if (state.room === 'meeting' && /\b(?:exit sign|east door)\b/.test(text)) return print('The red EXIT sign points east. The door beneath it leads to the corridor; the west door you entered through is gone.');
     if (state.room === 'meeting' && /\b(?:under table|beneath table)\b/.test(text)) return print('Beneath the table: polished legs, immaculate carpet, and no hidden exit. The red EXIT sign points east.');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
@@ -263,6 +264,7 @@
 
   function take(text) {
     const id = findItem(text, true);
+    if (state.room === 'legal_annex' && hasWord(text, 'stamp') && state.flags.stampTaken) return print(state.inventory.includes('waiver_stamp') ? 'You already carry Waiver Stamp 4C. The acrylic box is empty.' : 'The acrylic box is open and empty. Waiver Stamp 4C is no longer here.');
     if (state.room === 'legal_annex' && hasWord(text, 'stamp') && !state.flags.stampTaken) return print('Waiver Stamp 4C is locked in the acrylic box. Your visitor badge might pry it open.');
     if (!id) return print(`You cannot find ${text || 'that'} here. This is one of your better outcomes tonight.`);
     const item = DORK_DATA.items[id];
@@ -416,6 +418,7 @@
     if (state.room === 'subbasement' && c.verb === 'use' && hasWord(c.objectText, 'lights')) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
+    if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');
     if (state.room === 'executive_corridor' && c.verb === 'push' && /elevator|button/.test(c.objectText)) return print('You press the elevator call button. Nothing lights up. The car is out of service.');
     if (state.room === 'continuity_chamber' && c.verb === 'touch' && hasWord(c.objectText, 'seals')) return print(state.flags.keyUsed ? 'The seals glow under your fingers. Their five poses are a naming clue, not buttons.' : 'The brass seals are cold. The silver key slot beneath them is still empty.');
     if (state.room === 'break_room' && c.verb === 'push' && /vending|button/.test(c.objectText)) return print('You press the vending machine button. OUT OF STOCK stays lit. Procurement has the candle now.');
