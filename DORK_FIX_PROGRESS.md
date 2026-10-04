@@ -12,3 +12,19 @@ Resume at the first batch not marked DONE. Each batch must be exercised by `brow
 | 6 | 17 | DONE | `game.js`, `game-data.js`, `browser_test.py` | `browser_test.py` passed: state-aware room and box descriptions plus full route | First active flag wins, so finalOpen precedes keyUsed; changed no prior assertions. |
 | 7 | 18, 19, 20 | DONE | `game.js`, `game-data.js`, `browser_test.py` | `browser_test.py` passed: Ash, Jorge, five cat interactions, full route and death checks | Added HUG to TOUCH synonyms; changed no prior assertions. |
 | 8 | 24 | DONE | `README.md`, `SOLUTION.md`, `browser_test.py` | `browser_test.py` passed: spoiler placement and full browser run | README now points to the separate spoiler file; changed no prior assertions. |
+
+## Player-style review, 2026-10-04
+
+Method: entered commands in Edge against the local page, read each reply, then replayed the full browser regression after changes. These are observed responses, not a source-only estimate of parser coverage.
+
+| Room | Player input | Initial result | Change / remaining note |
+|---|---|---|---|
+| Meeting | `look at exit sign` | Nonspecific examination | Now points east and explains the missing west door. |
+| Meeting | `drink water` | Generic warning unrelated to the visible skin | Now describes the water and leaves the player in control. |
+| Meeting | `go through east door` | Parser rejection | Now moves east. |
+| Break room | `look in fridge`, `open fridge` | Nonspecific or generic failure | Now describes the contents and Jorge's creamer. |
+| Break room | `press vending machine button` | Generic push reply | Now points toward Procurement for the candle. |
+| Records lobby | `go through gate` | Parser rejection | Now checks Jorge's gate and respects its blocker. |
+| Legal Annex | `refuse contract` | Parser rejection | Now explains that the waiver stamp records refusal. |
+
+The route to the true ending, deaths, autosave, restart, parser boundaries, and narrow layouts still pass in the browser regression. This pass samples seven confusing input patterns; it does not establish that every possible command or room response is coherent. Continue with a room-by-room command matrix, logging each command, state, actual reply, expected behavior, and any remaining generic fallback. Prioritize puzzle objects and common English phrasing before adding novelty lines.

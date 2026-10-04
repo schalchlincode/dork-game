@@ -54,6 +54,7 @@
     hint: ['hint','clue','assist'],
     restart: ['restart'],
     sign: ['sign','autograph','initial'],
+    refuse: ['refuse','reject','decline'],
     deaths: ['deaths','deathlog','obituary'],
     lore: ['lore','journal','archive'],
     save: ['save'],
@@ -133,6 +134,13 @@
     if (/^(?:check inventory|look in bag|check my stuff)$/.test(cleaned)) return {verb:'inventory', objectText:'', targetText:'', raw};
     if (/^(?:take all items|grab all of it)$/.test(cleaned)) return {verb:'take', objectText:'all', targetText:'', raw};
     if (/^(?:get out(?: of here)?|go out(?:side)?|walk out|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
+    const through = cleaned.match(/^(?:go|walk|move|head)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
+    if (through) {
+      const route = through[1].replace(/\s+(?:door|passage|exit|way)$/,'');
+      const direction = verbMap[route];
+      if (['north','south','east','west'].includes(direction)) return {verb:direction, objectText:'', targetText:'', raw};
+      return {verb:'exitAlias', objectText:route, targetText:'', raw};
+    }
     if (/^(?:back|go back|return)$/.test(cleaned)) return {verb:'back', objectText:'', targetText:'', raw};
     if (/^(?:(?:go|walk|move|head|take|use|climb)\s+)?(?:down|up|downstairs|upstairs|stairs|elevator)$/.test(cleaned) || cleaned === 'descend') {
       const alias = /elevator/.test(cleaned) ? 'elevator' : /stairs/.test(cleaned) && !/downstairs|upstairs/.test(cleaned) ? 'stairs' : /up/.test(cleaned) ? 'up' : 'down';
@@ -192,6 +200,11 @@
       }
       print("You decline to make that signature binding. Legal seems disappointed to retain only your attention.");
     },
+    refuse: (c) => {
+      if (state.room === 'legal_annex' && hasWord(c.objectText, 'contract'))
+        return print('You refuse the contract. Legal requires Waiver Stamp 4C to record that refusal; the stamp is locked in the acrylic box.');
+      print(`You decline ${c.objectText || 'the offer'}. The Agency records your lack of enthusiasm.`);
+    },
     deaths: showDeaths,
     lore: showLore,
     save: () => { saveRun(); print('Run state saved locally. Even bureaucracy occasionally works.'); }
@@ -217,6 +230,9 @@
 
   function examine(text) {
     if (!text) return describeRoom(true);
+    if (state.room === 'meeting' && /\b(?:exit sign|east door)\b/.test(text)) return print('The red EXIT sign points east. The door beneath it leads to the corridor; the west door you entered through is gone.');
+    if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
+    if (state.room === 'break_room' && /\b(?:vending machine|machine button)\b/.test(text)) return print('The vending machine lists one black candle as OUT OF STOCK. Procurement handles emergency supplies now.');
     const id = findItem(text);
     if (!id) {
       if (/jorge/.test(text) && state.room === 'records_lobby') return print("Jorge is at least seven feet tall when seated, which raises questions you do not have clearance to ask. His smile contains excellent dental benefits.");
@@ -274,6 +290,7 @@
   }
 
   function openThing(text) {
+    if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("You open the refrigerator. Expired lunches crowd around Jorge's hazelnut creamer; the warning on the door is apparently for your benefit.");
     if (/box|stamp/.test(text) && state.room === 'legal_annex') {
       if (state.flags.stampTaken) return print('The acrylic box is already open and, like most safeguards, retrospectively decorative.');
       if (!state.inventory.includes('badge')) return print('The box needs a thin pry tool. Your visitor badge might survive the job.');
@@ -365,6 +382,8 @@
   function genericAction(c) {
     // direct puzzle phrases / natural-language easter eggs
     const r = c.raw.toLowerCase();
+    if (state.room === 'meeting' && c.verb === 'drink' && hasWord(c.objectText, 'water')) return print('You lift the glass. The skin on the water moves against the rim. You put it down without drinking.');
+    if (state.room === 'break_room' && c.verb === 'push' && /vending|button/.test(c.objectText)) return print('You press the vending machine button. OUT OF STOCK stays lit. Procurement has the candle now.');
     if (state.room === 'continuity_chamber' && /boo.*salem.*ash.*luna.*merlin/.test(r) && state.flags.keyUsed) return talkThing({objectText:r,targetText:''});
     if (/read/.test(r)) return examine(c.objectText);
     if (/coffee/.test(r) && state.room === 'break_room') return print("The coffee machine produces a liquid that is technically darker than the cup. You decide Jorge deserves the creamer more than you deserve this.");

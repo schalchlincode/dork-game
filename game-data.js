@@ -27,6 +27,7 @@ const DORK_DATA = {
       descByFlag: { jorgeMoved: "The Records lobby smells of dust and toner. Jorge has rolled his chair aside, leaving the southern gate clear. He still holds the barcoded femur. North returns to the corridor; south enters the stacks." },
       exits: { north: "executive_corridor", south: "records_stacks" },
       blocked: { south: "jorge" },
+      exitAliases: { gate: "south", stacks: "south" },
       items: ["jorge"]
     },
     records_stacks: {

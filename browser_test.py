@@ -228,6 +228,28 @@ async def run():
             await fix_page.reload()
             await command(fix_page, "look around")
             assert "Exits: east" in await fix_page.locator("#output").inner_text()
+            await command(fix_page, "look at exit sign")
+            assert "points east" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "drink water")
+            assert "skin on the water" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "go through east door")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "executive_corridor"
+            await command(fix_page, "north")
+            for phrase, expected in (("look in fridge", "warnings"), ("open fridge", "You open the refrigerator"),
+                                     ("press vending machine button", "OUT OF STOCK")):
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), phrase
+            await command(fix_page, "south")
+            await command(fix_page, "south")
+            await command(fix_page, "go through gate")
+            assert "Jorge occupies" in await fix_page.locator("#output p").last.inner_text()
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'legal_annex', inventory:[], taken:[], dropped:{}, flags:{}, visited:['legal_annex'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "refuse contract")
+            assert "Waiver Stamp 4C" in await fix_page.locator("#output p").last.inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
+            await fix_page.reload()
             await command(fix_page, "take all items")
             assert {"badge", "agenda"}.issubset(set(await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")))
             await command(fix_page, "check inventory")
