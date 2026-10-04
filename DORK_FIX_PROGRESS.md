@@ -46,3 +46,18 @@ Method: each input was entered through the actual Edge page in the named room wi
 | Continuity Chamber | `look at door`; `touch seals`; `open door` | Nonspecific door; ungrammatical seal reply; generic opening response | Replies track the key and door state and point to the five-name clue. |
 
 Remaining review: test more natural phrasings and novelty verbs per room in both fresh and progressed states. This matrix verifies observed commands, not a count of distinct authored responses or exhaustive parser coverage.
+
+### Additional Edge command sample, 2026-10-04
+
+Fresh states were loaded in the actual Edge page. The first reply below was observed before editing; the corrected replies now have browser assertions and the full ending regression passes.
+
+| Room | Input | Initial reply problem | Resolution |
+|---|---|---|---|
+| Meeting | `look under table`; `open agenda` | Nonspecific table; agenda said nothing opens | Table names what is under it; opening the agenda reads its contents. |
+| Break room | `read warning`; `use coffee machine` | Nonspecific warning; use rejected the machine | Both now describe visible context and point toward Jorge's creamer. |
+| Records lobby | `read placard` | Nonspecific placard | Gives Jorge's title and the gate context. |
+| Records stacks | `read shelf 20` | Nonspecific shelf | Reads the scratched warning. |
+| Legal Annex | `stamp contract` | Parser rejected a plausible refusal action | Explains that the waiver stamp goes to Procurement with Form 66-B. |
+| Archives | `go down stairs` | Parser rejected a natural route phrase | Descends when a lit candle is carried; the existing darkness rule still applies. |
+
+`read drawings` was also checked in Occult Compliance: it describes the drawings and then prints an archive update. No change was needed. More fresh and progressed puzzle states remain to be sampled; this is still not an exhaustive response count.

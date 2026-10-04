@@ -366,6 +366,24 @@ async def run():
             assert "out of service" in await fix_page.locator("#output p").last.inner_text()
             await command(fix_page, "go to records")
             assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
+            # Additional observed player phrasings, checked in their actual rooms.
+            for room, phrase, expected in (
+                ("meeting", "look under table", "no hidden exit"),
+                ("meeting", "open agenda", "Establish continuity"),
+                ("break_room", "read warning", "reserves"),
+                ("break_room", "use coffee machine", "creamer"),
+                ("records_lobby", "read placard", "SPECIALIST III"),
+                ("records_stacks", "read shelf 20", "ASH HIDES"),
+                ("legal_annex", "stamp contract", "Procurement"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'archives', inventory:['black_candle'], taken:['black_candle'], dropped:{}, flags:{candleLit:true}, visited:['archives'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "go down stairs")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "subbasement"
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:
