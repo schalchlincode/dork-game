@@ -283,6 +283,8 @@
     const item = DORK_DATA.items[id];
     if (id === 'jorge') return print('You cannot take Jorge. Records has already tried transferring him. The forms came back bitten.');
     if (id === 'tarot_spread') return print('The tarot spread stays on the orientation table. Choose a card; Merlin favors The Tower.');
+    if (id === 'drawings') return print("The children's drawings are fixed to the wall. Read their signatures here; the three witnesses matter later.");
+    if (id === 'ledger') return print('The ledger is chained to its pedestal. Read it here before taking the eastern stair.');
     if (!item.portable && id === 'water') return print('You lift the glass, but the skin on the water stirs. You set it back on the table.');
     if (!item.portable) return print(`You attempt to take ${item.name}. It declines the transfer.`);
     if (state.inventory.includes(id)) return print(`You already have ${item.name}. Hoarding is not leadership.`);
@@ -335,6 +337,8 @@
     if (state.room === 'records_stacks' && hasWord(text, 'file')) return examine('file');
     if (state.room === 'archives' && hasWord(text, 'ledger')) return examine('ledger');
     if (state.room === 'occult_compliance' && hasWord(text, 'inbox')) return examine('inbox');
+    if (state.room === 'archives' && hasWord(text, 'cabinets')) return print('The filing cabinets are mortared into the limestone walls. Their drawers cannot open; the ledger on its pedestal can be read.');
+    if (state.room === 'subbasement' && /parking|passage/.test(text)) return print('Black roots have collapsed the parking passage. The painted arrow points east to the Continuity Chamber.');
     if (state.room === 'records_lobby' && hasWord(text, 'gate')) return move('south');
     if (state.room === 'continuity_chamber' && hasWord(text, 'door')) return examine('door');
     if (/box|stamp/.test(text) && state.room === 'legal_annex') {
@@ -399,6 +403,8 @@
 
   function talkThing(c) {
     const t = `${c.objectText} ${c.targetText}`.trim();
+    if (state.room === 'subbasement' && /^(?:for )?(?:directions|way out|exit)$/.test(t)) return print('The painted arrow points east to the Continuity Chamber. Black roots block the parking passage.');
+    if (state.room === 'continuity_chamber' && /^(?:for )?names$|^(?:the )?room about seals$/.test(t)) return print(state.flags.keyUsed ? 'Read the five lit seals from left to right. Their poses match the five cats you met; name each in that order.' : 'The five seals are dark. Use the silver key in the slot beneath them, then read their poses.');
     const names = ['boo','salem','ash','luna','merlin'];
     if (state.room === 'continuity_chamber' && state.flags.keyUsed && names.every(n => new RegExp(`\\b${n}\\b`).test(t))) {
       if (!/\bboo\b.*\bsalem\b.*\bash\b.*\bluna\b.*\bmerlin\b/.test(t)) return print('The five seals flicker, then go dark. Match their poses from left to right.');
@@ -434,6 +440,7 @@
     if (state.room === 'meeting' && c.verb === 'sit' && hasWord(c.objectText, 'table')) return print('You sit at the conference table. The agenda and badge remain in reach; the east door is the only exit.');
     if (state.room === 'subbasement' && c.verb === 'use' && hasWord(c.objectText, 'lights')) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
+    if (state.room === 'subbasement' && /^(?:follow|take) (?:the )?(?:painted )?arrow$/.test(r)) return move('east');
     if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
     if (state.room === 'procurement' && c.verb === 'buy' && hasWord(c.objectText, 'candle')) return print('The requisition machine does not take money. Feed it Form 66-B and Waiver Stamp 4C to receive the black candle.');
     if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');

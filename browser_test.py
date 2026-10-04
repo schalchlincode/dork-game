@@ -496,6 +496,25 @@ async def run():
             await fix_page.reload()
             await command(fix_page, "knock on door")
             assert "five lit seals still wait" in await fix_page.locator("#output p").last.inner_text()
+            # Player wording and fixed scenery observed in a later-room Edge sample.
+            for room, phrase, expected, flags in (
+                ("occult_compliance", "take drawings", "fixed to the wall", {}),
+                ("archives", "take ledger", "chained to its pedestal", {}),
+                ("archives", "open cabinets", "mortared into", {}),
+                ("subbasement", "ask for directions", "painted arrow points east", {}),
+                ("subbasement", "open parking passage", "Black roots have collapsed", {}),
+                ("continuity_chamber", "ask for names", "Use the silver key", {}),
+                ("continuity_chamber", "ask for names", "five lit seals", {"keyUsed": True}),
+                ("continuity_chamber", "ask the room about seals", "five lit seals", {"keyUsed": True}),
+            ):
+                await fix_page.evaluate("([room, flags]) => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:['black_candle'], taken:[], dropped:{}, flags, visited:[room], dead:false, won:false}))", [room, flags])
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'subbasement', inventory:['black_candle'], taken:[], dropped:{}, flags:{candleLit:true}, visited:['subbasement'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "follow arrow")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "continuity_chamber"
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:
