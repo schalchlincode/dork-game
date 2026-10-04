@@ -316,6 +316,10 @@ async def run():
             assert all(pose in seal_text for pose in ("sitting upright", "curled asleep", "crouched high", "eyes showing", "one paw raised"))
             await command(fix_page, "say merlin luna ash salem boo")
             assert "poses" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "listen to breathing")
+            assert "You listen to breathing." in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "pray to cats")
+            assert "You pray to cats." in await fix_page.locator("#output p").last.inner_text()
             # Batch 6: descriptions follow the run's puzzle flags.
             for room, flags, room_line, item_command, item_line in (
                 ("legal_annex", {"stampTaken": True}, "open and empty", "examine box", "open and empty"),

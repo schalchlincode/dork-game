@@ -77,7 +77,7 @@
     climb: ["You assess {o} for climbability. Your assessment is negative."],
     hide: ["You attempt to hide near {o}. You are a grown executive crouching in a government building. Reflect on this."],
     sit: ["You sit near {o}. The building continues without your leadership."],
-    pray: ["You pray at {o}. Something, somewhere, marks the request as received."],
+    pray: ["You pray to {o}. Something, somewhere, marks the request as received."],
     threaten: ["You threaten {o}. Your executive presence is noted and ignored."],
     flatter: ["You compliment {o}. This is beneath both of you."],
     dance: ["You dance. There are no witnesses you can prove exist."],
@@ -163,7 +163,8 @@
       if (['north','south','east','west'].includes(d)) return { verb:d, objectText:'', targetText:'', raw, verbToken };
     }
     const verb = verbMap[verbToken] || verbToken;
-    const rest = words.join(' ').replace(/^(the|a|an)\s+/,'').replace(/^at\s+/,'');
+    let rest = words.join(' ').replace(/^(the|a|an)\s+/,'').replace(/^at\s+/,'');
+    if (['listen', 'pray'].includes(verb)) rest = rest.replace(/^to\s+/,'');
     const split = rest.split(/\s+(?:on|with|to|into|in|at|using)\s+/);
     return { verb, objectText: split[0] || '', targetText: split[1] || '', raw, verbToken };
   }
