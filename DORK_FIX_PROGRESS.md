@@ -90,3 +90,7 @@ Entered commands through the Edge page after loading puzzle states with Jorge mo
 | Final door open / Continuity Chamber | `go through door` | Visible exit rejected | Enters the parking garage. |
 
 Other sampled replies were coherent or gave a fair clue: Jorge's dialogue after moving, the open acrylic box, the chamber seals and door, and the final door's open description. `say the five names` does not solve the puzzle without names; that is expected. This review is still sampled rather than exhaustive, and it does not establish hundreds of distinct authored responses.
+
+### Additional fresh-route Edge sample, 2026-10-04
+
+Entered commands from the meeting room through Procurement in Edge and recorded the actual replies before editing. Five gaps were corrected: `ask for help` addressed an imaginary person, `open east door` gave a generic door line, `ride elevator` fell into parser confusion, `look at gate` ignored Jorge's blocked or cleared state, and `use machine` gave a generic workflow line. The new browser checks cover those replies and both elevator locations. The wider sample also included the badge, directory, break room, Jorge, Shelf 20, Ash, the file, and the Legal Annex. Those observed replies were either coherent or did not warrant a change. This remains a sample, not a complete count of authored responses or proof of exhaustive coverage.

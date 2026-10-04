@@ -425,6 +425,27 @@ async def run():
             await fix_page.reload()
             await command(fix_page, "go through door")
             assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "parking_exit"
+            # Fresh and progressed player wording, reproduced in Edge before these fixes.
+            for room, phrase, expected in (
+                ("meeting", "ask for help", "DORK understands"),
+                ("meeting", "open east door", "Go east"),
+                ("records_lobby", "look at gate", "Jorge and his desk"),
+                ("procurement", "use machine", "FORM and WAIVER slots"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{jorgeMoved:true}, visited:['records_lobby'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "look at gate")
+            assert "gate into the stacks is clear" in await fix_page.locator("#output p").last.inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'executive_corridor', inventory:[], taken:[], dropped:{}, flags:{}, visited:['executive_corridor'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "ride elevator")
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "elevator"
+            await command(fix_page, "ride elevator")
+            assert "already in the elevator" in await fix_page.locator("#output p").last.inner_text()
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:

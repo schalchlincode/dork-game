@@ -132,6 +132,7 @@
     if (!cleaned) return null;
     if (/^(?:look around|look room|look here|look at room|examine room|survey)$/.test(cleaned)) return {verb:'look', objectText:'', targetText:'', raw};
     if (/^(?:check inventory|look in bag|check my stuff)$/.test(cleaned)) return {verb:'inventory', objectText:'', targetText:'', raw};
+    if (/^(?:ask for help|ask for a hint)$/.test(cleaned)) return {verb:cleaned.endsWith('hint') ? 'hint' : 'help', objectText:'', targetText:'', raw};
     if (/^(?:take all items|grab all of it)$/.test(cleaned)) return {verb:'take', objectText:'all', targetText:'', raw};
     if (/^(?:get out(?: of here)?|go out(?:side)?|go out (?:the )?door|walk out(?: (?:the )?door)?|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
     const through = cleaned.match(/^(?:go|walk|move|head)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
@@ -142,6 +143,7 @@
       return {verb:'exitAlias', objectText:route, targetText:'', raw};
     }
     if (/^(?:back|go back|return)$/.test(cleaned)) return {verb:'back', objectText:'', targetText:'', raw};
+    if (/^(?:ride|enter|step into) (?:the )?elevator$/.test(cleaned)) return {verb:'exitAlias', objectText:'elevator', targetText:'', raw};
     if (/^(?:(?:go|walk|move|head|take|use|climb)\s+)?(?:down|up|downstairs|upstairs|stairs|elevator)$/.test(cleaned) || cleaned === 'descend') {
       const alias = /elevator/.test(cleaned) ? 'elevator' : /stairs/.test(cleaned) && !/downstairs|upstairs/.test(cleaned) ? 'stairs' : /up/.test(cleaned) ? 'up' : 'down';
       return {verb:'exitAlias', objectText:alias, targetText:'', raw};
@@ -180,6 +182,7 @@
     exitAlias: (c) => {
       const direction = roomNow().exitAliases?.[c.objectText];
       if (direction) move(direction);
+      else if (state.room === 'elevator' && c.objectText === 'elevator') print('You are already in the elevator. The buttons are dead; west returns to the corridor.');
       else if (state.room === 'subbasement' && hasWord(c.objectText, 'parking')) print('Black roots have collapsed the parking passage. The marked route east leads to the Continuity Chamber.');
       else print(`There is no ${c.objectText} route from here.`);
     },
@@ -235,6 +238,7 @@
     if (!text) return describeRoom(true);
     if (state.room === 'hr_reliquary' && /^(?:the )?wall$/.test(text)) return examine('east wall');
     if (state.room === 'meeting' && /\b(?:exit sign|east door)\b/.test(text)) return print('The red EXIT sign points east. The door beneath it leads to the corridor; the west door you entered through is gone.');
+    if (state.room === 'records_lobby' && hasWord(text, 'gate')) return print(state.flags.jorgeMoved ? 'Jorge has rolled aside. The southern gate into the stacks is clear.' : 'Jorge and his desk block the southern gate into the stacks. He keeps glancing toward the break room.');
     if (state.room === 'meeting' && /\b(?:under table|beneath table)\b/.test(text)) return print('Beneath the table: polished legs, immaculate carpet, and no hidden exit. The red EXIT sign points east.');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
     if (state.room === 'break_room' && /\b(?:warning|note on fridge)\b/.test(text)) return print("The warning reserves the hazelnut creamer for Jorge. The fridge contains expired lunches and no useful substitute.");
@@ -313,6 +317,7 @@
   }
 
   function openThing(text) {
+    if (state.room === 'meeting' && hasWord(text, 'east door')) return print('The east door opens onto the Executive Corridor. Go east to leave the meeting room.');
     if (state.room === 'meeting' && hasWord(text, 'agenda')) return examine('agenda');
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("You open the refrigerator. Expired lunches crowd around Jorge's hazelnut creamer; the warning on the door is apparently for your benefit.");
     if (state.room === 'executive_corridor' && hasWord(text, 'elevator')) return print('The elevator doors open east, but the car is out of service. You can step in; it will not take you to another floor.');
@@ -334,6 +339,7 @@
     const a = findInventory(c.objectText) || findItem(c.objectText);
     const b = c.targetText ? (findItem(c.targetText) || specialTarget(c.targetText)) : null;
     if (state.room === 'break_room' && hasWord(c.objectText, 'coffee machine')) return print('The coffee machine wheezes out something dark. The useful hazelnut creamer is reserved for Jorge in Records.');
+    if (state.room === 'procurement' && /^(?:requisition )?machine$/.test(c.objectText)) return print('The requisition machine has FORM and WAIVER slots. Insert Form 66-B and Waiver Stamp 4C to request the candle and key.');
 
     if (state.room === 'legal_annex' && a === 'badge' && /box|stamp/.test(c.targetText)) return openThing('box');
 
