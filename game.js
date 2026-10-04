@@ -498,7 +498,7 @@
     if (state.room === 'continuity_chamber' && c.verb === 'knock' && hasWord(c.objectText, 'door')) return print(state.flags.finalOpen ? 'The door is already open. Go east to leave.' : state.flags.keyUsed ? 'Your knock echoes behind the sealed door. The five lit seals still wait for their names.' : 'The door does not answer. A silver key slot sits beneath the five seals.');
     if (state.room === 'break_room' && c.verb === 'push' && /vending|button/.test(c.objectText)) return print('You press the vending machine button. OUT OF STOCK stays lit. Procurement has the candle now.');
     if (state.room === 'continuity_chamber' && /boo.*salem.*ash.*luna.*merlin/.test(r) && state.flags.keyUsed) return talkThing({objectText:r,targetText:''});
-    if (/read/.test(r)) return examine(c.objectText);
+    if (/\bread\b/.test(r)) return examine(c.objectText);
     if (/coffee/.test(r) && state.room === 'break_room') return print("The coffee machine produces a liquid that is technically darker than the cup. You decide Jorge deserves the creamer more than you deserve this.");
     const id = findItem(c.objectText) || findInventory(c.objectText);
     if (id === 'jorge') {
@@ -522,6 +522,16 @@
       };
       return print(lines[id]);
     }
+    if (['smell', 'listen', 'lick'].includes(c.verb) && ['ash','merlin','salem','luna','boo'].includes(id)) {
+      const cats = {
+        ash: {smell: 'Ash smells faintly of dust from Shelf 20.', listen: 'Ash makes a small warning sound from the shelf. Something here frightens him.', lick: 'Ash retreats higher on Shelf 20. That is a reasonable response to your proposal.'},
+        merlin: {smell: 'Merlin smells of old paper and the HR table. His paw stays beside The Tower.', listen: 'Merlin purrs, then taps The Tower with one paw.', lick: 'Merlin moves away from your face and points you back toward The Tower.'},
+        salem: {smell: 'Salem smells of warm fur and the paper in the nearby inbox.', listen: 'Salem purrs beside the empty inbox. The freight elevator is quieter.', lick: 'Salem withdraws from this terrible plan. The inbox remains available for normal investigation.'},
+        luna: {smell: 'Luna smells of dry paper from beneath the ledger.', listen: 'Luna breathes softly beneath the ledger pedestal. She is hiding from something below.', lick: 'Luna slips farther beneath the ledger. Leave the frightened cat alone.'},
+        boo: {smell: 'Boo smells of clean fur and the cold metal of the chamber door.', listen: 'Boo purrs beside the five seals, then falls silent as you study them.', lick: 'Boo gives you a look that would end a lesser administration.'}
+      };
+      return print(cats[id][c.verb]);
+    }
     if (c.verb === 'touch') {
       const lines = {
         agenda: 'The leather folder is cool and stiff. Five blank signature lines wait inside; touching them signs nothing.',
@@ -543,9 +553,55 @@
       };
       if (lines[id]) return print(lines[id]);
     }
+    const sensory = {
+      water: {
+        smell: 'The water smells faintly of a closed aquarium. The skin on top stays perfectly still.',
+        listen: 'The glass is silent. The fluorescent lights above it buzz for both of you.',
+        lick: 'You touch the water to your tongue. The surface skin clings to it; you stop before taking a drink.'
+      },
+      creamer: {
+        smell: "The sealed creamer smells of hazelnut. Jorge's name is written across the label.",
+        listen: 'You shake the creamer. It sloshes; Jorge is still waiting in Records.',
+        lick: "You taste a drop of hazelnut creamer. Jorge needs the bottle, not your review of it."
+      },
+      mug: {
+        smell: 'The mug smells of old coffee. The chipped rim has outlived its government slogan.',
+        listen: 'The empty mug gives a dull ceramic ring when you tap it. The coffee machine keeps wheezing.',
+        lick: 'The chipped mug tastes of stale coffee and ceramic dust. You have learned nothing useful.'
+      },
+      agenda: {
+        smell: 'The leather agenda smells new. Its five signature lines are still blank.',
+        listen: 'The agenda makes no sound when you lift it. The east exit sign hums across the room.'
+      },
+      badge: {
+        smell: 'The plastic badge smells of fresh laminate. Your temporary access has a longer shelf life than expected.',
+        listen: 'The badge clicks against its clip. It has no electronics to answer you.'
+      },
+      napkin: {
+        smell: 'The napkin smells of purple marker and old coffee. Three names circle the drawn door.',
+        listen: 'The napkin rustles. Angela, Julia, and Audrey left a written clue, not a recording.'
+      },
+      requisition_machine: {
+        smell: 'The brass machine smells of hot metal and paper. FORM and WAIVER are its open slots.',
+        listen: 'A mechanism ticks behind the FORM and WAIVER slots. The SOUL slot stays taped shut.'
+      },
+      tarot_spread: {
+        smell: 'The cards smell of old paper. Merlin keeps his paw beside The Tower.',
+        listen: 'The cards are quiet. Merlin taps the table once beside The Tower.'
+      },
+      ledger: {
+        smell: 'The ledger smells of dry paper and limestone. Luna hides beneath its pedestal.',
+        listen: 'Pages settle with a soft crackle. Beneath the pedestal, Luna breathes very quietly.'
+      },
+      seals: {
+        smell: state.flags.keyUsed ? 'The warm brass seals smell of old metal. The silver key rests in its slot.' : 'The brass seals smell of old metal. The key slot beneath them is empty.',
+        listen: state.flags.keyUsed ? 'The five awakened seals hum together. They still wait for five names.' : 'The cold seals make no sound. A silver key fits the slot beneath them.'
+      }
+    };
+    if (sensory[id] && sensory[id][c.verb]) return print(sensory[id][c.verb]);
     if (generic[c.verb]) {
       const arr = generic[c.verb]; const line = arr[Math.abs(hash(c.raw)) % arr.length];
-      const name = id ? (DORK_DATA.items[id].article || (['boo','salem','ash','luna','merlin'].includes(id) ? DORK_DATA.items[id].name : `the ${DORK_DATA.items[id].name}`)) : (c.objectText || 'the situation');
+      const name = id ? (DORK_DATA.items[id].article || (['jorge','boo','salem','ash','luna','merlin'].includes(id) || /^the /i.test(DORK_DATA.items[id].name) ? DORK_DATA.items[id].name : `the ${DORK_DATA.items[id].name}`)) : (c.objectText || 'the situation');
       return print(line.replace('{o}', name).replace('{O}', cap(name)));
     }
     if (verbMap[c.verb]) return print("You attempt that. The result is technically an action but not a useful one.");

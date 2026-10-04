@@ -13,7 +13,7 @@ from playwright.async_api import async_playwright
 
 
 HERE = Path(__file__).resolve().parent
-VERBS = ("look at", "read", "open", "take", "use", "touch", "search")
+VERBS = ("look at", "read", "open", "take", "use", "touch", "search", "smell", "listen to", "taste")
 
 
 async def collect(url):
@@ -73,7 +73,7 @@ def main():
     args = parser.parse_args()
     rows = asyncio.run(collect(args.url))
     args.output.write_text(json.dumps({
-        "method": "Fresh isolated room state; seven verbs per visible room item; actual Edge input and output.",
+        "method": "Fresh isolated room state; ten verbs per visible room item; actual Edge input and output.",
         "source": "index.html" if args.url == (HERE / "index.html").as_uri() else args.url,
         "distinct_reply_count": len({row["reply"] for row in rows}),
         "rows": rows,

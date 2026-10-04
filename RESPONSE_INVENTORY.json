@@ -1,7 +1,7 @@
 {
-  "method": "Fresh isolated room state; seven verbs per visible room item; actual Edge input and output.",
+  "method": "Fresh isolated room state; ten verbs per visible room item; actual Edge input and output.",
   "source": "index.html",
-  "distinct_reply_count": 123,
+  "distinct_reply_count": 208,
   "rows": [
     {
       "room": "meeting",
@@ -56,6 +56,30 @@
       "item": "agenda folder",
       "command": "search agenda folder",
       "reply": "The agenda contains one item: '1. Establish continuity.' Five blank signature lines follow. The footer says: 'Attendance constitutes consent unless otherwise documented.'",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "smell agenda folder",
+      "reply": "The leather agenda smells new. Its five signature lines are still blank.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "listen to agenda folder",
+      "reply": "The agenda makes no sound when you lift it. The east exit sign hums across the room.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "agenda folder",
+      "command": "taste agenda folder",
+      "reply": "The agenda folder tastes like dust, copper, and a decision you can no longer defend.",
       "room_after": "meeting",
       "dead": false
     },
@@ -117,6 +141,30 @@
     },
     {
       "room": "meeting",
+      "item": "visitor badge",
+      "command": "smell visitor badge",
+      "reply": "The plastic badge smells of fresh laminate. Your temporary access has a longer shelf life than expected.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "listen to visitor badge",
+      "reply": "The badge clicks against its clip. It has no electronics to answer you.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "visitor badge",
+      "command": "taste visitor badge",
+      "reply": "You lick the visitor badge. The narrator records this without comment. The narrator is lying.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
       "item": "glass of water",
       "command": "look at glass of water",
       "reply": "The water is room temperature and somehow looks judgmental.",
@@ -168,6 +216,30 @@
       "item": "glass of water",
       "command": "search glass of water",
       "reply": "The water is room temperature and somehow looks judgmental.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "smell glass of water",
+      "reply": "The water smells faintly of a closed aquarium. The skin on top stays perfectly still.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "listen to glass of water",
+      "reply": "The glass is silent. The fluorescent lights above it buzz for both of you.",
+      "room_after": "meeting",
+      "dead": false
+    },
+    {
+      "room": "meeting",
+      "item": "glass of water",
+      "command": "taste glass of water",
+      "reply": "You touch the water to your tongue. The surface skin clings to it; you stop before taking a drink.",
       "room_after": "meeting",
       "dead": false
     },
@@ -229,6 +301,30 @@
     },
     {
       "room": "break_room",
+      "item": "government mug",
+      "command": "smell government mug",
+      "reply": "The mug smells of old coffee. The chipped rim has outlived its government slogan.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "listen to government mug",
+      "reply": "The empty mug gives a dull ceramic ring when you tap it. The coffee machine keeps wheezing.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "government mug",
+      "command": "taste government mug",
+      "reply": "The chipped mug tastes of stale coffee and ceramic dust. You have learned nothing useful.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
       "item": "hazelnut creamer",
       "command": "look at hazelnut creamer",
       "reply": "JORGE ONLY. Apparently policy.",
@@ -280,6 +376,30 @@
       "item": "hazelnut creamer",
       "command": "search hazelnut creamer",
       "reply": "JORGE ONLY. Apparently policy.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "smell hazelnut creamer",
+      "reply": "The sealed creamer smells of hazelnut. Jorge's name is written across the label.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "listen to hazelnut creamer",
+      "reply": "You shake the creamer. It sloshes; Jorge is still waiting in Records.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "hazelnut creamer",
+      "command": "taste hazelnut creamer",
+      "reply": "You taste a drop of hazelnut creamer. Jorge needs the bottle, not your review of it.",
       "room_after": "break_room",
       "dead": false
     },
@@ -341,6 +461,30 @@
     },
     {
       "room": "break_room",
+      "item": "napkin drawing",
+      "command": "smell napkin drawing",
+      "reply": "The napkin smells of purple marker and old coffee. Three names circle the drawn door.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "listen to napkin drawing",
+      "reply": "The napkin rustles. Angela, Julia, and Audrey left a written clue, not a recording.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "napkin drawing",
+      "command": "taste napkin drawing",
+      "reply": "You lick the napkin drawing. The narrator records this without comment. The narrator is lying.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
       "item": "break-room memo",
       "command": "look at break-room memo",
       "reply": "MEMO: Records staff are not to be fed after 5:00 PM except approved flavored creamers. This policy supersedes the 2019 incident.",
@@ -392,6 +536,30 @@
       "item": "break-room memo",
       "command": "search break-room memo",
       "reply": "MEMO: Records staff are not to be fed after 5:00 PM except approved flavored creamers. This policy supersedes the 2019 incident.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "smell break-room memo",
+      "reply": "The break-room memo smells institutional.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "listen to break-room memo",
+      "reply": "You listen to the break-room memo. Mostly, you hear the building pretending to be empty.",
+      "room_after": "break_room",
+      "dead": false
+    },
+    {
+      "room": "break_room",
+      "item": "break-room memo",
+      "command": "taste break-room memo",
+      "reply": "You lick the break-room memo. The narrator records this without comment. The narrator is lying.",
       "room_after": "break_room",
       "dead": false
     },
@@ -448,6 +616,30 @@
       "item": "Jorge",
       "command": "search Jorge",
       "reply": "Jorge is at least seven feet tall while seated. His suit is immaculate, his proportions are not, and his clipboard appears to require its own clearance.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "smell Jorge",
+      "reply": "Jorge smells of toner, hazelnut creamer, and a sealed personnel file.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "listen to Jorge",
+      "reply": "You listen to Jorge. Mostly, you hear the building pretending to be empty.",
+      "room_after": "records_lobby",
+      "dead": false
+    },
+    {
+      "room": "records_lobby",
+      "item": "Jorge",
+      "command": "taste Jorge",
+      "reply": "Jorge looks at you. Even the femur seems disappointed.",
       "room_after": "records_lobby",
       "dead": false
     },
@@ -509,6 +701,30 @@
     },
     {
       "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "smell Form 66-B",
+      "reply": "The Form 66-B smells institutional.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "listen to Form 66-B",
+      "reply": "You listen to the Form 66-B. Mostly, you hear the building pretending to be empty.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Form 66-B",
+      "command": "taste Form 66-B",
+      "reply": "You lick the Form 66-B. The narrator records this without comment. The narrator is lying.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
       "item": "scratched shelf note",
       "command": "look at scratched shelf note",
       "reply": "Scratched into Shelf 20: ASH HIDES BEFORE IT ARRIVES. IF THE CAT LEAVES, YOU SHOULD HAVE ALREADY LEFT.",
@@ -560,6 +776,30 @@
       "item": "scratched shelf note",
       "command": "search scratched shelf note",
       "reply": "Scratched into Shelf 20: ASH HIDES BEFORE IT ARRIVES. IF THE CAT LEAVES, YOU SHOULD HAVE ALREADY LEFT.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "smell scratched shelf note",
+      "reply": "The scratched shelf note smells institutional.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "listen to scratched shelf note",
+      "reply": "You listen to the scratched shelf note. Mostly, you hear the building pretending to be empty.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "scratched shelf note",
+      "command": "taste scratched shelf note",
+      "reply": "You lick the scratched shelf note. The narrator records this without comment. The narrator is lying.",
       "room_after": "records_stacks",
       "dead": false
     },
@@ -621,6 +861,30 @@
     },
     {
       "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "smell continuity personnel file",
+      "reply": "You smell the continuity personnel file. There are easier ways to disappoint your ancestors.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "listen to continuity personnel file",
+      "reply": "You listen to the continuity personnel file. Mostly, you hear the building pretending to be empty.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "continuity personnel file",
+      "command": "taste continuity personnel file",
+      "reply": "The continuity personnel file tastes like dust, copper, and a decision you can no longer defend.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
       "item": "Ash",
       "command": "look at Ash",
       "reply": "Ash crouches high on Shelf 20, grey fur pressed low. He has correctly assessed the workplace.",
@@ -672,6 +936,30 @@
       "item": "Ash",
       "command": "search Ash",
       "reply": "Ash crouches high on Shelf 20, grey fur pressed low. He has correctly assessed the workplace.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "smell Ash",
+      "reply": "Ash smells faintly of dust from Shelf 20.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "listen to Ash",
+      "reply": "Ash makes a small warning sound from the shelf. Something here frightens him.",
+      "room_after": "records_stacks",
+      "dead": false
+    },
+    {
+      "room": "records_stacks",
+      "item": "Ash",
+      "command": "taste Ash",
+      "reply": "Ash retreats higher on Shelf 20. That is a reasonable response to your proposal.",
       "room_after": "records_stacks",
       "dead": false
     },
@@ -733,6 +1021,30 @@
     },
     {
       "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "smell continuity contract",
+      "reply": "You smell the continuity contract. There are easier ways to disappoint your ancestors.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "listen to continuity contract",
+      "reply": "You listen to the continuity contract. Mostly, you hear the building pretending to be empty.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "continuity contract",
+      "command": "taste continuity contract",
+      "reply": "The continuity contract tastes like dust, copper, and a decision you can no longer defend.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
       "item": "waiver stamp box",
       "command": "look at waiver stamp box",
       "reply": "A locked acrylic box contains WAIVER STAMP 4C. The lock is cheap. Law school has prepared you for almost none of this.",
@@ -784,6 +1096,30 @@
       "item": "waiver stamp box",
       "command": "search waiver stamp box",
       "reply": "A locked acrylic box contains WAIVER STAMP 4C. The lock is cheap. Law school has prepared you for almost none of this.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "smell waiver stamp box",
+      "reply": "You smell the waiver stamp box. There are easier ways to disappoint your ancestors.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "listen to waiver stamp box",
+      "reply": "You listen to the waiver stamp box. Mostly, you hear the building pretending to be empty.",
+      "room_after": "legal_annex",
+      "dead": false
+    },
+    {
+      "room": "legal_annex",
+      "item": "waiver stamp box",
+      "command": "taste waiver stamp box",
+      "reply": "The waiver stamp box tastes like dust, copper, and a decision you can no longer defend.",
       "room_after": "legal_annex",
       "dead": false
     },
@@ -840,6 +1176,30 @@
       "item": "requisition machine",
       "command": "search requisition machine",
       "reply": "Two slots labeled FORM and WAIVER. A third slot labeled SOUL has been taped over.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "smell requisition machine",
+      "reply": "The brass machine smells of hot metal and paper. FORM and WAIVER are its open slots.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "listen to requisition machine",
+      "reply": "A mechanism ticks behind the FORM and WAIVER slots. The SOUL slot stays taped shut.",
+      "room_after": "procurement",
+      "dead": false
+    },
+    {
+      "room": "procurement",
+      "item": "requisition machine",
+      "command": "taste requisition machine",
+      "reply": "You lick the requisition machine. The narrator records this without comment. The narrator is lying.",
       "room_after": "procurement",
       "dead": false
     },
@@ -901,6 +1261,30 @@
     },
     {
       "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "smell The Fool",
+      "reply": "The Fool smells institutional.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "listen to The Fool",
+      "reply": "You listen to The Fool. Mostly, you hear the building pretending to be empty.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Fool",
+      "command": "taste The Fool",
+      "reply": "You lick The Fool. The narrator records this without comment. The narrator is lying.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
       "item": "The Tower",
       "command": "look at The Tower",
       "reply": "A tower is struck by lightning while people fall from it. HR has marked this card 'CHANGE MANAGEMENT.'",
@@ -952,6 +1336,30 @@
       "item": "The Tower",
       "command": "search The Tower",
       "reply": "A tower is struck by lightning while people fall from it. HR has marked this card 'CHANGE MANAGEMENT.'",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "smell The Tower",
+      "reply": "You smell The Tower. There are easier ways to disappoint your ancestors.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "listen to The Tower",
+      "reply": "You listen to The Tower. Mostly, you hear the building pretending to be empty.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Tower",
+      "command": "taste The Tower",
+      "reply": "The Tower tastes like dust, copper, and a decision you can no longer defend.",
       "room_after": "hr_reliquary",
       "dead": false
     },
@@ -1013,6 +1421,30 @@
     },
     {
       "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "smell The Sun",
+      "reply": "The Sun smells institutional.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "listen to The Sun",
+      "reply": "You listen to The Sun. Mostly, you hear the building pretending to be empty.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "The Sun",
+      "command": "taste The Sun",
+      "reply": "You lick The Sun. The narrator records this without comment. The narrator is lying.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
       "item": "Merlin",
       "command": "look at Merlin",
       "reply": "Merlin is sweet, grey, and looking at The Tower card with aggressive patience.",
@@ -1069,6 +1501,30 @@
     },
     {
       "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "smell Merlin",
+      "reply": "Merlin smells of old paper and the HR table. His paw stays beside The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "listen to Merlin",
+      "reply": "Merlin purrs, then taps The Tower with one paw.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "Merlin",
+      "command": "taste Merlin",
+      "reply": "Merlin moves away from your face and points you back toward The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
       "item": "tarot spread",
       "command": "look at tarot spread",
       "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
@@ -1111,7 +1567,7 @@
       "room": "hr_reliquary",
       "item": "tarot spread",
       "command": "touch tarot spread",
-      "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
+      "reply": "You touch the tarot spread. It does not improve the situation.",
       "room_after": "hr_reliquary",
       "dead": false
     },
@@ -1120,6 +1576,30 @@
       "item": "tarot spread",
       "command": "search tarot spread",
       "reply": "Three cards wait on the table: THE FOOL, THE TOWER, and THE SUN. Merlin's paw favors THE TOWER.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "smell tarot spread",
+      "reply": "The cards smell of old paper. Merlin keeps his paw beside The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "listen to tarot spread",
+      "reply": "The cards are quiet. Merlin taps the table once beside The Tower.",
+      "room_after": "hr_reliquary",
+      "dead": false
+    },
+    {
+      "room": "hr_reliquary",
+      "item": "tarot spread",
+      "command": "taste tarot spread",
+      "reply": "You lick the tarot spread. The narrator records this without comment. The narrator is lying.",
       "room_after": "hr_reliquary",
       "dead": false
     },
@@ -1181,6 +1661,30 @@
     },
     {
       "room": "occult_compliance",
+      "item": "Salem",
+      "command": "smell Salem",
+      "reply": "Salem smells of warm fur and the paper in the nearby inbox.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "listen to Salem",
+      "reply": "Salem purrs beside the empty inbox. The freight elevator is quieter.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Salem",
+      "command": "taste Salem",
+      "reply": "Salem withdraws from this terrible plan. The inbox remains available for normal investigation.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
       "item": "children's drawings",
       "command": "look at children's drawings",
       "reply": "Three drawings, three signatures: Angela, Julia, Audrey. Each child drew the same door from a different angle. Together, the drawings show five cat-shaped marks around its frame.\n[ARCHIVE UPDATED]",
@@ -1237,6 +1741,30 @@
     },
     {
       "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "smell children's drawings",
+      "reply": "You smell the children's drawings. There are easier ways to disappoint your ancestors.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "listen to children's drawings",
+      "reply": "You listen to the children's drawings. Mostly, you hear the building pretending to be empty.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "children's drawings",
+      "command": "taste children's drawings",
+      "reply": "The children's drawings tastes like dust, copper, and a decision you can no longer defend.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
       "item": "Occult Compliance Manual",
       "command": "look at Occult Compliance Manual",
       "reply": "Section 8.4: 'Continuity seals respond to household anchors. Where five anchors exist, all five must be named in sequence.'\n[ARCHIVE UPDATED]",
@@ -1288,6 +1816,30 @@
       "item": "Occult Compliance Manual",
       "command": "search Occult Compliance Manual",
       "reply": "Section 8.4: 'Continuity seals respond to household anchors. Where five anchors exist, all five must be named in sequence.'\n[ARCHIVE UPDATED]",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "smell Occult Compliance Manual",
+      "reply": "The Occult Compliance Manual smells institutional.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "listen to Occult Compliance Manual",
+      "reply": "You listen to the Occult Compliance Manual. Mostly, you hear the building pretending to be empty.",
+      "room_after": "occult_compliance",
+      "dead": false
+    },
+    {
+      "room": "occult_compliance",
+      "item": "Occult Compliance Manual",
+      "command": "taste Occult Compliance Manual",
+      "reply": "You lick the Occult Compliance Manual. The narrator records this without comment. The narrator is lying.",
       "room_after": "occult_compliance",
       "dead": false
     },
@@ -1349,6 +1901,30 @@
     },
     {
       "room": "archives",
+      "item": "continuity ledger",
+      "command": "smell continuity ledger",
+      "reply": "The ledger smells of dry paper and limestone. Luna hides beneath its pedestal.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "listen to continuity ledger",
+      "reply": "Pages settle with a soft crackle. Beneath the pedestal, Luna breathes very quietly.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "continuity ledger",
+      "command": "taste continuity ledger",
+      "reply": "You lick the continuity ledger. The narrator records this without comment. The narrator is lying.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
       "item": "Luna",
       "command": "look at Luna",
       "reply": "Luna is very, very afraid of the stairway. This is the strongest evidence you have received all evening.",
@@ -1400,6 +1976,30 @@
       "item": "Luna",
       "command": "search Luna",
       "reply": "Luna is very, very afraid of the stairway. This is the strongest evidence you have received all evening.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "smell Luna",
+      "reply": "Luna smells of dry paper from beneath the ledger.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "listen to Luna",
+      "reply": "Luna breathes softly beneath the ledger pedestal. She is hiding from something below.",
+      "room_after": "archives",
+      "dead": false
+    },
+    {
+      "room": "archives",
+      "item": "Luna",
+      "command": "taste Luna",
+      "reply": "Luna slips farther beneath the ledger. Leave the frightened cat alone.",
       "room_after": "archives",
       "dead": false
     },
@@ -1461,6 +2061,30 @@
     },
     {
       "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "smell Boo",
+      "reply": "Boo smells of clean fur and the cold metal of the chamber door.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "listen to Boo",
+      "reply": "Boo purrs beside the five seals, then falls silent as you study them.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "Boo",
+      "command": "taste Boo",
+      "reply": "Boo gives you a look that would end a lesser administration.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
       "item": "five brass seals",
       "command": "look at five brass seals",
       "reply": "Left to right: a huge white cat sitting upright as if it outranks the door; a black cat curled asleep; a small grey cat crouched high, as if on a shelf; a black cat with only its eyes showing; a grey cat with one paw raised.",
@@ -1517,6 +2141,30 @@
     },
     {
       "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "smell five brass seals",
+      "reply": "The brass seals smell of old metal. The key slot beneath them is empty.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "listen to five brass seals",
+      "reply": "The cold seals make no sound. A silver key fits the slot beneath them.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "five brass seals",
+      "command": "taste five brass seals",
+      "reply": "You lick the five brass seals. The narrator records this without comment. The narrator is lying.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
       "item": "continuity plaque",
       "command": "look at continuity plaque",
       "reply": "'WHAT YOU RETURN TO IS WHAT RETURNS YOU.' Below that, in smaller type: 'Do not submit a ticket for this door.'",
@@ -1568,6 +2216,30 @@
       "item": "continuity plaque",
       "command": "search continuity plaque",
       "reply": "'WHAT YOU RETURN TO IS WHAT RETURNS YOU.' Below that, in smaller type: 'Do not submit a ticket for this door.'",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "smell continuity plaque",
+      "reply": "You smell the continuity plaque. There are easier ways to disappoint your ancestors.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "listen to continuity plaque",
+      "reply": "You listen to the continuity plaque. Mostly, you hear the building pretending to be empty.",
+      "room_after": "continuity_chamber",
+      "dead": false
+    },
+    {
+      "room": "continuity_chamber",
+      "item": "continuity plaque",
+      "command": "taste continuity plaque",
+      "reply": "The continuity plaque tastes like dust, copper, and a decision you can no longer defend.",
       "room_after": "continuity_chamber",
       "dead": false
     }

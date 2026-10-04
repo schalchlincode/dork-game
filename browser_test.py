@@ -297,7 +297,7 @@ async def run():
             await fix_page.reload()
             assert "Visible: agenda folder, visitor badge, glass of water." in await fix_page.locator("#output").inner_text()
             await command(fix_page, "lick water")
-            assert "the glass of water" in await fix_page.locator("#output p").last.inner_text()
+            assert "surface skin clings" in await fix_page.locator("#output p").last.inner_text()
             await command(fix_page, "east")
             assert "Exits: west, north, south, east." in await fix_page.locator("#output").inner_text()
             await command(fix_page, "east")
@@ -546,6 +546,35 @@ async def run():
                 await fix_page.reload()
                 await command(fix_page, phrase)
                 assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
+            for room, phrase, expected in (
+                ("meeting", "smell water", "closed aquarium"),
+                ("meeting", "listen to agenda", "east exit sign"),
+                ("break_room", "taste creamer", "Jorge needs the bottle"),
+                ("break_room", "smell mug", "old coffee"),
+                ("procurement", "listen to machine", "FORM and WAIVER slots"),
+                ("hr_reliquary", "smell tarot spread", "Merlin keeps his paw"),
+                ("hr_reliquary", "smell The Tower", "The Tower"),
+                ("archives", "listen to ledger", "Luna breathes"),
+                ("continuity_chamber", "smell seals", "key slot beneath them is empty"),
+                ("records_lobby", "listen to Jorge", "Jorge"),
+                ("records_stacks", "taste Ash", "retreats higher"),
+                ("hr_reliquary", "listen to Merlin", "taps The Tower"),
+                ("occult_compliance", "smell Salem", "warm fur"),
+                ("archives", "taste Luna", "Leave the frightened cat alone"),
+                ("continuity_chamber", "listen to Boo", "five seals"),
+            ):
+                await fix_page.evaluate("room => localStorage.setItem('dork_run_v1', JSON.stringify({room, inventory:[], taken:[], dropped:{}, flags:{}, visited:[room], dead:false, won:false}))", room)
+                await fix_page.reload()
+                await command(fix_page, phrase)
+                assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
+                if phrase == "smell The Tower":
+                    assert "the The Tower" not in await fix_page.locator("#output p").last.inner_text()
+                if phrase == "listen to Jorge":
+                    assert "the Jorge" not in await fix_page.locator("#output p").last.inner_text()
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:[], taken:[], dropped:{}, flags:{keyUsed:true}, visited:['continuity_chamber'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "smell seals")
+            assert "silver key rests" in await fix_page.locator("#output p").last.inner_text()
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
         finally:
