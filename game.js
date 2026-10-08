@@ -17,18 +17,18 @@
 
   const verbMap = buildVerbMap({
     look: ['look','l','observe','view','see','survey','glance','peer','stare'],
-    examine: ['examine','x','inspect','study','check','investigate','analyze','analyse','read','review'],
-    take: ['take','get','grab','pick','pickup','collect','yoink','acquire','obtain','snag','steal'],
-    drop: ['drop','discard','ditch','release'],
+    examine: ['examine','x','inspect','study','check','investigate','analyze','analyse','read','review','scrutinize','scrutinise','peruse','scan'],
+    take: ['take','get','grab','pick','pickup','collect','yoink','acquire','obtain','snag','steal','retrieve','fetch'],
+    drop: ['drop','discard','ditch','release','deposit'],
     leave: ['leave','exit','depart'],
-    inventory: ['inventory','inv','i','items','stuff','possessions'],
+    inventory: ['inventory','inv','i','items','stuff','possessions','belongings'],
     open: ['open','unseal','unlock','pry'],
     close: ['close','shut','seal'],
     use: ['use','apply','operate','activate','insert','put','place','select','choose','present','show'],
-    give: ['give','offer','hand','feed'],
-    talk: ['talk','speak','chat','address','greet','say','ask','tell'],
+    give: ['give','offer','hand','feed','deliver'],
+    talk: ['talk','speak','chat','address','greet','say','ask','tell','converse'],
     attack: ['attack','hit','punch','kick','fight','stab','kill','murder','smack','strike','bash'],
-    touch: ['touch','feel','poke','prod','pet','stroke','hug'],
+    touch: ['touch','feel','poke','prod','pet','stroke','hug','pat'],
     lick: ['lick','taste','tongue'],
     smell: ['smell','sniff'],
     listen: ['listen','hear'],
@@ -37,20 +37,20 @@
     break: ['break','smash','destroy','crush','wreck'],
     burn: ['burn','ignite','light','torch','incinerate'],
     eat: ['eat','chew','bite','consume'],
-    drink: ['drink','sip','gulp'],
+    drink: ['drink','sip','gulp','swig','slurp'],
     wear: ['wear','puton','don'],
-    throw: ['throw','toss','hurl','chuck'],
+    throw: ['throw','toss','hurl','chuck','fling','lob'],
     climb: ['climb','scale','ascend'],
     hide: ['hide','conceal','duck'],
     sit: ['sit','rest'],
     pray: ['pray','worship','invoke','beg'],
     threaten: ['threaten','intimidate','menace'],
-    flatter: ['flatter','compliment','praise'],
+    flatter: ['flatter','compliment','praise','commend'],
     dance: ['dance','boogie'],
     sing: ['sing','hum'],
     jump: ['jump','leap','hop'],
     wait: ['wait','z'],
-    help: ['help','commands','verbs','?'],
+    help: ['help','commands','verbs','?','instructions'],
     hint: ['hint','clue','assist'],
     restart: ['restart'],
     sign: ['sign','autograph','initial'],
@@ -128,17 +128,42 @@
   }
 
   function parse(raw) {
-    const cleaned = raw.trim() === '?' ? 'help' : raw.toLowerCase().replace(/[!?.,]/g,' ').replace(/\s+/g,' ').trim();
+    const cleaned = raw.trim() === '?' ? 'help' : raw.toLowerCase().replace(/[!?.,]/g,' ').replace(/\s+/g,' ').trim().replace(/^(?:please\s+|could you\s+|can you\s+)+/,'').replace(/\s+please$/,'');
     if (!cleaned) return null;
+    if (/\b(?:not|never|dont|don't)\b/.test(cleaned)) return null;
+    let sensory = cleaned.match(/^take\s+a\s+(?:sip|swig|slurp)\s+of\s+(.+)$/);
+    if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
+    sensory = cleaned.match(/^take\s+a\s+(?:sniff|whiff)\s+of\s+(.+)$/);
+    if (sensory) return {verb:'smell', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'smell'};
+    sensory = cleaned.match(/^(?:gulp|slurp)\s+down\s+(.+)$/);
+    if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
+    sensory = cleaned.match(/^(?:gulp|slurp)\s+(.+?)\s+down$/);
+    if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
+    let phrase = cleaned.match(/^(?:open\s+up\s+(.+)|open\s+(.+?)\s+up)$/);
+    if (phrase) return {verb:'open', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'open up'};
+    phrase = cleaned.match(/^check\s+out\s+(.+)$/);
+    if (phrase) return {verb:'examine', objectText:phrase[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'check out'};
+    phrase = cleaned.match(/^pick\s+(.+?)\s+up$/);
+    if (phrase) return {verb:'take', objectText:phrase[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'pick up'};
+    phrase = cleaned.match(/^(?:put\s+down\s+(.+)|put\s+(.+?)\s+down)$/);
+    if (phrase) return {verb:'drop', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'put down'};
+    phrase = cleaned.match(/^(?:(set|lay)\s+down\s+(.+)|(set|lay)\s+(.+?)\s+down)$/);
+    if (phrase) return {verb:'drop', objectText:(phrase[2] || phrase[4]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:`${phrase[1] || phrase[3]} down`};
+    phrase = cleaned.match(/^(?:hand\s+over\s+(.+?)|hand\s+(.+?)\s+over)\s+to\s+(.+)$/);
+    if (phrase) return {verb:'give', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:phrase[3].replace(/^(?:the|a|an)\s+/,'').trim(), raw, verbToken:'hand over'};
+    phrase = cleaned.match(/^(?:hand\s+off\s+(.+?)|hand\s+(.+?)\s+off)\s+to\s+(.+)$/);
+    if (phrase) return {verb:'give', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:phrase[3].replace(/^(?:the|a|an)\s+/,'').trim(), raw, verbToken:'hand off'};
     if (/^(?:look around|look room|look here|look at room|examine room|survey)$/.test(cleaned)) return {verb:'look', objectText:'', targetText:'', raw};
-    if (/^(?:check inventory|look in bag|check my stuff)$/.test(cleaned)) return {verb:'inventory', objectText:'', targetText:'', raw};
+    if (/^(?:check inventory|look in bag|check my stuff|show (?:my )?(?:inventory|belongings)|what am i carrying)$/.test(cleaned)) return {verb:'inventory', objectText:'', targetText:'', raw};
+    if (/^show (?:me )?(?:the )?(?:commands|instructions)$/.test(cleaned)) return {verb:'help', objectText:'', targetText:'', raw};
+    if (/^give me (?:a )?(?:hint|clue)$/.test(cleaned)) return {verb:'hint', objectText:'', targetText:'', raw};
     if (/^(?:ask for help|ask for a hint)$/.test(cleaned)) return {verb:cleaned.endsWith('hint') ? 'hint' : 'help', objectText:'', targetText:'', raw};
     if (/^(?:take all items|grab all of it)$/.test(cleaned)) return {verb:'take', objectText:'all', targetText:'', raw};
     if (/^(?:get out(?: of here)?|go out(?:side)?|go out (?:the )?door|walk out(?: (?:the )?door)?|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
     if (/^(?:enter|step through) (?:the )?gate$/.test(cleaned)) return {verb:'exitAlias', objectText:'gate', targetText:'', raw};
     if (/^(?:call|summon) (?:the )?elevator$/.test(cleaned)) return {verb:'push', objectText:'elevator button', targetText:'', raw};
     if (/^(?:shuffle|mix) (?:the )?(?:cards|tarot|tarot spread)$/.test(cleaned)) return {verb:'shuffle', objectText:'tarot spread', targetText:'', raw};
-    const through = cleaned.match(/^(?:go|walk|move|head)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
+    const through = cleaned.match(/^(?:go|walk|move|head|step|travel|proceed)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
     if (through) {
       const route = through[1].replace(/\s+(?:door|passage|exit|way)$/,'');
       const direction = verbMap[route];
@@ -152,13 +177,13 @@
       const alias = /elevator/.test(cleaned) ? 'elevator' : /stairs/.test(cleaned) && !/downstairs|upstairs/.test(cleaned) ? 'stairs' : /up/.test(cleaned) ? 'up' : 'down';
       return {verb:'exitAlias', objectText:alias, targetText:'', raw};
     }
-    if (/^(?:go|walk|move|head|climb)\s+(?:down|up)\s+(?:the\s+)?stairs?$/.test(cleaned))
+    if (/^(?:go|walk|move|head|step|climb)\s+(?:down|up)\s+(?:the\s+)?stairs?$/.test(cleaned))
       return {verb:'exitAlias', objectText:/\bup\b/.test(cleaned) ? 'up' : 'down', targetText:'', raw};
     const words = cleaned.split(' ');
     let verbToken = words.shift();
     if (verbToken === 'pick' && words[0] === 'up') { words.shift(); verbToken = 'pickup'; }
     if (verbToken === 'put' && words[0] === 'on') { words.shift(); verbToken = 'puton'; }
-    if (['go','walk','move','travel','head','proceed'].includes(verbToken) && words.length) {
+    if (['go','walk','move','travel','head','proceed','step'].includes(verbToken) && words.length) {
       const d = verbMap[words[0]] || words[0];
       if (['north','south','east','west'].includes(d)) return { verb:d, objectText:'', targetText:'', raw, verbToken };
     }
@@ -326,6 +351,9 @@
     if (state.room !== 'hr_reliquary') return false;
     const id = findItem(c.objectText, true);
     if (!['fool','tower','sun'].includes(id)) return false;
+    if (c.targetText && findItem(c.targetText, true) !== 'tarot_spread' && !/^(?:the )?(?:orientation )?table$/.test(c.targetText)) {
+      print('That is not the tarot spread. The card stays where it is.'); return true;
+    }
     if (c.verb === 'take' && c.verbToken === 'take' && id !== 'tower') {
       print('Choose a card. Do not pocket it.'); return true;
     }
@@ -377,12 +405,19 @@
 
     if ((a === 'creamer' || /creamer/.test(c.objectText)) && (b === 'jorge' || state.room === 'records_lobby')) {
       if (state.room !== 'records_lobby') return print('Jorge is in Records. Even the Agency requires you to deliver his creamer in person.');
+      if (c.targetText && b !== 'jorge') return print('That recipient is not Jorge. His creamer stays with you.');
       if (!state.inventory.includes('creamer')) return print("You have no creamer. Jorge notices this before you do.");
       state.flags.jorgeMoved = true; state.inventory = state.inventory.filter(x => x !== 'creamer');
       print("You offer Jorge the hazelnut creamer.\n\nHe studies you. Then the creamer. Then you again.\n\n'Approved,' he says.\n\nHe drinks it directly from the little plastic cup without breaking eye contact and rolls his chair six feet sideways, clearing the gate. Nobody involved acknowledges the femur."); return;
     }
 
     if (state.room === 'procurement' && (a === 'form66b' || a === 'waiver_stamp' || /form|stamp/.test(c.objectText))) {
+      if (c.targetText) {
+        const destination = c.targetText.replace(/^(?:the|a|an)\s+/, '').trim();
+        const machine = /^(?:(?:requisition|brass)\s+)?machine$/.test(destination);
+        const correctSlot = a === 'form66b' ? 'form slot' : 'waiver slot';
+        if (!machine && destination !== correctSlot) return print(`That is not the ${correctSlot} or the requisition machine. Keep the paperwork.`);
+      }
       if ((hasWord(c.objectText, 'form') && state.flags.formInserted) || (hasWord(c.objectText, 'stamp') && state.flags.stampInserted)) return print('The machine already has that. It is unusually possessive about paperwork.');
       if (!['form66b','waiver_stamp'].includes(a) || !state.inventory.includes(a)) return print('The machine requires a real form or waiver stamp in your possession. Imaginary paperwork is handled upstairs.');
       if (a === 'form66b') state.flags.formInserted = true;
@@ -397,15 +432,21 @@
     }
 
     if (state.room === 'hr_reliquary' && (a === 'tower' || /tower/.test(c.objectText))) {
+      if (c.targetText && b !== 'tarot_spread' && !/^(?:the )?(?:orientation )?table$/.test(c.targetText))
+        return print('That is not the tarot spread. The card stays where it is.');
       state.flags.tarotSolved = true; print("You select THE TOWER. Merlin purrs.\n\nThe east wall splits down the middle with the sound of a building reconsidering its benefits package. A passage appears.\n\nHR has successfully facilitated change."); return;
     }
 
     if (state.room === 'hr_reliquary' && (a === 'fool' || a === 'sun')) {
+      if (c.targetText && b !== 'tarot_spread' && !/^(?:the )?(?:orientation )?table$/.test(c.targetText))
+        return print('That is not the tarot spread. The card stays where it is.');
       return die('orientation', a === 'fool' ? "You select THE FOOL. HR appreciates your self-identification. The floor opens beneath you." : "You select THE SUN. It is not the sun. Your shadow notices first.");
     }
 
     if (state.room === 'continuity_chamber' && (a === 'silver_key' || /key/.test(c.objectText))) {
       if (!state.inventory.includes('silver_key')) return print('You need the silver key in your hand, not merely in a sentence.');
+      if (c.targetText && !/^(?:(?:the|a|an) )?(?:five (?:brass )?seals|(?:brass )?seals|key slot|silver key slot|slot(?: beneath (?:the )?(?:five )?seals)?|(?:final |eastern |east )?door)$/.test(c.targetText))
+        return print('The key fits the slot beneath the five seals, not that target.');
       state.flags.keyUsed = true; print("The silver key fits a slot beneath the five seals. It turns once. Five small lights wake above the door.\n\nThe chamber waits for names."); return;
     }
 

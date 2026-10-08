@@ -581,8 +581,232 @@ async def run():
             await fix_page.reload()
             await command(fix_page, "smell seals")
             assert "silver key rests" in await fix_page.locator("#output p").last.inner_text()
+            alias_page = await browser.new_page()
+            alias_page.on("pageerror", lambda error: errors.append(str(error)))
+            await alias_page.goto(URL)
+            for phrase, expected in (("scrutinize name badge", "ACCESS LEVEL"),
+                                     ("scrutinise water glass", "room temperature"),
+                                     ("peruse the agenda", "Establish continuity"),
+                                     ("scan name badge", "ACCESS LEVEL"),
+                                     ("check out the water glass", "room temperature")):
+                await command(alias_page, phrase)
+                assert expected in await alias_page.locator("#output p").last.inner_text(), phrase
+            await command(alias_page, "check out the silver key")
+            assert "nonspecific" in (await alias_page.locator("#output p").last.inner_text()).lower()
+            await command(alias_page, "do not check out the agenda")
+            assert "parser" in (await alias_page.locator("#output p").last.inner_text()).lower()
+            await command(alias_page, "take name badge")
+            assert "badge" in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "grab water glass")
+            assert "water" not in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            for phrase, item in (("retrieve badge", "badge"), ("fetch agenda", "agenda"),
+                                 ("pick the badge up", "badge"), ("could you please pick the agenda up", "agenda")):
+                await command(alias_page, phrase)
+                assert item in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory"), phrase
+            await command(alias_page, "deposit badge")
+            assert "badge" not in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "put the agenda down")
+            assert "agenda" not in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "put down the badge")
+            assert "badge" not in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "please fetch badge")
+            assert "badge" in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "do not drop badge")
+            assert "badge" in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "pick badge")
+            assert "badge" in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            await command(alias_page, "east")
+            await command(alias_page, "north")
+            await command(alias_page, "retrieve creamer")
+            await command(alias_page, "south")
+            await command(alias_page, "south")
+            await command(alias_page, "deliver creamer to Jorge")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved")
+            await alias_page.reload()
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:['creamer'], taken:['creamer'], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await alias_page.reload()
+            await command(alias_page, "hand the creamer over to Jorge")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved")
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:['creamer'], taken:['creamer'], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await alias_page.reload()
+            await command(alias_page, "hand over the creamer to Jorge")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved")
+            for phrase in ("hand off the creamer to Jorge", "hand the creamer off to Jorge"):
+                await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:['creamer'], taken:['creamer'], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+                await alias_page.reload()
+                await command(alias_page, phrase)
+                assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved"), phrase
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await alias_page.reload()
+            await command(alias_page, "hand off the creamer to Jorge")
+            assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved")
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:['creamer'], taken:['creamer'], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await alias_page.reload()
+            for phrase in ("give creamer to Scott", "deliver creamer to badge", "hand the creamer over to Merlin"):
+                await command(alias_page, phrase)
+                assert "not Jorge" in await alias_page.locator("#output p").last.inner_text(), phrase
+                assert "creamer" in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory"), phrase
+                assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved"), phrase
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['form66b','waiver_stamp'], taken:['form66b','waiver_stamp'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await alias_page.reload()
+            for phrase in ("insert form into waiver slot", "put stamp in form slot", "use form on silver key"):
+                await command(alias_page, phrase)
+                assert "not the" in await alias_page.locator("#output p").last.inner_text(), phrase
+                assert await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == ['form66b','waiver_stamp'], phrase
+                assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted"), phrase
+            await command(alias_page, "insert form into form slot")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted")
+            await command(alias_page, "insert stamp into waiver slot")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("procured")
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'hr_reliquary', inventory:['badge'], taken:['badge'], dropped:{}, flags:{}, visited:['hr_reliquary'], dead:false, won:false}))")
+            await alias_page.reload()
+            for phrase in ("use fool on badge", "choose sun on Merlin", "select tower with badge",
+                           "give tower to badge", "give fool to badge"):
+                await command(alias_page, phrase)
+                run = await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+                assert not run['dead'] and not run['flags'].get('tarotSolved'), phrase
+                assert 'not the tarot spread' in (await alias_page.locator('#output p').last.inner_text()).lower(), phrase
+            await command(alias_page, "choose tower on tarot spread")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("tarotSolved")
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:['silver_key'], taken:['silver_key'], dropped:{}, flags:{}, visited:['continuity_chamber'], dead:false, won:false}))")
+            await alias_page.reload()
+            for phrase in ("use key on badge", "put key in machine", "use key on Jorge"):
+                await command(alias_page, phrase)
+                assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("keyUsed"), phrase
+                assert 'not that target' in (await alias_page.locator('#output p').last.inner_text()).lower(), phrase
+            await command(alias_page, "use key on door")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("keyUsed")
+            movement_page = await browser.new_page()
+            movement_page.on("pageerror", lambda error: errors.append(str(error)))
+            await movement_page.goto(URL)
+            await command(movement_page, "step east")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "executive_corridor"
+            await command(movement_page, "step into the break room")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "break_room"
+            await command(movement_page, "do not step south")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "break_room"
+            await command(movement_page, "step south")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "executive_corridor"
+            await command(movement_page, "step into the records")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
+            for phrase in ("travel to the records", "proceed to the records",
+                           "travel through the records", "proceed through the records",
+                           "travel into the records", "proceed into the records"):
+                await movement_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'executive_corridor', inventory:[], taken:[], dropped:{}, flags:{}, visited:['executive_corridor'], dead:false, won:false}))")
+                await movement_page.reload()
+                await command(movement_page, phrase)
+                assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby", phrase
+            await command(movement_page, "proceed through the gate")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
+            await command(movement_page, "do not travel to the corridor")
+            assert await movement_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
+            await movement_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'archives', inventory:[], taken:[], dropped:{}, flags:{}, visited:['archives'], dead:false, won:false}))")
+            await movement_page.reload()
+            await command(movement_page, "step down the stair")
+            assert await movement_page.evaluate("localStorage.getItem('dork_run_v1')") is None
+            assert len(await movement_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 1
+            sensory_page = await browser.new_page()
+            sensory_page.on("pageerror", lambda error: errors.append(str(error)))
+            await sensory_page.goto(URL)
+            for phrase in ("swig water", "slurp the water", "take a sip of water",
+                           "take a swig of the water", "take a slurp of water",
+                           "gulp down the water", "gulp the water down",
+                           "slurp down the water", "slurp the water down"):
+                await command(sensory_page, phrase)
+                assert "skin on the water" in await sensory_page.locator("#output p").last.inner_text(), phrase
+                assert await sensory_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == [], phrase
+            for phrase in ("take a sniff of water", "take a whiff of the water"):
+                await command(sensory_page, phrase)
+                assert "closed aquarium" in await sensory_page.locator("#output p").last.inner_text(), phrase
+            await command(sensory_page, "pat the badge")
+            assert "plastic badge warms" in await sensory_page.locator("#output p").last.inner_text()
+            await command(sensory_page, "do not gulp down the water")
+            assert "parser" in (await sensory_page.locator("#output p").last.inner_text()).lower()
+            await command(sensory_page, "take a sip of the silver key")
+            assert "skin on the water" not in await sensory_page.locator("#output p").last.inner_text()
+            social_page = await browser.new_page()
+            social_page.on("pageerror", lambda error: errors.append(str(error)))
+            await social_page.goto(URL)
+            await social_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await social_page.reload()
+            for phrase in ("converse with Jorge", "converse Jorge"):
+                await command(social_page, phrase)
+                assert "Do you have something for me?" in await social_page.locator("#output p").last.inner_text(), phrase
+            await command(social_page, "commend Jorge")
+            assert "accepts the compliment" in await social_page.locator("#output p").last.inner_text()
+            await command(social_page, "converse with Merlin")
+            assert "Do you have something for me?" not in await social_page.locator("#output p").last.inner_text()
+            await command(social_page, "do not commend Jorge")
+            assert "parser" in (await social_page.locator("#output p").last.inner_text()).lower()
+            assert await social_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "records_lobby"
+            assert await social_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == []
+            throw_page = await browser.new_page()
+            throw_page.on("pageerror", lambda error: errors.append(str(error)))
+            await throw_page.goto(URL)
+            await command(throw_page, "take the badge")
+            original_throw_state = await throw_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+            for phrase in ("fling the badge", "lob the badge"):
+                await command(throw_page, phrase)
+                reply = await throw_page.locator("#output p").last.inner_text()
+                assert ("You throw" in reply or "It lands" in reply), phrase
+                assert await throw_page.evaluate("JSON.parse(localStorage.dork_run_v1)") == original_throw_state, phrase
+            await command(throw_page, "do not fling the badge")
+            assert "parser" in (await throw_page.locator("#output p").last.inner_text()).lower()
+            assert await throw_page.evaluate("JSON.parse(localStorage.dork_run_v1)") == original_throw_state
+            utility_page = await browser.new_page()
+            utility_page.on("pageerror", lambda error: errors.append(str(error)))
+            await utility_page.goto(URL)
+            for phrase in ("belongings", "show inventory", "show my inventory",
+                           "show belongings", "show my belongings", "what am I carrying"):
+                await command(utility_page, phrase)
+                assert "carrying nothing" in await utility_page.locator("#output p").last.inner_text(), phrase
+            for phrase in ("instructions", "show commands", "show me commands",
+                           "show the instructions", "show me the instructions"):
+                await command(utility_page, phrase)
+                assert "DORK understands" in await utility_page.locator("#output p").last.inner_text(), phrase
+            for phrase in ("give me a hint", "give me hint", "give me a clue", "give me clue"):
+                before = await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1 || '{}').hints || 0")
+                await command(utility_page, phrase)
+                assert "The badge is more useful" in await utility_page.locator("#output p").last.inner_text(), phrase
+                assert await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1).hints") == before + 1, phrase
+            before = await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1 || '{}').hints || 0")
+            await command(utility_page, "do not give me a hint")
+            assert await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1).hints") == before
+            assert await utility_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == []
+            opening_page = await browser.new_page()
+            opening_page.on("pageerror", lambda error: errors.append(str(error)))
+            await opening_page.goto(URL)
+            for phrase in ("open up the stamp box", "open the stamp box up"):
+                await opening_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'legal_annex', inventory:['badge'], taken:['badge'], dropped:{}, flags:{}, visited:['legal_annex'], dead:false, won:false}))")
+                await opening_page.reload()
+                await command(opening_page, phrase)
+                run = await opening_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+                assert run["flags"].get("stampTaken") and "waiver_stamp" in run["inventory"], phrase
+            await opening_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'legal_annex', inventory:[], taken:[], dropped:{}, flags:{}, visited:['legal_annex'], dead:false, won:false}))")
+            await opening_page.reload()
+            await command(opening_page, "open the stamp box up")
+            assert not (await opening_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("stampTaken")
+            await command(opening_page, "do not open up the stamp box")
+            assert not (await opening_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("stampTaken")
+            await command(opening_page, "open up the silver key")
+            assert not (await opening_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("stampTaken")
+            dropping_page = await browser.new_page()
+            dropping_page.on("pageerror", lambda error: errors.append(str(error)))
+            await dropping_page.goto(URL)
+            for phrase in ("set down the badge", "set the badge down",
+                           "lay down the badge", "lay the badge down"):
+                await dropping_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:['badge'], taken:['badge'], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
+                await dropping_page.reload()
+                await command(dropping_page, phrase)
+                run = await dropping_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+                assert 'badge' not in run['inventory'] and run['dropped'].get('badge') == 'meeting', phrase
+            await dropping_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:['badge'], taken:['badge'], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
+            await dropping_page.reload()
+            for phrase in ("do not set the badge down", "set the badge on the table", "set down the silver key"):
+                await command(dropping_page, phrase)
+                assert 'badge' in await dropping_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory"), phrase
             assert not errors, errors
-            print("Dork browser path, autosave, restart, death persistence, parser and narrow viewport: OK")
+            print("Dork browser path, autosave, restart, death persistence, parser, input aliases and narrow viewport: OK")
         finally:
             await browser.close()
 

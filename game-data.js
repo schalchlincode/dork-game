@@ -102,8 +102,8 @@ const DORK_DATA = {
   },
   items: {
     agenda: { name: "agenda folder", aliases: ["agenda", "folder", "leather folder"], portable: true, desc: "The agenda contains one item: '1. Establish continuity.' Five blank signature lines follow. The footer says: 'Attendance constitutes consent unless otherwise documented.'" },
-    badge: { name: "visitor badge", aliases: ["badge", "visitor badge", "id", "id badge"], portable: true, desc: "VISITOR: SCOTT. ACCESS LEVEL: TEMPORARILY ADEQUATE. The photo is surprisingly flattering. Scott would probably agree." },
-    water: { name: "glass of water", article: "the glass of water", aliases: ["water", "glass", "glass of water"], portable: false, desc: "The water is room temperature and somehow looks judgmental." },
+    badge: { name: "visitor badge", aliases: ["badge", "visitor badge", "id", "id badge", "name badge"], portable: true, desc: "VISITOR: SCOTT. ACCESS LEVEL: TEMPORARILY ADEQUATE. The photo is surprisingly flattering. Scott would probably agree." },
+    water: { name: "glass of water", article: "the glass of water", aliases: ["water", "glass", "glass of water", "water glass"], portable: false, desc: "The water is room temperature and somehow looks judgmental." },
     mug: { name: "government mug", aliases: ["mug", "cup", "coffee mug"], portable: true, desc: "A chipped mug reading WORLD'S MOST ESSENTIAL DEPUTY SOMETHING. The last word has worn off." },
     creamer: { name: "hazelnut creamer", aliases: ["creamer", "hazelnut", "hazelnut creamer"], portable: true, desc: "JORGE ONLY. Apparently policy." },
     napkin: { name: "napkin drawing", aliases: ["napkin", "drawing", "stick figures"], portable: true, desc: "Three stick figures labeled Angela, Julia, and Audrey hold hands around a badly drawn door. One has written HOME IS A PASSWORD in purple marker." },

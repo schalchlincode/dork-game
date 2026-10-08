@@ -1,0 +1,50 @@
+﻿kind,maps_to,addition,previously_accepted,restriction,example
+action alias,examine,scrutinize,"examine, x, inspect, study, check, investigate, analyze, analyse, read, review",Same handler and state rules as original action,scrutinize badge
+action alias,examine,scrutinise,"examine, x, inspect, study, check, investigate, analyze, analyse, read, review",Same handler and state rules as original action,scrutinise badge
+action alias,examine,peruse,"examine, x, inspect, study, check, investigate, analyze, analyse, read, review",Same handler and state rules as original action,peruse badge
+action alias,examine,scan,"examine, x, inspect, study, check, investigate, analyze, analyse, read, review",Same handler and state rules as original action,scan badge
+action alias,take,retrieve,"take, get, grab, pick, pickup, collect, yoink, acquire, obtain, snag, steal",Same handler and state rules as original action,retrieve badge
+action alias,take,fetch,"take, get, grab, pick, pickup, collect, yoink, acquire, obtain, snag, steal",Same handler and state rules as original action,fetch badge
+action alias,drop,deposit,"drop, discard, ditch, release",Same handler and state rules as original action,deposit badge
+action alias,inventory,belongings,"inventory, inv, i, items, stuff, possessions",Same handler and state rules as original action,belongings
+action alias,give,deliver,"give, offer, hand, feed",Same handler and state rules as original action,deliver badge
+action alias,talk,converse,"talk, speak, chat, address, greet, say, ask, tell",Same handler and state rules as original action,converse badge
+action alias,touch,pat,"touch, feel, poke, prod, pet, stroke, hug",Same handler and state rules as original action,pat badge
+action alias,drink,swig,"drink, sip, gulp",Same handler and state rules as original action,swig badge
+action alias,drink,slurp,"drink, sip, gulp",Same handler and state rules as original action,slurp badge
+action alias,throw,fling,"throw, toss, hurl, chuck",Same handler and state rules as original action,fling badge
+action alias,throw,lob,"throw, toss, hurl, chuck",Same handler and state rules as original action,lob badge
+action alias,flatter,commend,"flatter, compliment, praise",Same handler and state rules as original action,commend badge
+action alias,help,instructions,"help, commands, verbs, ?",Same handler and state rules as original action,instructions
+target alias,badge,name badge,"badge, visitor badge, id, id badge",Only when target is visible or carried,examine name badge
+target alias,water,water glass,"water, glass, glass of water",Only when target is visible or carried,examine water glass
+command pattern,polite wrapper,please [command],See baseline parser forms,Leading please; inner command keeps its normal meaning,please fetch badge
+command pattern,polite wrapper,could you [command],See baseline parser forms,Leading could you; normal action restrictions,could you inspect agenda
+command pattern,polite wrapper,can you [command],See baseline parser forms,Leading can you; normal action restrictions,can you take badge
+command pattern,polite wrapper,[command] please,See baseline parser forms,Trailing please; normal action restrictions,inspect agenda please
+command pattern,drink,take a (sip|swig|slurp) of [object],See baseline parser forms,Visible target; no item acquisition,take a sip of water
+command pattern,smell,take a (sniff|whiff) of [object],See baseline parser forms,Visible target,take a whiff of water
+command pattern,drink,(gulp|slurp) down [object],See baseline parser forms,Visible target,gulp down water
+command pattern,drink,(gulp|slurp) [object] down,See baseline parser forms,Visible target,slurp water down
+command pattern,open,open up [object],See baseline parser forms,Existing open preconditions; target remains required,open up stamp box
+command pattern,open,open [object] up,See baseline parser forms,Existing open preconditions; target remains required,open stamp box up
+command pattern,examine,check out [object],See baseline parser forms,Accessible target,check out agenda
+command pattern,take,pick [object] up,See baseline parser forms,Portable and accessible target,pick badge up
+command pattern,drop,put down [object],See baseline parser forms,Must possess target,put down badge
+command pattern,drop,put [object] down,See baseline parser forms,Must possess target,put badge down
+command pattern,drop,set down [object],See baseline parser forms,Must possess target,set down badge
+command pattern,drop,set [object] down,See baseline parser forms,Must possess target,set badge down
+command pattern,drop,lay down [object],See baseline parser forms,Must possess target,lay down badge
+command pattern,drop,lay [object] down,See baseline parser forms,Must possess target,lay badge down
+command pattern,give,hand over [item] to [recipient],See baseline parser forms,Possession and valid recipient checks,hand over creamer to Jorge
+command pattern,give,hand [item] over to [recipient],See baseline parser forms,Possession and valid recipient checks,hand creamer over to Jorge
+command pattern,give,hand off [item] to [recipient],See baseline parser forms,Possession and valid recipient checks,hand off creamer to Jorge
+command pattern,give,hand [item] off to [recipient],See baseline parser forms,Possession and valid recipient checks,hand creamer off to Jorge
+command pattern,inventory,show (my) (inventory|belongings),See baseline parser forms,Exact utility phrase; my is optional,show my belongings
+command pattern,inventory,what am i carrying,See baseline parser forms,Exact utility phrase,what am I carrying
+command pattern,help,show (me) (the) (commands|instructions),See baseline parser forms,Exact utility phrase; me and the are optional,show me the commands
+command pattern,hint,give me (a) (hint|clue),See baseline parser forms,Exact utility phrase; a is optional; increments hint count,give me a clue
+command pattern,movement,step [cardinal direction],See baseline parser forms,Actual room exit and gate restrictions,step south
+command pattern,movement,step (through|into|to) (the) [direction or known exit],See baseline parser forms,Room-scoped route and hazard checks,step through the gate
+command pattern,movement,step (up|down) (the) stair(s),See baseline parser forms,Room-scoped stair and candle checks,step down the stairs
+command pattern,movement,(travel|proceed) (through|into|to) (the) [direction or known exit],See baseline parser forms,Room-scoped route and hazard checks,proceed to records
