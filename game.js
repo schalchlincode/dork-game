@@ -587,6 +587,7 @@
         listen: 'A mechanism ticks behind the FORM and WAIVER slots. The SOUL slot stays taped shut.'
       },
       tarot_spread: {
+        touch: 'The card edges are worn. Merlin presses one paw beside The Tower, keeping his recommendation clear.',
         smell: 'The cards smell of old paper. Merlin keeps his paw beside The Tower.',
         listen: 'The cards are quiet. Merlin taps the table once beside The Tower.'
       },

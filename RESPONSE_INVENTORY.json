@@ -1567,7 +1567,7 @@
       "room": "hr_reliquary",
       "item": "tarot spread",
       "command": "touch tarot spread",
-      "reply": "You touch the tarot spread. It does not improve the situation.",
+      "reply": "The card edges are worn. Merlin presses one paw beside The Tower, keeping his recommendation clear.",
       "room_after": "hr_reliquary",
       "dead": false
     },

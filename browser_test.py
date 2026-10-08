@@ -64,6 +64,8 @@ async def run():
             await command(page, "insert stamp into machine")
             await command(page, "east")
             await command(page, "talk to merlin")
+            await command(page, "touch tarot spread")
+            assert "Merlin presses one paw beside The Tower" in await page.locator("#output p").last.inner_text()
             await command(page, "look at the cat")
             await command(page, "choose the tower")
             await command(page, "east")

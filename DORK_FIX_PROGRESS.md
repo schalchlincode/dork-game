@@ -1,4 +1,4 @@
-# Dork Fix Progress
+﻿# Dork Fix Progress
 
 Resume at the first batch not marked DONE. Each batch must be exercised by `browser_test.py` before it is marked DONE.
 
@@ -142,3 +142,7 @@ The 280-command Edge inventory exposed stock replies that treated named cats lik
 ### Published cat responses and progressed-state grammar sample, 2026-10-04
 
 GitHub Pages completed build `8fc893a`. The published HTML, JavaScript, data, and CSS matched local bytes, and the full Edge regression passed on the public URL. A fresh local playthrough reached the Continuity Chamber and sampled 19 natural commands from that progressed state. `listen to breathing` and `pray to cats` exposed duplicated prepositions in the generic reply path. The parser now normalizes those phrases, the prayer reply uses `to`, and browser assertions cover both. Other sampled commands still include generic fallbacks; this is a focused correction, not an exhaustive coherence claim. The full local Edge regression passes. Publish and verify this change, then continue reviewing natural phrasing and progressed puzzle states.
+
+### Fresh-state response inventory follow-up, 2026-10-08
+
+The reproducible Edge inventory exercised 280 commands across the listed room items and found one remaining generic reply: `touch tarot spread`. Added a tactile, scene-specific response that reinforces Merlin's visible Tower clue, and added a browser assertion. The full Edge route regression passed, and the refreshed 280-command inventory produced 208 distinct observed replies with no generic-marker rows. This remains a sampled command set, not exhaustive parser coverage.
