@@ -80,6 +80,7 @@ async def run():
             await command(page, "say boo salem ash luna merlin")
             await command(page, "east")
             assert "TRUE ENDING" in await page.locator("#output").inner_text(), (await page.locator("#output").inner_text())[-4500:]
+            assert "The file you read in Records" in (await page.locator("#output").inner_text())[-1200:]
             data = await page.evaluate("JSON.parse(localStorage.dork_run_v1)")
             assert data["room"] == "parking_exit" and data["won"]
             assert set(data["visited"]) == {"meeting", "executive_corridor", "break_room", "records_lobby",
@@ -90,8 +91,15 @@ async def run():
             assert "parking_exit" == await page.evaluate("JSON.parse(localStorage.dork_run_v1).room")
             await command(page, "restart")
             assert "meeting" == await page.evaluate("JSON.parse(localStorage.dork_run_v1).room")
+            # The Records discovery is an optional choice: it changes the ending only
+            # when the player actually examines the file during this run.
+            await page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:[], taken:[], dropped:{}, flags:{finalOpen:true}, visited:['continuity_chamber'], dead:false, won:false}))")
+            await page.reload()
             await command(page, "east")
-            await command(page, "south")
+            ending = (await page.locator("#output").inner_text())[-1200:]
+            assert "TRUE ENDING" in ending and "read in Records" not in ending
+            await page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'records_lobby', inventory:[], taken:[], dropped:{}, flags:{}, visited:['records_lobby'], dead:false, won:false}))")
+            await page.reload()
             await command(page, "attack jorge")
             assert await page.evaluate("localStorage.getItem('dork_run_v1')") is None
             assert len(await page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 1
@@ -676,6 +684,9 @@ async def run():
                 assert 'not that target' in (await alias_page.locator('#output p').last.inner_text()).lower(), phrase
             await command(alias_page, "use key on door")
             assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("keyUsed")
+            key_reply = (await alias_page.locator("#output p").all_inner_texts())[-1]
+            assert "A household, filed as infrastructure" in key_reply and "five names" in key_reply.lower()
+            assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1)")).get("dead")
             movement_page = await browser.new_page()
             movement_page.on("pageerror", lambda error: errors.append(str(error)))
             await movement_page.goto(URL)

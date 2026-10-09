@@ -1,5 +1,15 @@
 # Dork changelog
 
+## 2026-10-09 - Optional Records discovery payoff
+
+- Reading Scott's personnel file is optional, but if the player examines it, the true ending now recalls its impossible date and frames it as evidence the Agency cannot answer. Skipping the file preserves the original ending.
+- Extend the Edge browser regression to complete the discovery route and verify both ending variants.
+
+## 2026-10-08 - Continuity reveal
+
+- Turn the final key moment into a payoff for the napkin clue and the five cats? established poses. The reveal clarifies why the seals are household anchors while preserving the existing name puzzle and route.
+- Add a live browser assertion for the reveal, unchanged progression state, and the existing full ending regression.
+
 ## 2026-10-08 - Player input audit: reconciled report and varied route
 
 - Generate a complete before/after action and item-alias reconciliation plus a CSV inventory of 30 reusable command patterns. The additions are 17 action aliases and 2 target aliases; no registered alias was removed.

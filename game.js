@@ -300,6 +300,7 @@
       return print(`You examine ${text}. It remains disappointingly nonspecific.`);
     }
     const item = DORK_DATA.items[id]; print(flagDescription(item));
+    if (id === 'records_file') state.flags.readPersonnelFile = true;
     discoverLore(id);
   }
 
@@ -701,7 +702,10 @@
     if (state.won) return;
     state.won = true;
     meta.won = true; saveMeta();
-    print("\n*** TRUE ENDING: RELEASED FROM CONTINUITY ***\n\nScott has escaped the Agency. The Agency has not escaped Scott.\n\nYour run is complete. Type DEATHS, LORE, or RESTART if you have learned nothing.", 'death');
+    const fileCallback = state.flags.readPersonnelFile
+      ? "\n\nThe file you read in Records was dated before your law-school graduation. Outside, that fact feels less like a clue than an accusation the Agency can no longer answer."
+      : '';
+    print(`\n*** TRUE ENDING: RELEASED FROM CONTINUITY ***\n\nScott has escaped the Agency. The Agency has not escaped Scott.${fileCallback}\n\nYour run is complete. Type DEATHS, LORE, or RESTART if you have learned nothing.`, 'death');
   }
 
   function die(code, text) {
