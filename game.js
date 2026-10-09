@@ -447,7 +447,7 @@
       if (!state.inventory.includes('silver_key')) return print('You need the silver key in your hand, not merely in a sentence.');
       if (c.targetText && !/^(?:(?:the|a|an) )?(?:five (?:brass )?seals|(?:brass )?seals|key slot|silver key slot|slot(?: beneath (?:the )?(?:five )?seals)?|(?:final |eastern |east )?door)$/.test(c.targetText))
         return print('The key fits the slot beneath the five seals, not that target.');
-      state.flags.keyUsed = true; print("The silver key fits a slot beneath the five seals. It turns once. Five small lights wake above the door.\n\nThe chamber waits for names."); return;
+      state.flags.keyUsed = true; print("The silver key fits a slot beneath the five seals. It turns once. Five small lights wake above the door.\n\nTheir poses resolve in the light: Boo upright, Salem curled asleep, Ash high on his shelf, Luna peering out, Merlin raising one paw. Not decorations. A household, filed as infrastructure.\n\nThe napkin's words return: HOME IS A PASSWORD. The chamber waits for the five names."); return;
     }
 
     if (a === 'black_candle' || hasWord(c.objectText, 'candle')) {
