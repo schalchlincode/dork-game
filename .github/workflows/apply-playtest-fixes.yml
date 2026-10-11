@@ -30,6 +30,19 @@ jobs:
       - name: Apply playtest fixes
         run: python .github/apply_playtest_fixes.py
 
+      - name: Preserve established stair-clue wording
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('game.js')
+          text = path.read_text(encoding='utf-8')
+          old = "The stair descends into a tunnel where the emergency lights have failed. Luna's warning and the black emergency candle now seem related."
+          new = "The stair descends into a tunnel where the emergency lights have failed. Luna refuses to approach it; take a lit candle—the black emergency candle is the obvious candidate."
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected one stair-clue match, found {text.count(old)}')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Validate JavaScript syntax
         run: node --check game.js
 
