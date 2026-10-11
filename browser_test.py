@@ -13,6 +13,22 @@ async def command(page, text):
     await page.locator("#commandInput").press("Enter")
 
 
+async def set_run(page, room, *, inventory=None, taken=None, flags=None, visited=None):
+    payload = {
+        "room": room,
+        "previousRoom": None,
+        "inventory": inventory or [],
+        "taken": taken or [],
+        "dropped": {},
+        "flags": flags or {},
+        "visited": visited or [room],
+        "dead": False,
+        "won": False,
+    }
+    await page.evaluate("payload => localStorage.setItem('dork_run_v1', JSON.stringify(payload))", payload)
+    await page.reload()
+
+
 async def run():
     readme = (Path(__file__).parent / "README.md").read_text(encoding="utf-8")
     solution = (Path(__file__).parent / "SOLUTION.md").read_text(encoding="utf-8")
@@ -816,8 +832,99 @@ async def run():
             for phrase in ("do not set the badge down", "set the badge on the table", "set down the silver key"):
                 await command(dropping_page, phrase)
                 assert 'badge' in await dropping_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory"), phrase
+
+            # Blind-playtest regressions: spoiler-free HELP, state-aware clues,
+            # natural parser phrasing, and final-sequence prerequisites.
+            review_page = await browser.new_page(viewport={"width": 390, "height": 520})
+            review_page.on("pageerror", lambda error: errors.append(str(error)))
+            await review_page.goto(URL)
+            await review_page.evaluate("localStorage.clear()")
+            await review_page.reload()
+            await review_page.wait_for_timeout(100)
+            assert await review_page.evaluate("document.querySelector('#output').scrollTop") == 0
+
+            await command(review_page, "help")
+            help_reply = await review_page.locator("#output p").last.inner_text()
+            for spoiler in ("JORGE", "MERLIN", "CREAMER", "CONTRACT", "WAIVER"):
+                assert spoiler not in help_reply, help_reply
+            assert "RECEPTIONIST" in help_reply and "PENCIL" in help_reply
+
+            await review_page.evaluate("""localStorage.setItem('dork_meta_v1', JSON.stringify({
+                runs:1, deaths:[], hints:0, won:false,
+                lore:["Scott's personnel file predates his involvement with the Agency.",
+                      "Five household anchors must be named to release a Continuity seal."]
+            }))""")
+            await review_page.reload()
+            await command(review_page, "lore")
+            migrated_lore = await review_page.locator("#output p").last.inner_text()
+            assert "before his law-school graduation" in migrated_lore
+            assert "correct sequence" in migrated_lore
+            assert "predates his involvement" not in migrated_lore
+
+            await set_run(review_page, "legal_annex", inventory=["waiver_stamp"],
+                          taken=["waiver_stamp"], flags={"stampTaken": True})
+            await command(review_page, "read page 64")
+            assert "already removed" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "use waiver stamp on continuity contract")
+            assert "submitted separately to Procurement" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "records_stacks", inventory=["form66b", "waiver_stamp"],
+                          taken=["form66b", "waiver_stamp"], flags={"stampTaken": True})
+            await command(review_page, "stamp Form 66-B")
+            assert "submitted separately to Procurement" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "use waiver stamp on Form 66-B")
+            assert "submitted separately to Procurement" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "legal_annex", flags={"stampTaken": True, "procured": True})
+            annex_text = await review_page.locator("#output").inner_text()
+            assert "Procurement has filed your refusal" in annex_text
+            await command(review_page, "read page 64")
+            assert "filed the waiver with Form 66-B" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "break_room")
+            await command(review_page, "read napkin")
+            assert (await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("readNapkin")
+
+            await set_run(review_page, "continuity_chamber", inventory=["silver_key"],
+                          taken=["silver_key"], flags={})
+            await command(review_page, "talk to Boo")
+            boo_reply = await review_page.locator("#output p").last.inner_text()
+            assert "beside the key slot" in boo_reply and "directly on" not in boo_reply
+            await command(review_page, "say Boo Salem Ash Luna Merlin")
+            assert "Use the silver continuity key first" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "use silver continuity key on door")
+            key_reply = await review_page.locator("#output p").last.inner_text()
+            assert "Boo lifts one paw" in key_reply
+            assert "A phrase resolves above the seals" in key_reply
+            assert "napkin's words return" not in key_reply.lower()
+            await command(review_page, "name Boo Salem Ash Luna Merlin")
+            run = await review_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+            assert run["flags"].get("finalOpen")
+
+            await set_run(review_page, "continuity_chamber", inventory=["silver_key"],
+                          taken=["silver_key"], flags={"readNapkin": True})
+            await command(review_page, "use silver continuity key on door")
+            assert "The napkin's words return" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "archives")
+            await command(review_page, "examine stairway")
+            stair_reply = await review_page.locator("#output p").last.inner_text()
+            assert "emergency lights have failed" in stair_reply and "black emergency candle" in stair_reply
+            await command(review_page, "examine tunnel")
+            assert "emergency lights have failed" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "subbasement", inventory=["black_candle"],
+                          taken=["black_candle"], flags={"candleLit": True})
+            room_text = await review_page.locator("#output").inner_text()
+            assert "Whatever it meant by BELOW is still somewhere else" in room_text
+            await command(review_page, "examine tunnel")
+            assert "painted arrow pointing east" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "meeting", inventory=["badge"], taken=["badge"])
+            await command(review_page, "use visitor badge on glass of water")
+            assert "Both objects are recognized" in await review_page.locator("#output p").last.inner_text()
             assert not errors, errors
-            print("Dork browser path, autosave, restart, death persistence, parser, input aliases and narrow viewport: OK")
+            print("Dork browser path, autosave, restart, death persistence, parser, input aliases, blind-playtest fixes and narrow viewport: OK")
         finally:
             await browser.close()
 
