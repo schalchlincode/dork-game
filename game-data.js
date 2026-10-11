@@ -39,7 +39,10 @@ const DORK_DATA = {
     legal_annex: {
       name: "Legal Annex",
       desc: "The Legal Annex is paneled in dark wood and lit by a green-shaded lamp. A contract waits on a lectern beneath a sign reading SIGNATURE REQUIRED. The document is sixty-three pages long. Page sixty-four is visible underneath it.\n\nA rubber waiver stamp sits inside a locked acrylic box.",
-      descByFlag: { stampTaken: "The Legal Annex is paneled in dark wood and lit by a green-shaded lamp. The contract still waits on its lectern beneath SIGNATURE REQUIRED. The acrylic box is open and empty. Legal has not yet filed an objection." },
+      descByFlag: {
+        objectionFiled: "The Legal Annex is paneled in dark wood and lit by a green-shaded lamp. The contract remains unsigned beneath SIGNATURE REQUIRED. The acrylic box is open and empty. Procurement has filed your refusal, and Legal is pretending this was its idea.",
+        stampTaken: "The Legal Annex is paneled in dark wood and lit by a green-shaded lamp. The contract still waits on its lectern beneath SIGNATURE REQUIRED. The acrylic box is open and empty. Legal has not yet filed an objection."
+      },
       exits: { west: "records_stacks", south: "procurement" },
       items: ["contract", "stamp_box"]
     },
@@ -79,7 +82,7 @@ const DORK_DATA = {
     },
     subbasement: {
       name: "Sub-Basement — Continuity Infrastructure",
-      desc: "The stair ends in a concrete tunnel. Emergency lights have failed. Something wet is breathing in the darkness ahead.\n\nA painted arrow points east: CONTINUITY CHAMBER. West, the stair leads back up to the Archives. A parking passage beyond the tunnel has collapsed behind a wall of black roots.",
+      desc: "The stair ends in a concrete tunnel. Emergency lights have failed. Something wet is breathing in the darkness ahead.\n\nA painted arrow points east: CONTINUITY CHAMBER. West, the stair leads back up to the Archives. A parking passage beyond the tunnel has collapsed behind a wall of black roots. The directory called this the Sub-Basement. Whatever it meant by BELOW is still somewhere else.",
       exits: { west: "archives", east: "continuity_chamber" },
       exitAliases: { up: "west", stairs: "west" },
       dark: true

@@ -10,10 +10,18 @@
   const RUN_KEY = 'dork_run_v1';
 
   const meta = Object.assign({ runs: 1, deaths: [], lore: [], hints: 0, won: false }, load(META_KEY, {}));
+  const legacyLore = {
+    "Scott's personnel file predates his involvement with the Agency.": "Scott's personnel file was created before his law-school graduation.",
+    "Five household anchors must be named to release a Continuity seal.": "Five household anchors must be named in the correct sequence to release a Continuity seal."
+  };
+  meta.lore = [...new Set((meta.lore || []).map(entry => legacyLore[entry] || entry))];
   let state = Object.assign(newRun(), load(RUN_KEY, {}));
   let restartPending = false;
   if (!DORK_DATA.rooms[state.room]) state = newRun();
   if (!state.dropped || typeof state.dropped !== 'object') state.dropped = {};
+  if (!state.flags || typeof state.flags !== 'object') state.flags = {};
+  if (state.flags.procured) state.flags.objectionFiled = true;
+  saveMeta();
 
   const verbMap = buildVerbMap({
     look: ['look','l','observe','view','see','survey','glance','peer','stare'],
@@ -26,7 +34,7 @@
     close: ['close','shut','seal'],
     use: ['use','apply','operate','activate','insert','put','place','select','choose','present','show'],
     give: ['give','offer','hand','feed','deliver'],
-    talk: ['talk','speak','chat','address','greet','say','ask','tell','converse'],
+    talk: ['talk','speak','chat','address','greet','say','ask','tell','converse','name'],
     attack: ['attack','hit','punch','kick','fight','stab','kill','murder','smack','strike','bash'],
     touch: ['touch','feel','poke','prod','pet','stroke','hug','pat'],
     lick: ['lick','taste','tongue'],
@@ -95,6 +103,7 @@
     describeRoom();
     updateStatus();
     input.focus();
+    requestAnimationFrame(() => { out.scrollTop = 0; });
   }
 
   form.addEventListener('submit', (e) => { e.preventDefault(); const c = input.value.trim(); input.value = ''; if (c) execute(c); });
@@ -266,6 +275,14 @@
     if (DORK_DATA.rooms[dest].ending) win();
   }
 
+  function page64Text() {
+    if (state.flags.objectionFiled || state.flags.procured)
+      return 'Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. Procurement has filed the waiver with Form 66-B; the acrylic box is empty.';
+    if (state.flags.stampTaken)
+      return 'Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. You have already removed the stamp from the acrylic box.';
+    return 'Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. The stamp is locked in the acrylic box.';
+  }
+
   function examine(text) {
     if (!text) return describeRoom(true);
     if (state.room === 'hr_reliquary' && /^(?:the )?wall$/.test(text)) return examine('east wall');
@@ -279,7 +296,13 @@
     if (state.room === 'break_room' && /\b(?:fridge|refrigerator)\b/.test(text)) return print("The refrigerator is plastered with warnings about Jorge's creamer. Inside are expired lunches and no safer alternative.");
     if (state.room === 'break_room' && /\b(?:warning|note on fridge)\b/.test(text)) return print("The warning reserves the hazelnut creamer for Jorge. The fridge contains expired lunches and no useful substitute.");
     if (state.room === 'break_room' && /\b(?:vending machine|machine button)\b/.test(text)) return print('The vending machine lists one black candle as OUT OF STOCK. Procurement handles emergency supplies now.');
-    if (state.room === 'legal_annex' && /\b(?:page 64|page sixty four|page sixty-four)\b/.test(text)) return print("Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. The stamp is locked in the acrylic box.");
+    if (state.room === 'legal_annex' && /\b(?:page 64|page sixty four|page sixty-four)\b/.test(text)) return print(page64Text());
+    if (state.room === 'archives' && /\b(?:stair|stairs|stairway|tunnel)\b/.test(text))
+      return print(state.flags.candleLit
+        ? 'The green candle reveals a concrete tunnel below. The emergency lights are dead, but the marked route continues east.'
+        : "The stair descends into a tunnel where the emergency lights have failed. Luna refuses to approach it; take a lit candle—the black emergency candle is the obvious candidate.");
+    if (state.room === 'subbasement' && /\btunnel\b/.test(text))
+      return print('The green candle shows a concrete tunnel, dead emergency lights, and a painted arrow pointing east to the Continuity Chamber.');
     const scenery = {
       executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.', lights: 'The fluorescent lights buzz overhead. They illuminate the corridor but offer no route out; Records lies south.' },
       records_lobby: { placard: 'JORGE — RECORDS MANAGEMENT SPECIALIST III. His desk blocks the southern gate to the stacks.' },
@@ -301,6 +324,7 @@
     }
     const item = DORK_DATA.items[id]; print(flagDescription(item));
     if (id === 'records_file') state.flags.readPersonnelFile = true;
+    if (id === 'napkin') state.flags.readNapkin = true;
     discoverLore(id);
   }
 
@@ -404,6 +428,10 @@
 
     if (state.room === 'legal_annex' && a === 'badge' && /box|stamp/.test(c.targetText)) return openThing('box');
 
+    const paperwork = new Set([a, b].filter(Boolean));
+    if (state.room !== 'procurement' && paperwork.has('waiver_stamp') && (paperwork.has('contract') || paperwork.has('form66b')))
+      return print('Waiver Stamp 4C and Form 66-B are submitted separately to Procurement. Put the form in the FORM slot and the stamp in the WAIVER slot; do not stamp the contract or form directly.');
+
     if ((a === 'creamer' || /creamer/.test(c.objectText)) && (b === 'jorge' || state.room === 'records_lobby')) {
       if (state.room !== 'records_lobby') return print('Jorge is in Records. Even the Agency requires you to deliver his creamer in person.');
       if (c.targetText && b !== 'jorge') return print('That recipient is not Jorge. His creamer stays with you.');
@@ -426,7 +454,7 @@
       state.inventory = state.inventory.filter(x => x !== a);
       print(`${DORK_DATA.items[a].name} accepted by the requisition machine.`);
       if (state.flags.formInserted && state.flags.stampInserted && !state.flags.procured) {
-        state.flags.procured = true; ['black_candle','silver_key'].forEach(x => state.inventory.push(x));
+        state.flags.procured = true; state.flags.objectionFiled = true; ['black_candle','silver_key'].forEach(x => state.inventory.push(x));
         print("The machine groans like a committee reaching consensus. A drawer opens.\n\nIssued: BLACK EMERGENCY CANDLE.\nIssued: SILVER CONTINUITY KEY.\n\nA receipt prints for $0.00 and twelve human years.");
       }
       return;
@@ -448,7 +476,12 @@
       if (!state.inventory.includes('silver_key')) return print('You need the silver key in your hand, not merely in a sentence.');
       if (c.targetText && !/^(?:(?:the|a|an) )?(?:five (?:brass )?seals|(?:brass )?seals|key slot|silver key slot|slot(?: beneath (?:the )?(?:five )?seals)?|(?:final |eastern |east )?door)$/.test(c.targetText))
         return print('The key fits the slot beneath the five seals, not that target.');
-      state.flags.keyUsed = true; print("The silver key fits a slot beneath the five seals. It turns once. Five small lights wake above the door.\n\nTheir poses resolve in the light: Boo upright, Salem curled asleep, Ash high on his shelf, Luna peering out, Merlin raising one paw. Not decorations. A household, filed as infrastructure.\n\nThe napkin's words return: HOME IS A PASSWORD. The chamber waits for the five names."); return;
+      if (state.flags.keyUsed) return print('The silver key is already turned. Five lit seals still wait for the five names.');
+      state.flags.keyUsed = true;
+      const passwordLine = state.flags.readNapkin
+        ? "The napkin's words return: HOME IS A PASSWORD."
+        : 'A phrase resolves above the seals: HOME IS A PASSWORD.';
+      print(`Boo lifts one paw with executive reluctance. The silver key fits the slot beneath the five seals and turns once. Five small lights wake above the door.\n\nTheir poses resolve in the light: Boo upright, Salem curled asleep, Ash high on his shelf, Luna peering out, Merlin raising one paw. Not decorations. A household, filed as infrastructure.\n\n${passwordLine} The chamber waits for the five names.`); return;
     }
 
     if (a === 'black_candle' || hasWord(c.objectText, 'candle')) {
@@ -457,6 +490,10 @@
     }
 
     if (a && !c.targetText) {
+      if (a === 'napkin') {
+        state.flags.readNapkin = true;
+        return print('The napkin drawing says HOME IS A PASSWORD. Keep that in mind when you reach the final door.');
+      }
       const replies = {
         agenda: 'The agenda is for reading, not signing. Its five empty lines are the warning.',
         badge: 'The badge might pry open the acrylic stamp box in Legal. It will not open any electronic door.',
@@ -482,7 +519,14 @@
       if (['ash','merlin','salem','luna','boo'].includes(a)) return print(`${DORK_DATA.items[a].name} is a cat, not a tool. Observe the cat; its pose may matter later.`);
     }
 
-    if (a) return print(`You ${c.verbToken || 'use'} ${DORK_DATA.items[a].name}${b ? ` on ${typeof b === 'string' && DORK_DATA.items[b] ? DORK_DATA.items[b].name : c.targetText}` : ''}. The universe declines to recognize this workflow.`);
+    if (a) {
+      const diagnosis = b
+        ? 'Both objects are recognized; this is the wrong target or location.'
+        : c.targetText
+          ? 'The item is recognized, but the target is not.'
+          : 'The item is recognized, but this action is not useful here.';
+      return print(`You ${c.verbToken || 'use'} ${DORK_DATA.items[a].name}${b ? ` on ${typeof b === 'string' && DORK_DATA.items[b] ? DORK_DATA.items[b].name : c.targetText}` : ''}. The universe declines to recognize this workflow. ${diagnosis}`);
+    }
     print("Use what, exactly? Specificity is the thin line between magic and a meeting.");
   }
 
@@ -492,7 +536,10 @@
     if (state.room === 'subbasement' && /^(?:for )?(?:directions|way out|exit)$/.test(t)) return print('The painted arrow points east to the Continuity Chamber. Black roots block the parking passage.');
     if (state.room === 'continuity_chamber' && /^(?:for )?names$|^(?:the )?room about seals$/.test(t)) return print(state.flags.keyUsed ? 'Read the five lit seals from left to right. Their poses match the five cats you met; name each in that order.' : 'The five seals are dark. Use the silver key in the slot beneath them, then read their poses.');
     const names = ['boo','salem','ash','luna','merlin'];
-    if (state.room === 'continuity_chamber' && state.flags.keyUsed && names.every(n => new RegExp(`\\b${n}\\b`).test(t))) {
+    const allFiveNames = names.every(n => new RegExp(`\\b${n}\\b`).test(t));
+    if (state.room === 'continuity_chamber' && allFiveNames && !state.flags.keyUsed)
+      return print('You say the five names, but the seals remain dark. Use the silver continuity key first.');
+    if (state.room === 'continuity_chamber' && state.flags.keyUsed && allFiveNames) {
       if (!/\bboo\b.*\bsalem\b.*\bash\b.*\bluna\b.*\bmerlin\b/.test(t)) return print('The five seals flicker, then go dark. Match their poses from left to right.');
       state.flags.finalOpen = true;
       print("You name them: BOO. SALEM. ASH. LUNA. MERLIN.\n\nOne by one, the brass seals illuminate. The enormous door unlocks with a sound like five hundred filing cabinets opening at once.\n\nBoo stands, stretches, and moves aside.\n\nFor the first time tonight, you have been cleared to leave."); return;
@@ -502,7 +549,7 @@
     if (state.room === 'hr_reliquary' && /merlin|cat/.test(t)) return print("Merlin taps THE TOWER once with a paw, then looks at you. This is humiliatingly clear guidance.");
     if (state.room === 'occult_compliance' && /salem|cat/.test(t)) return print("Salem opens one eye. 'Mrrp.'\n\nYou have received more actionable guidance from this than from several executive briefings.");
     if (state.room === 'archives' && /luna|cat/.test(t)) return print("Luna retreats farther beneath the ledger when you mention the stair. Strong no.");
-    if (state.room === 'continuity_chamber' && /boo|cat/.test(t)) return print(state.flags.keyUsed ? "Boo looks at the five seals, then at you. Naming things is apparently your department now." : "Boo sits directly on the key slot. Leadership obstruction at its purest.");
+    if (state.room === 'continuity_chamber' && /boo|cat/.test(t)) return print(state.flags.keyUsed ? "Boo looks at the five seals, then at you. Naming things is apparently your department now." : "Boo sits beside the key slot and watches you ignore the silver continuity key. Leadership oversight at its purest.");
 
     if (/angela/.test(t) && /julia/.test(t) && /audrey/.test(t)) return print("The three names seem to matter here, but not as the final key. Their drawings were witnesses, not anchors.");
     print(`You address ${t || 'the room'}. The Agency appreciates stakeholder engagement and offers nothing in return.`);
@@ -531,7 +578,8 @@
     if (state.room === 'archives' && c.verb === 'search' && hasWord(c.objectText, 'cabinets')) return print('The cabinets are mortared shut. The ledger on its pedestal is the record you can actually read.');
     if (c.verb === 'search') return examine(c.objectText);
     if (state.room === 'subbasement' && c.verb === 'listen' && hasWord(c.objectText, 'breathing')) return print('The breathing comes from beyond the collapsed parking passage. The painted arrow points east, away from it.');
-    if (state.room === 'legal_annex' && c.verb === 'stamp' && hasWord(c.objectText, 'contract')) return print('The waiver stamp documents your refusal. Procurement accepts it with Form 66-B; stamping the contract here will not release you.');
+    if (c.verb === 'stamp' && (hasWord(c.objectText, 'contract') || hasWord(c.objectText, 'form') || hasWord(c.objectText, '66-b') || hasWord(c.objectText, '66b')))
+      return print('Waiver Stamp 4C and Form 66-B are submitted separately to Procurement. Put the form in the FORM slot and the stamp in the WAIVER slot; do not stamp the contract or form directly.');
     if (state.room === 'procurement' && c.verb === 'buy' && hasWord(c.objectText, 'candle')) return print('The requisition machine does not take money. Feed it Form 66-B and Waiver Stamp 4C to receive the black candle.');
     if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');
     if (state.room === 'hr_reliquary' && c.verb === 'shuffle') return print('You shuffle the three cards. Merlin puts a paw on The Tower again. HR calls this a randomized process.');
@@ -678,7 +726,7 @@
   }
 
   function help() {
-    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE BADGE / TAKE FORM / DROP MUG\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE KEY ON DOOR / GIVE CREAMER TO JORGE\nTALK TO MERLIN / ASK JORGE ABOUT RECORDS\nOPEN BOX / READ CONTRACT / INVENTORY / LEAVE ROOM\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT, DEATHS, LORE, SAVE, RESTART.\n\nTry unreasonable things. The game has opinions.");
+    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN DRAWER / READ NOTICE / INVENTORY / LEAVE ROOM\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT, DEATHS, LORE, SAVE, RESTART.\n\nTry unreasonable things. The game has opinions.");
   }
 
   function showDeaths() { print(meta.deaths.length ? "PERSONNEL SEPARATION LOG:\n" + meta.deaths.map((d,i)=>`${i+1}. ${d}`).join('\n') : "PERSONNEL SEPARATION LOG: No deaths recorded. This is temporary."); }
@@ -752,10 +800,10 @@
 
   function discoverLore(id) {
     const loreMap = {
-      records_file: "Scott's personnel file predates his involvement with the Agency.",
+      records_file: "Scott's personnel file was created before his law-school graduation.",
       contract: "The Agency can retain identity and post-mortem administrative capacity through consent.",
       drawings: "Angela, Julia, and Audrey's drawings act as three witnesses to the Continuity door.",
-      compliance_manual: "Five household anchors must be named to release a Continuity seal.",
+      compliance_manual: "Five household anchors must be named in the correct sequence to release a Continuity seal.",
       ledger: "Scott was invited by authority, retained by consent, and may be released by an anchor."
     };
     if (loreMap[id] && !meta.lore.includes(loreMap[id])) { meta.lore.push(loreMap[id]); saveMeta(); print("[ARCHIVE UPDATED]", 'dim'); }

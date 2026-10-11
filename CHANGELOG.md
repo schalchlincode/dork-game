@@ -1,5 +1,15 @@
 # Dork changelog
 
+## 2026-10-11 - Blind playtest revision
+
+- Replace HELP examples that exposed real later puzzles with neutral parser examples.
+- Accept NAME as a final-sequence synonym, explain the key prerequisite, and remove the false implication that Boo must be moved before the key can be used.
+- Redirect natural waiver/form stamping attempts to Procurement's separate FORM and WAIVER slots.
+- Make Page 64, the Legal Annex, the napkin callback, and legacy LORE entries state-aware.
+- Preserve the five-anchor sequence requirement in LORE and ground the personnel-file summary in observed text.
+- Give stairway and tunnel examinations a useful candle-related clue, acknowledge that BELOW is still elsewhere, improve unsupported USE diagnostics, and keep the opening title visible.
+- Add browser regressions for each blind-playtest finding while retaining the complete true-ending route.
+
 ## 2026-10-09 - Optional Records discovery payoff
 
 - Reading Scott's personnel file is optional, but if the player examines it, the true ending now recalls its impossible date and frames it as evidence the Agency cannot answer. Skipping the file preserves the original ending.
