@@ -12,8 +12,17 @@ def replace_once(path: Path, old: str, new: str) -> None:
 game = Path("game.js")
 game_text = game.read_text(encoding="utf-8")
 game_text = game_text.replace("Procurement's", "Procurement\\'s")
+old_page64 = "Page sixty-four is the detachable Waiver Form 4C."
+if game_text.count(old_page64) != 3:
+    raise RuntimeError(f"game.js: expected three active Page 64 states, found {game_text.count(old_page64)}")
+game_text = game_text.replace(old_page64, "Page sixty-four is the detachable refusal clause, Waiver Form 4C.")
 game.write_text(game_text, encoding="utf-8")
 
+replace_once(
+    game,
+    "Page sixty-four is a detachable refusal form labeled WAIVER FORM 4C. Stamp that paper with Waiver Stamp 4C, then submit it to Procurement.",
+    "Page sixty-four is the detachable refusal clause, labeled WAIVER FORM 4C. Stamp that paper with Waiver Stamp 4C, then submit it to Procurement.",
+)
 replace_once(
     game,
     """  function useThing(c) {
