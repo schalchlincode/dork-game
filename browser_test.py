@@ -1,11 +1,12 @@
 """Exercise the shipped static page through real browser input, without a server."""
 import asyncio
+import os
 from pathlib import Path
 
 from playwright.async_api import async_playwright
 
 
-URL = (Path(__file__).parent / "index.html").as_uri()
+URL = os.environ.get("DORK_TEST_URL", (Path(__file__).parent / "index.html").as_uri())
 
 
 async def command(page, text):
@@ -35,7 +36,7 @@ async def run():
     assert "See `SOLUTION.md`" in readme and "Boo, Salem, Ash, Luna, Merlin" not in readme
     assert "Boo, Salem, Ash, Luna, Merlin" in solution
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True, channel="msedge")
+        browser = await playwright.chromium.launch(headless=True, **({"executable_path": os.environ["DORK_BROWSER_EXECUTABLE"], "args": ["--no-sandbox"]} if os.environ.get("DORK_BROWSER_EXECUTABLE") else {"channel": "msedge"}))
         try:
             page = await browser.new_page(viewport={"width": 390, "height": 844}, is_mobile=True,
                                           device_scale_factor=3, has_touch=True)
@@ -314,7 +315,7 @@ async def run():
             assert len(await fix_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 2
             await command(fix_page, "examine tarot spread")
             assert "orientation assessment" in await fix_page.locator("#output p").last.inner_text()
-            await command(fix_page, "pick the tower")
+            await command(fix_page, "choose the tower")
             assert (await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("tarotSolved")
             await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['badge','form66b','waiver_stamp','waiver_form'], taken:['badge','form66b','waiver_stamp','waiver_form'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
             await fix_page.reload()
@@ -812,7 +813,8 @@ async def run():
             for phrase in ("give me a hint", "give me hint", "give me a clue", "give me clue"):
                 before = await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1 || '{}').hints || 0")
                 await command(utility_page, phrase)
-                assert "The badge is more useful" in await utility_page.locator("#output p").last.inner_text(), phrase
+                # Hints now advance through three explicit levels; every alias still counts once.
+                assert "MANAGEMENT ASSISTANCE REQUIRED" in await utility_page.locator("#output p").last.inner_text(), phrase
                 assert await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1).hints") == before + 1, phrase
             before = await utility_page.evaluate("JSON.parse(localStorage.dork_meta_v1 || '{}').hints || 0")
             await command(utility_page, "do not give me a hint")

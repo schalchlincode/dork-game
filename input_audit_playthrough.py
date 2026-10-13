@@ -1,5 +1,6 @@
 """Play from a fresh save to the true ending using new input forms."""
 import asyncio
+import os
 from pathlib import Path
 
 from playwright.async_api import async_playwright
@@ -7,7 +8,8 @@ from playwright.async_api import async_playwright
 
 async def main():
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True, channel="msedge")
+        executable = os.environ.get("DORK_BROWSER_EXECUTABLE")
+        browser = await playwright.chromium.launch(headless=True, **({"executable_path": executable, "args": ["--no-sandbox"]} if executable else {"channel": "msedge"}))
         try:
             page = await browser.new_page()
             errors = []
@@ -26,9 +28,11 @@ async def main():
                 ("fetch form", "records_stacks", "form66b", None),
                 ("step east", "legal_annex", None, None),
                 ("open the stamp box up", "legal_annex", "waiver_stamp", None),
+                ("fetch waiver form", "legal_annex", "waiver_form", None),
+                ("use waiver stamp on waiver form", "legal_annex", None, "waiverStamped"),
                 ("step south", "procurement", None, None),
                 ("insert form into form slot", "procurement", None, "formInserted"),
-                ("insert stamp into waiver slot", "procurement", None, "procured"),
+                ("insert waiver form into waiver slot", "procurement", None, "procured"),
                 ("step east", "hr_reliquary", None, None),
                 ("choose tower on tarot spread", "hr_reliquary", None, "tarotSolved"),
                 ("step east", "occult_compliance", None, None),
@@ -38,6 +42,8 @@ async def main():
                 ("step east", "continuity_chamber", None, None),
                 ("use key on seals", "continuity_chamber", None, "keyUsed"),
                 ("say boo salem ash luna merlin", "continuity_chamber", None, "finalOpen"),
+                ("step east", "asset_control", None, None),
+                ("return all", "asset_control", None, None),
                 ("step east", "parking_exit", None, None),
             ]
             for phrase, room, item, flag in steps:

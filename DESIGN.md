@@ -56,3 +56,13 @@ iPhone is a first-class target:
 Expand departments into distinct mini-dungeons while preserving one interconnected building. Good candidates: Executive Administration, Records, Legal, Procurement, HR, Occult Compliance, Restricted Archives, Facilities, Finance, IT, Investigations, Communications, and Below.
 
 AI-generated/adaptive content is optional future work and must not be required for the static GitHub Pages release.
+
+## Expanded Edition 2.0.0 implementation
+
+IT, Facilities, Investigations, and Below now form a connected optional middle act. The repaired lift makes a physical navigation loop. The original route and one true ending remain intact. Optional investigation adds understanding and authored ending callbacks rather than mandatory collectibles.
+
+Casebook facts must come from observed material. Preserve the distinction between remembered evidence and current inventory or solved puzzles. Hints are opt-in and graduated; the map may name only discovered locations. Buttons prepare commands, never silently solve puzzles.
+
+All aliases for the same action must have the same irreversible consequences. Resolve named objects through the shared core resolver, ask about ties, and validate targets before mutating state. Permadeath does not justify killing a player for a parser ambiguity or a reversible administrative surrender. Explicitly dangerous actions remain dangerous.
+
+New scenes are deterministic and action-triggered; reading does not run a hidden clock. Keep one authored narrator rather than requiring a live AI service.
