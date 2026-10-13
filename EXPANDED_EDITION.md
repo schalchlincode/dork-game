@@ -11,7 +11,7 @@ The implementation is an incremental separation of the existing engine, not a fr
 | Recommendation | Implementation | Acceptance evidence |
 | --- | --- | --- |
 | Trustworthy parser | One shared exact-name-first resolver; ambiguity clarification; target guards; consistent tarot-taking aliases; no fictional object movement | Core invariants; inventory permutations; action-equivalence matrix; browser failure-path checks |
-| Investigative support | Observation-only persistent casebook with recorded excerpts, current procedures, open questions, hazards, and prior-run labels | Fresh-game spoiler checks; observed evidence; restart and hint-state tests |
+| Persistent lore | Original text-only LORE command; selected discoveries survive death. Casebook removed at the author's request. | Alias equivalence, existing saves, death/restart/reload, and confirmed backup import |
 | Graduated help and map | Three stages for all 23 rooms, resetting with progress; visited-room map with hidden destinations and blocked routes | Every-room hint invariant; hint progression; complete 23-room map |
 | Interconnected world | Four related department puzzles; repaired lift links the elevator, Archives, and new departments | Full expanded route and gate rejection tests |
 | Meaningful repeat attempts | Cause-specific reports/callbacks, observed warning records, brief revisits, safe command history | Multiple deaths/restarts; no retained inventory or puzzle flags |
@@ -27,7 +27,7 @@ The existing browser storage keys are retained. Version-one paperwork, issued re
 
 All taking synonyms now refuse to pocket all three orientation cards. An old test that intentionally used PICK to select The Tower now uses CHOOSE. Hint aliases still increase the hint count, but the text intentionally changes as the player requests deeper assistance; the historical fixed-text assertion was updated accordingly. The varied-input walkthrough is updated for the real stamped waiver and Asset Control introduced in the preceding release.
 
-The casebook records observations, not an omniscient puzzle checklist. Current room connections are observed through room descriptions and updated when the room changes. Prior-run location names are a separate memory section, not a revealed current map. Reading a document updates its stored excerpt so a later inspection of a stamped form supersedes the earlier blank-form observation.
+The Casebook interface and summary generator have been removed. LORE remains unchanged; internal observation fields are retained for puzzles and compatible saves. Current room connections are observed through room descriptions and updated when the room changes. Prior-run location names are a separate memory section, not a revealed current map. Reading a document updates its stored excerpt so a later inspection of a stamped form supersedes the earlier blank-form observation.
 
 Saving failures never intentionally block play. A memory fallback cannot survive closing the tab, so the warning directs players to export. Future-version saves remain untouched while a temporary compatible run is available; an export of the original is provided. Backups are explicitly a portability tool, not an intended permadeath bypass.
 
@@ -46,3 +46,7 @@ Keep exact actions and their narrated consequences aligned. Add new objects/scen
 ## Discovery-focused interface revision (2026-10-13)
 
 PACK and its object-insertion menu have been removed at the author's request. The ordinary inventory command remains. Tab completion is restricted to carried items; it must not reveal an environmental object list. HELP now contains imaginary syntax examples only, without tarot or property-return instructions. Casebook, Map, Tools, the world, puzzle rules, and save data were not removed or altered by this revision. Cross-browser acceptance includes these discovery constraints.
+
+## Casebook removal (2026-10-13)
+
+Remove the button, panel, CASEBOOK/NOTES/NOTEBOOK command registration, procedural summaries, and references in HELP or puzzle feedback. Keep LORE/JOURNAL/ARCHIVE unchanged, including previously discovered lore. Shared map, hints, and death callbacks now live in `game-support.js`; they do not expose a Casebook. Map, Tools, ordinary inventory, puzzles, and storage schema are unchanged. Browser coverage explicitly verifies retained lore after death, restart, reload, export, and confirmed import.

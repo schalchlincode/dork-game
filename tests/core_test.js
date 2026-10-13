@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const context = vm.createContext({console});
-for (const file of ['engine-core.js','game-data.js','expansion-data.js','world-content.js','parser.js','casebook.js']) {
+for (const file of ['engine-core.js','game-data.js','expansion-data.js','world-content.js','parser.js','game-support.js']) {
   vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
 }
 const execute = source => vm.runInContext(source,context);
@@ -56,12 +56,18 @@ check('Invalid and future backup imports are rejected',()=>{
   for(const text of ['not json','{}',JSON.stringify({format:'dork-backup',schemaVersion:99,run:{},meta:{}}),JSON.stringify({format:'dork-backup',schemaVersion:2,run:{schemaVersion:99},meta:{}}),JSON.stringify({format:'dork-backup',schemaVersion:2,run:{},meta:{schemaVersion:99}})])assert.throws(()=>execute(`DorkCore.decodeBackup(${JSON.stringify(text)},DORK_DATA)`));
 });
 check('Every playable room has three defined hint levels',()=>{
-  const result=snapshot(`Object.keys(DORK_DATA.rooms).map(room=>{const s=DorkCore.newRun(DORK_DATA);s.room=room;const h=DorkJournal.hint(s,DorkCore.validateMeta({}));return [room,h.steps.length,h.steps.every(x=>typeof x==='string' && x.length>0)];})`);
+  const result=snapshot(`Object.keys(DORK_DATA.rooms).map(room=>{const s=DorkCore.newRun(DORK_DATA);s.room=room;const h=DorkSupport.hint(s,DorkCore.validateMeta({}));return [room,h.steps.length,h.steps.every(x=>typeof x==='string' && x.length>0)];})`);
   for(const [room,count,valid] of result){assert.equal(count,3,room);assert(valid,room);}
 });
-check('Fresh casebook and map do not disclose unobserved evidence or final answer',()=>{
-  const text=execute(`JSON.stringify(DorkJournal.sections(DorkCore.newRun(DORK_DATA),DorkCore.validateMeta({}),DORK_DATA))`);
-  for(const forbidden of ['BOO, SALEM','candidate record','identity lease','Merlin —','TICKET SCOTT'])assert(!text.includes(forbidden),forbidden);
+check('Casebook commands and summaries are removed; lore aliases remain',()=>{
+  for(const token of ['lore','journal','archive'])assert.equal(execute(`DorkParser.parse('${token}',{room:'meeting'}).verb`),'lore');
+  for(const token of ['casebook','notes','notebook'])assert.equal(execute(`DorkParser.verbMap['${token}']`),undefined);
+  assert.equal(execute('DorkSupport.sections'),undefined);
+  assert(!fs.existsSync(path.join(root,'casebook.js')));
+});
+check('Fresh map exposes no destination or evidence before discovery',()=>{
+  const rooms=snapshot(`DorkSupport.map({...DorkCore.newRun(DORK_DATA),knownExits:{meeting:['east']}},DorkCore.validateMeta({}),DORK_DATA,id=>DORK_DATA.rooms[id].exits,()=>false)`);
+  assert.equal(rooms.length,1);assert.equal(rooms[0].id,'meeting');assert.equal(rooms[0].routes[0].target,'Unexplored');
 });
 check('Save failure retains the newest memory copy rather than stale disk data',()=>{
   execute(`globalThis.localStorage={getItem:()=>'{"old":true}',setItem:()=>{throw new Error('quota')},removeItem:()=>{throw new Error('denied')}};globalThis.testStore=DorkCore.storage();testStore.write('run',{new:true});`);

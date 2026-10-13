@@ -12,7 +12,7 @@ The original escape route remains intact. The expanded edition adds eight interc
 
 Type a command and press Enter or the submit button. LOOK, EXAMINE, TAKE, DROP, USE, GIVE, TALK, and N/S/E/W are useful starting points. HELP gives neutral examples. HINT offers three deliberate stages of assistance for the current puzzle. HELP teaches syntax with imaginary examples, not actual puzzles or their special commands.
 
-INVENTORY (INV / I) lists only carried items in the transcript. There is no PACK panel or clickable surroundings catalog; discover interactions by reading and experimenting. CASEBOOK keeps observed evidence, current procedures, questions, known hazards, and prior-run death reports separate. MAP reveals visited rooms and marks unexplored or blocked connections without exposing their destinations.
+INVENTORY (INV / I) lists only carried items in the transcript. There is no PACK panel or clickable surroundings catalog; discover interactions by reading and experimenting. LORE (also JOURNAL / ARCHIVE) prints selected discoveries in the transcript and retains them between runs. There is no Casebook panel, automatic objectives list, or hazard-summary interface. MAP reveals visited rooms and marks unexplored or blocked connections without exposing their destinations.
 
 TOOLS contains readable display, larger text, reduced animation, brief revisits, history, save import/export, and transcript export. Up/Down recalls commands and preserves an unfinished draft. Tab can complete a single unambiguous carried object name, never a nearby or undiscovered object. Escape closes a panel. LOOK always gives the full room description, even when brief revisits are enabled.
 
@@ -56,7 +56,7 @@ python tests/expanded_test.py
 | `expansion-data.js` | Optional departments, objects, clues, and room connections |
 | `world-content.js` | Registered scenery and state-aware descriptions |
 | `expansion.js` | Department puzzle rules, conversations, scenes, and ending callbacks |
-| `casebook.js` | Evidence presentation, discovered map, graduated hints, death lessons |
+| `game-support.js` | Discovered map, graduated hints, death lessons, and observation metadata |
 | `interface.js` | Accessible panels, history, settings, downloads, confirmed imports |
 | `game.js` | Core puzzle actions, command dispatch, narration, run lifecycle |
 | `index.html`, `style.css` | Responsive CRT presentation and readable display |
