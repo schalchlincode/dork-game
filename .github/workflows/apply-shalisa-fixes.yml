@@ -1,0 +1,52 @@
+name: Apply Shalisa playtest fixes
+
+on:
+  push:
+    branches:
+      - shalisa-playtest-fixes-2026-10-12
+    paths:
+      - .github/apply_shalisa_fixes.py
+      - .github/workflows/apply-shalisa-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: shalisa-playtest-fixes-2026-10-12
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Apply Shalisa playtest fixes
+        run: python .github/apply_shalisa_fixes.py
+
+      - name: Validate JavaScript syntax
+        run: node --check game.js
+
+      - name: Install browser test dependencies
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps msedge
+
+      - name: Run full browser regression
+        run: python browser_test.py
+
+      - name: Commit verified changes
+        run: |
+          rm .github/apply_shalisa_fixes.py
+          rm .github/workflows/apply-shalisa-fixes.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Implement Shalisa playtest revisions"
+          git push origin HEAD:shalisa-playtest-fixes-2026-10-12
