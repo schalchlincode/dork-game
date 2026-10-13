@@ -30,6 +30,19 @@ jobs:
       - name: Apply Shalisa playtest fixes
         run: python .github/apply_shalisa_fixes.py
 
+      - name: Normalize generated JavaScript quoting
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('game.js')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              "form66b: 'Form 66-B is already completed and belongs in Procurement's FORM slot.',",
+              'form66b: "Form 66-B is already completed and belongs in Procurement\'s FORM slot.",'
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+
       - name: Validate JavaScript syntax
         run: node --check game.js
 
