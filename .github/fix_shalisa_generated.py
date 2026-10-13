@@ -34,5 +34,30 @@ replace_once(
     '            assert "Three cards" in await fix_page.locator("#output p").last.inner_text()',
     '            assert "orientation assessment" in await fix_page.locator("#output p").last.inner_text()',
 )
+replace_once(
+    browser_test,
+    '''            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['badge','form66b','waiver_stamp'], taken:['badge','form66b','waiver_stamp'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "show badge to machine")
+            assert "You show" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "insert form into machine")
+            await command(fix_page, "insert form into machine")
+            assert "already has that" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "insert stamp into machine")
+            inventory = await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            assert "form66b" not in inventory and "waiver_stamp" not in inventory and inventory.count("silver_key") == 1''',
+    '''            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['badge','form66b','waiver_stamp','waiver_form'], taken:['badge','form66b','waiver_stamp','waiver_form'], dropped:{}, flags:{stampTaken:true}, visited:['procurement'], dead:false, won:false}))")
+            await fix_page.reload()
+            await command(fix_page, "show badge to machine")
+            assert "You show" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "insert form into machine")
+            await command(fix_page, "insert form into machine")
+            assert "already has that" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "use waiver stamp on waiver form")
+            assert "DECLINED WITH PREJUDICE" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "insert waiver into machine")
+            inventory = await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            assert "form66b" not in inventory and "waiver_form" not in inventory and "waiver_stamp" in inventory and inventory.count("silver_key") == 1 and "procurement_receipt" in inventory''',
+)
 
 print("Generated Shalisa files normalized.")
