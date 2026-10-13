@@ -22,6 +22,11 @@ jobs:
         with:
           ref: dork-expanded-edition-2026-10-13
           fetch-depth: 0
+      - name: Retain source transport for checksum diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-transport
+          path: _delivery/
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -35,33 +40,51 @@ jobs:
           from pathlib import Path
           manifest=json.loads(Path('_delivery/ready.json').read_text())
           chunks=[]
+          bad=[]
           for name in manifest['parts']:
               path=Path('_delivery')/name
               if path.parent != Path('_delivery') or not name.endswith('.b64'): raise ValueError('Invalid part path')
-              chunks.append(path.read_text().strip())
+              content=path.read_text().strip()
+              for old,new in manifest.get('repairs',{}).get(name,[]):
+                  if content.count(old)!=1: raise ValueError('Nonunique transport correction: '+name+' '+old)
+                  content=content.replace(old,new)
+              actual=hashlib.sha256(content.encode()).hexdigest()
+              print(name,len(content),actual,flush=True)
+              if actual!=manifest['part_sha256'][name]: bad.append(name)
+              chunks.append(content)
+          if bad: raise ValueError('Source transport checksum mismatch: '+', '.join(bad))
           patch=gzip.decompress(base64.b64decode(''.join(chunks),validate=True))
           if hashlib.sha256(patch).hexdigest()!=manifest['sha256']: raise ValueError('Patch checksum mismatch')
           Path('/tmp/expanded.patch').write_bytes(patch)
           subprocess.run(['git','apply','--check','--index','/tmp/expanded.patch'],check=True)
           subprocess.run(['git','apply','--index','/tmp/expanded.patch'],check=True)
+          test=Path('tests/expanded_test.py')
+          text=test.read_text()
+          old="        assert 'DECLINED WITH PREJUDICE' in await p.locator('.tool-body').inner_text()"
+          new="        await p.get_by_text('OBSERVED FACTS & EXCERPTS',exact=True).click()\n"+old
+          if text.count(old)!=1: raise ValueError('Expected casebook detail assertion missing')
+          test.write_text(text.replace(old,new))
+          if hashlib.sha256(test.read_bytes()).hexdigest()!=manifest['acceptance_sha256']: raise ValueError('Acceptance test checksum mismatch')
+          subprocess.run(['git','add','tests/expanded_test.py'],check=True)
+          Path('test-results').mkdir(exist_ok=True)
           print('Verified patch:',manifest['sha256'])
           PY
       - name: Syntax and invariants
         run: |
           find . -maxdepth 2 -name '*.js' -not -path './node_modules/*' -exec node --check {} \;
-          node tests/core_test.js
+          node tests/core_test.js | tee test-results/core-tests.txt
       - name: Install test browsers
         run: |
           python -m pip install --disable-pip-version-check -r requirements-dev.txt
           python -m playwright install --with-deps msedge chromium webkit
       - name: Original Edge regression
-        run: python browser_test.py
+        run: python browser_test.py | tee test-results/original-edge.txt
       - name: Alias equivalence and varied route
         run: |
-          python input_audit_matrix.py
-          python input_audit_playthrough.py
+          python input_audit_matrix.py | tee test-results/alias-matrix.txt
+          python input_audit_playthrough.py | tee test-results/varied-route.txt
       - name: Chromium and WebKit expanded acceptance
-        run: python tests/expanded_test.py
+        run: python tests/expanded_test.py | tee test-results/expanded-browsers.txt
       - name: Commit validated implementation
         run: |
           git config user.name 'github-actions[bot]'
