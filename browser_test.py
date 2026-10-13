@@ -61,7 +61,8 @@ async def run():
             assert not (await page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved")
             await command(page, "drop creamer")
             await command(page, "take everything")
-            assert {"mug", "creamer", "napkin", "memo"}.issubset(set(await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")))
+            assert {"mug", "creamer", "napkin"}.issubset(set(await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")))
+            assert "memo" not in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
             await command(page, "south")
             await command(page, "south")
             await command(page, "give creamer to jorge")
@@ -73,11 +74,13 @@ async def run():
             await command(page, "east")
             await command(page, "read contract")
             await command(page, "take all")
-            assert "There is nothing portable left" in (await page.locator("#output").inner_text())[-500:]
+            assert "waiver_form" in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
             await command(page, "open box")
             await command(page, "south")
             await command(page, "insert form into machine")
-            await command(page, "insert stamp into machine")
+            await command(page, "use waiver stamp on waiver form")
+            await command(page, "insert waiver into machine")
+            assert "procurement_receipt" in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
             await command(page, "east")
             await command(page, "talk to merlin")
             await command(page, "touch tarot spread")
@@ -93,7 +96,11 @@ async def run():
             await command(page, "east")
             await command(page, "east")
             await command(page, "apply key to seals")
+            assert "silver_key" not in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
             await command(page, "say boo salem ash luna merlin")
+            await command(page, "east")
+            assert await page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "asset_control"
+            await command(page, "return all")
             await command(page, "east")
             assert "TRUE ENDING" in await page.locator("#output").inner_text(), (await page.locator("#output").inner_text())[-4500:]
             assert "The file you read in Records" in (await page.locator("#output").inner_text())[-1200:]
@@ -102,7 +109,7 @@ async def run():
             assert set(data["visited"]) == {"meeting", "executive_corridor", "break_room", "records_lobby",
                                             "records_stacks", "legal_annex", "procurement", "hr_reliquary",
                                             "occult_compliance", "archives", "subbasement", "continuity_chamber",
-                                            "parking_exit"}
+                                            "asset_control", "parking_exit"}
             await page.reload()
             assert "parking_exit" == await page.evaluate("JSON.parse(localStorage.dork_run_v1).room")
             await command(page, "restart")
@@ -111,6 +118,7 @@ async def run():
             # when the player actually examines the file during this run.
             await page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:[], taken:[], dropped:{}, flags:{finalOpen:true}, visited:['continuity_chamber'], dead:false, won:false}))")
             await page.reload()
+            await command(page, "east")
             await command(page, "east")
             ending = (await page.locator("#output").inner_text())[-1200:]
             assert "TRUE ENDING" in ending and "read in Records" not in ending
@@ -305,23 +313,27 @@ async def run():
             assert "Do not pocket it" in await fix_page.locator("#output p").last.inner_text()
             assert len(await fix_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")) == 2
             await command(fix_page, "examine tarot spread")
-            assert "Three cards" in await fix_page.locator("#output p").last.inner_text()
+            assert "orientation assessment" in await fix_page.locator("#output p").last.inner_text()
             await command(fix_page, "pick the tower")
             assert (await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("tarotSolved")
-            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['badge','form66b','waiver_stamp'], taken:['badge','form66b','waiver_stamp'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['badge','form66b','waiver_stamp','waiver_form'], taken:['badge','form66b','waiver_stamp','waiver_form'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
             await fix_page.reload()
             await command(fix_page, "show badge to machine")
             assert "You show" in await fix_page.locator("#output p").last.inner_text()
             await command(fix_page, "insert form into machine")
-            await command(fix_page, "insert form into machine")
+            await command(fix_page, "insert Form 66-B into machine")
             assert "already has that" in await fix_page.locator("#output p").last.inner_text()
-            await command(fix_page, "insert stamp into machine")
+            await command(fix_page, "insert waiver into machine")
+            assert "Stamp Waiver Form 4C" in await fix_page.locator("#output p").last.inner_text()
+            await command(fix_page, "use waiver stamp on waiver form")
+            await command(fix_page, "insert waiver into machine")
             inventory = await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
-            assert "form66b" not in inventory and "waiver_stamp" not in inventory and inventory.count("silver_key") == 1
+            assert "form66b" not in inventory and "waiver_form" not in inventory
+            assert "waiver_stamp" in inventory and inventory.count("silver_key") == 1 and "procurement_receipt" in inventory
             # Batch 5: entry information, seal poses, key placement, geography, articles.
             await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'meeting', inventory:[], taken:[], dropped:{}, flags:{}, visited:['meeting'], dead:false, won:false}))")
             await fix_page.reload()
-            assert "Visible: agenda folder, visitor badge, glass of water." in await fix_page.locator("#output").inner_text()
+            assert "Visible: agenda folder, visitor badge, glass of water, wall clock." in await fix_page.locator("#output").inner_text()
             await command(fix_page, "lick water")
             assert "surface skin clings" in await fix_page.locator("#output p").last.inner_text()
             await command(fix_page, "east")
@@ -349,7 +361,7 @@ async def run():
             # Batch 6: descriptions follow the run's puzzle flags.
             for room, flags, room_line, item_command, item_line in (
                 ("legal_annex", {"stampTaken": True}, "open and empty", "examine box", "open and empty"),
-                ("hr_reliquary", {"tarotSolved": True}, "split open into a passage", "examine cards", "Three cards"),
+                ("hr_reliquary", {"tarotSolved": True}, "split open into a passage", "examine cards", "orientation assessment"),
                 ("records_lobby", {"jorgeMoved": True}, "chair aside", "look", "chair aside"),
                 ("continuity_chamber", {"keyUsed": True}, "key rests in its slot", "look", "key rests in its slot"),
                 ("continuity_chamber", {"keyUsed": True, "finalOpen": True}, "door stands open", "look", "door stands open"),
@@ -469,7 +481,7 @@ async def run():
             await fix_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'continuity_chamber', inventory:[], taken:[], dropped:{}, flags:{keyUsed:true,finalOpen:true}, visited:['continuity_chamber'], dead:false, won:false}))")
             await fix_page.reload()
             await command(fix_page, "go through door")
-            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "parking_exit"
+            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "asset_control"
             # Fresh and progressed player wording, reproduced in Edge before these fixes.
             for room, phrase, expected in (
                 ("meeting", "ask for help", "DORK understands"),
@@ -519,7 +531,7 @@ async def run():
             for room, phrase, expected in (
                 ("hr_reliquary", "take tarot spread", "Choose a card"),
                 ("hr_reliquary", "shuffle cards", "The Tower again"),
-                ("hr_reliquary", "look at the table", "orientation table"),
+                ("hr_reliquary", "look at the table", "orientation assessment"),
                 ("occult_compliance", "take inbox", "fixed to the desk"),
                 ("occult_compliance", "call elevator", "already here"),
             ):
@@ -529,7 +541,7 @@ async def run():
                 assert expected in await fix_page.locator("#output p").last.inner_text(), (room, phrase)
             # Natural requests observed on the published game during the next room sample.
             for room, phrase, expected in (
-                ("procurement", "buy candle", "Form 66-B and Waiver Stamp 4C"),
+                ("procurement", "buy candle", "stamped Waiver Form 4C"),
                 ("subbasement", "read sign", "There is no sign here"),
                 ("continuity_chamber", "knock on door", "silver key slot"),
             ):
@@ -544,7 +556,7 @@ async def run():
             # Player wording and fixed scenery observed in a later-room Edge sample.
             for room, phrase, expected, flags in (
                 ("occult_compliance", "take drawings", "fixed to the wall", {}),
-                ("archives", "take ledger", "chained to its pedestal", {}),
+                ("archives", "take ledger", "chained to the stone reading stand", {}),
                 ("archives", "open cabinets", "mortared into", {}),
                 ("subbasement", "ask for directions", "painted arrow points east", {}),
                 ("subbasement", "open parking passage", "Black roots have collapsed", {}),
@@ -671,17 +683,23 @@ async def run():
                 assert "not Jorge" in await alias_page.locator("#output p").last.inner_text(), phrase
                 assert "creamer" in await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory"), phrase
                 assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("jorgeMoved"), phrase
-            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['form66b','waiver_stamp'], taken:['form66b','waiver_stamp'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['form66b','waiver_stamp','waiver_form'], taken:['form66b','waiver_stamp','waiver_form'], dropped:{}, flags:{stampTaken:true}, visited:['procurement'], dead:false, won:false}))")
             await alias_page.reload()
             for phrase in ("insert form into waiver slot", "put stamp in form slot", "use form on silver key"):
                 await command(alias_page, phrase)
-                assert "not the" in await alias_page.locator("#output p").last.inner_text(), phrase
-                assert await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == ['form66b','waiver_stamp'], phrase
+                guidance = (await alias_page.locator("#output p").last.inner_text()).lower()
+                assert any(marker in guidance for marker in ("not the", "waiver form", "wrong target")), (phrase, guidance)
+                assert await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == ['form66b','waiver_stamp','waiver_form'], phrase
                 assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted"), phrase
             await command(alias_page, "insert form into form slot")
             assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted")
-            await command(alias_page, "insert stamp into waiver slot")
-            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("procured")
+            await command(alias_page, "use waiver stamp on waiver form")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("waiverStamped")
+            await command(alias_page, "insert waiver into waiver slot")
+            alias_run = await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+            assert alias_run['flags'].get('procured')
+            assert 'form66b' not in alias_run['inventory'] and 'waiver_form' not in alias_run['inventory']
+            assert 'waiver_stamp' in alias_run['inventory'] and 'silver_key' in alias_run['inventory'] and 'procurement_receipt' in alias_run['inventory']
             await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'hr_reliquary', inventory:['badge'], taken:['badge'], dropped:{}, flags:{}, visited:['hr_reliquary'], dead:false, won:false}))")
             await alias_page.reload()
             for phrase in ("use fool on badge", "choose sun on Merlin", "select tower with badge",
@@ -861,25 +879,27 @@ async def run():
             assert "correct sequence" in migrated_lore
             assert "predates his involvement" not in migrated_lore
 
-            await set_run(review_page, "legal_annex", inventory=["waiver_stamp"],
-                          taken=["waiver_stamp"], flags={"stampTaken": True})
+            await set_run(review_page, "legal_annex", inventory=["waiver_stamp", "waiver_form"],
+                          taken=["waiver_stamp", "waiver_form"], flags={"stampTaken": True})
             await command(review_page, "read page 64")
-            assert "already removed" in await review_page.locator("#output p").last.inner_text()
+            assert "still needs Waiver Stamp 4C" in await review_page.locator("#output p").last.inner_text()
             await command(review_page, "use waiver stamp on continuity contract")
-            assert "submitted separately to Procurement" in await review_page.locator("#output p").last.inner_text()
+            assert "Do not stamp the contract" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "use waiver stamp on waiver form")
+            assert (await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("waiverStamped")
 
             await set_run(review_page, "records_stacks", inventory=["form66b", "waiver_stamp"],
                           taken=["form66b", "waiver_stamp"], flags={"stampTaken": True})
             await command(review_page, "stamp Form 66-B")
-            assert "submitted separately to Procurement" in await review_page.locator("#output p").last.inner_text()
+            assert "already completed" in await review_page.locator("#output p").last.inner_text()
             await command(review_page, "use waiver stamp on Form 66-B")
-            assert "submitted separately to Procurement" in await review_page.locator("#output p").last.inner_text()
+            assert "detachable Waiver Form 4C" in await review_page.locator("#output p").last.inner_text()
 
             await set_run(review_page, "legal_annex", flags={"stampTaken": True, "procured": True})
             annex_text = await review_page.locator("#output").inner_text()
             assert "Procurement has filed your refusal" in annex_text
             await command(review_page, "read page 64")
-            assert "filed the waiver with Form 66-B" in await review_page.locator("#output p").last.inner_text()
+            assert "filed the stamped waiver with Form 66-B" in await review_page.locator("#output p").last.inner_text()
 
             await set_run(review_page, "break_room")
             await command(review_page, "read napkin")
@@ -923,6 +943,84 @@ async def run():
             await set_run(review_page, "meeting", inventory=["badge"], taken=["badge"])
             await command(review_page, "use visitor badge on glass of water")
             assert "Both objects are recognized" in await review_page.locator("#output p").last.inner_text()
+            # Shalisa playtest regressions.
+            await set_run(review_page, "meeting")
+            opening = await review_page.locator("#output").inner_text()
+            assert "4:30 PM" in opening and "5:17" in opening
+            await command(review_page, "what time is it")
+            assert "after-5:00" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "east")
+            await command(review_page, "examine directory")
+            assert "YOU ARE HERE — FLOOR 6" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "break_room")
+            await command(review_page, "take memo")
+            assert "bolted to the wall" in await review_page.locator("#output p").last.inner_text()
+            assert "memo" not in await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+
+            await set_run(review_page, "records_stacks")
+            await command(review_page, "read file")
+            await command(review_page, "make a joke")
+            assert "HUMOR RESPONSE CONFIRMED" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "read form 66-b")
+            assert "already completed" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "archives", inventory=["black_candle"], taken=["black_candle"])
+            await command(review_page, "take candle out")
+            assert not (await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("candleLit")
+            await command(review_page, "east")
+            deaths = await review_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")
+            assert deaths[-1] == "Entered unlit continuity infrastructure"
+
+            await set_run(review_page, "archives", inventory=["black_candle"], taken=["black_candle"])
+            await command(review_page, "twist candle")
+            assert (await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("candleLit")
+            assert "striker cap" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "look under ledger")
+            assert "beneath the stand, not beneath the book" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "move pedestal")
+            assert "mortared to the floor" in await review_page.locator("#output p").last.inner_text()
+            await command(review_page, "lift ledger")
+            assert "chained to the stone reading stand" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "occult_compliance")
+            await command(review_page, "examine drawings")
+            drawing_text = " ".join((await review_page.locator("#output p").all_inner_texts())[-2:])
+            assert "impossible building" in drawing_text and "enormous door" in drawing_text
+
+            await set_run(review_page, "continuity_chamber", inventory=["silver_key"], taken=["silver_key"])
+            chamber = await review_page.locator("#output").inner_text()
+            assert "silver key slot" in chamber and "clockwise" in chamber
+            await command(review_page, "use silver key on door")
+            key_reply = await review_page.locator("#output p").last.inner_text()
+            assert "silver_key" not in await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            assert all(name not in key_reply for name in ("Salem", "Ash", "Luna", "Merlin"))
+            await command(review_page, "take key")
+            assert "locked into the continuity mechanism" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "procurement", inventory=["form66b", "waiver_form", "waiver_stamp"],
+                          taken=["form66b", "waiver_form", "waiver_stamp"], flags={"waiverStamped": True})
+            await command(review_page, "insert form into machine")
+            await command(review_page, "insert waiver into machine")
+            inventory = await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            assert "procurement_receipt" in inventory and "waiver_stamp" in inventory
+            await command(review_page, "read receipt")
+            assert "EMPLOYEE COPY" in await review_page.locator("#output p").last.inner_text()
+
+            await set_run(review_page, "asset_control", inventory=["badge", "black_candle", "waiver_stamp", "procurement_receipt"],
+                          taken=["badge", "black_candle", "waiver_stamp", "procurement_receipt"])
+            await command(review_page, "east")
+            deaths = await review_page.evaluate("JSON.parse(localStorage.dork_meta_v1).deaths")
+            assert deaths[-1] == "Attempted unauthorized removal of state property"
+
+            await set_run(review_page, "asset_control", inventory=["badge", "black_candle", "waiver_stamp", "procurement_receipt"],
+                          taken=["badge", "black_candle", "waiver_stamp", "procurement_receipt"])
+            await command(review_page, "return all")
+            inventory = await review_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")
+            assert inventory == ["procurement_receipt"]
+            await command(review_page, "east")
+            assert "TRUE ENDING" in await review_page.locator("#output").inner_text()
+
             assert not errors, errors
             print("Dork browser path, autosave, restart, death persistence, parser, input aliases, blind-playtest fixes and narrow viewport: OK")
         finally:

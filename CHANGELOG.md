@@ -1,5 +1,16 @@
 # Dork changelog
 
+## 2026-10-12 - Shalisa playtest revision
+
+- Establish the 4:30–5:00 meeting schedule and the stopped 5:17 wall clock; mark the Executive Corridor as Floor 6.
+- Make the break-room memo wall-mounted and nonportable, Form 66-B visibly pre-completed, and the Procurement receipt a real employee-copy item.
+- Replace the nonsensical stamp-in-slot workflow with a detachable Waiver Form 4C that must be stamped and then submitted as paper.
+- Add authored joke responses, self-lighting candle hardware and clearer unlit-candle failure feedback.
+- Reconcile the building/door drawings, clarify Luna's reading-stand hiding place, and support furniture-inspection attempts.
+- Expose the final key slot, consume the inserted key, and preserve the cat deduction by revealing poses rather than names in clockwise order.
+- Add an Asset Control Vestibule: attempting to leave with registered state property now causes termination; RETURN ALL permits the true ending.
+- Expand browser regressions for all revised interactions and save migrations.
+
 ## 2026-10-11 - Blind playtest revision
 
 - Replace HELP examples that exposed real later puzzles with neutral parser examples.
