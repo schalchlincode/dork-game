@@ -20,13 +20,25 @@
   if (!DORK_DATA.rooms[state.room]) state = newRun();
   if (!state.dropped || typeof state.dropped !== 'object') state.dropped = {};
   if (!state.flags || typeof state.flags !== 'object') state.flags = {};
+  if (!Array.isArray(state.inventory)) state.inventory = [];
+  if (!Array.isArray(state.taken)) state.taken = [];
   if (state.flags.procured) state.flags.objectionFiled = true;
+  if (state.flags.stampInserted && !state.flags.waiverInserted) {
+    state.flags.waiverInserted = true;
+    state.flags.waiverStamped = true;
+    delete state.flags.stampInserted;
+  }
+  if (state.flags.keyUsed) state.inventory = state.inventory.filter(id => id !== 'silver_key');
+  if (state.flags.procured && !state.taken.includes('procurement_receipt')) {
+    state.taken.push('procurement_receipt');
+    if (!state.inventory.includes('procurement_receipt')) state.inventory.push('procurement_receipt');
+  }
   saveMeta();
 
   const verbMap = buildVerbMap({
     look: ['look','l','observe','view','see','survey','glance','peer','stare'],
     examine: ['examine','x','inspect','study','check','investigate','analyze','analyse','read','review','scrutinize','scrutinise','peruse','scan'],
-    take: ['take','get','grab','pick','pickup','collect','yoink','acquire','obtain','snag','steal','retrieve','fetch'],
+    take: ['take','get','grab','pick','pickup','collect','yoink','acquire','obtain','snag','steal','retrieve','fetch','lift'],
     drop: ['drop','discard','ditch','release','deposit'],
     leave: ['leave','exit','depart'],
     inventory: ['inventory','inv','i','items','stuff','possessions','belongings'],
@@ -40,10 +52,10 @@
     lick: ['lick','taste','tongue'],
     smell: ['smell','sniff'],
     listen: ['listen','hear'],
-    push: ['push','shove','press'],
+    push: ['push','shove','press','move'],
     pull: ['pull','yank','tug'],
     break: ['break','smash','destroy','crush','wreck'],
-    burn: ['burn','ignite','light','torch','incinerate'],
+    burn: ['burn','ignite','light','torch','incinerate','strike','twist'],
     eat: ['eat','chew','bite','consume'],
     drink: ['drink','sip','gulp','swig','slurp'],
     wear: ['wear','puton','don'],
@@ -58,6 +70,8 @@
     sing: ['sing','hum'],
     jump: ['jump','leap','hop'],
     wait: ['wait','z'],
+    joke: ['joke'],
+    stamp: ['stamp'],
     help: ['help','commands','verbs','?','instructions'],
     hint: ['hint','clue','assist'],
     restart: ['restart'],
@@ -93,6 +107,11 @@
     jump: ["You jump. Gravity remains the only agency function operating normally."],
     wait: ["You wait. Somewhere, a deadline becomes overdue."]
   };
+
+  const GOVERNMENT_PROPERTY = new Set([
+    'agenda', 'badge', 'mug', 'memo', 'form66b', 'waiver_form', 'waiver_stamp',
+    'records_file', 'compliance_manual', 'black_candle', 'silver_key'
+  ]);
 
   boot();
 
@@ -140,6 +159,18 @@
     const cleaned = raw.trim() === '?' ? 'help' : raw.toLowerCase().replace(/[!?.,]/g,' ').replace(/\s+/g,' ').trim().replace(/^(?:please\s+|could you\s+|can you\s+)+/,'').replace(/\s+please$/,'');
     if (!cleaned) return null;
     if (/\b(?:not|never|dont|don't)\b/.test(cleaned)) return null;
+    if (/^(?:what time is it|what is the time|tell me the time|check the time)$/.test(cleaned))
+      return {verb:'examine', objectText:'clock', targetText:'', raw, verbToken:'check'};
+    const jokePhrase = cleaned.match(/^(?:make|tell|crack)(?: me)? (?:a )?joke(?: about (.+))?$/);
+    if (jokePhrase) return {verb:'joke', objectText:jokePhrase[1] || '', targetText:'', raw, verbToken:'joke'};
+    const takeOut = cleaned.match(/^(?:take|get|pull|bring) (?:the )?(.+?) out$/);
+    if (takeOut) return {verb:'take', objectText:takeOut[1], targetText:'', raw, verbToken:'take out'};
+    if (state.room === 'asset_control') {
+      if (/^(?:return|surrender|deposit)(?: all| everything| all property| government property| state property| all government property| all state property)$/.test(cleaned))
+        return {verb:'returnProperty', objectText:'all', targetText:'', raw, verbToken:'return'};
+      const returnOne = cleaned.match(/^(?:return|surrender|deposit) (?:the )?(.+?)(?: (?:in|into|to) (?:the )?(?:return )?bin)?$/);
+      if (returnOne) return {verb:'returnProperty', objectText:returnOne[1], targetText:'', raw, verbToken:'return'};
+    }
     let sensory = cleaned.match(/^take\s+a\s+(?:sip|swig|slurp)\s+of\s+(.+)$/);
     if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
     sensory = cleaned.match(/^take\s+a\s+(?:sniff|whiff)\s+of\s+(.+)$/);
@@ -208,7 +239,7 @@
     examine: (c) => examine(c.objectText),
     search: (c) => genericAction(c),
     inventory: inventory,
-    take: (c) => c.objectText === 'all' || c.objectText === 'everything' ? takeAll() : chooseCard(c) || take(c.objectText),
+    take: (c) => c.objectText === 'all' || c.objectText === 'everything' ? takeAll() : chooseCard(c) || take(c.objectText, c.raw),
     drop: (c) => ['all','everything'].includes(c.objectText) ? dropAll() : drop(c.objectText),
     leave: (c) => {
       if (findInventory(c.objectText)) return drop(c.objectText);
@@ -236,6 +267,9 @@
     give: useThing,
     touch: (c) => chooseCard(c) || genericAction(c),
     talk: talkThing,
+    joke: joke,
+    stamp: stampThing,
+    returnProperty: (c) => returnProperty(c.objectText),
     attack: attackThing,
     help: help,
     hint: hint,
@@ -257,6 +291,61 @@
     save: () => { saveRun(); print('Run state saved locally. Even bureaucracy occasionally works.'); }
   };
 
+  function joke() {
+    if (state.flags.readPersonnelFile) {
+      state.flags.joked = true;
+      return print("You make a joke about administrative continuity.\n\nSomewhere inside the wall, a printer emits one approving click.\n\n[HUMOR RESPONSE CONFIRMED]");
+    }
+    print('You make a joke. The building does not laugh. Somewhere in Records, something adds a note to your file.');
+  }
+
+  function stampWaiver() {
+    if (!state.inventory.includes('waiver_stamp')) return print('You need Waiver Stamp 4C in your possession. It is locked in the acrylic box in Legal.');
+    if (!state.inventory.includes('waiver_form')) return print('You need the detachable Waiver Form 4C from beneath the continuity contract.');
+    if (state.flags.waiverStamped) return print('Waiver Form 4C is already stamped DECLINED WITH PREJUDICE. Procurement is ready to misunderstand it.');
+    state.flags.waiverStamped = true;
+    print('You press Waiver Stamp 4C onto the certification box.\n\nThe paper now reads: DECLINED WITH PREJUDICE.\n\nWaiver Form 4C is ready for Procurement.');
+  }
+
+  function stampThing(c) {
+    const target = `${c.objectText} ${c.targetText}`.trim();
+    if (hasWord(target, 'waiver') || hasWord(target, 'page 64') || hasWord(target, 'refusal form')) return stampWaiver();
+    if (hasWord(target, 'form 66-b') || hasWord(target, '66-b') || hasWord(target, '66b'))
+      return print('Form 66-B is already completed. Stamp the detachable Waiver Form 4C instead.');
+    if (hasWord(target, 'contract')) return print('Do not stamp the contract. Stamp detachable Waiver Form 4C, then submit that paper to Procurement.');
+    print('Stamp what? Legal requires the detachable Waiver Form 4C, not a general display of force.');
+  }
+
+  function carriedGovernmentProperty() {
+    return state.inventory.filter(id => GOVERNMENT_PROPERTY.has(id));
+  }
+
+  function assetList(ids) {
+    return ids.map(id => DORK_DATA.items[id]?.name || id).join(', ');
+  }
+
+  function returnAssetById(id) {
+    if (!id || !state.inventory.includes(id)) return print('You are not carrying that asset. Asset Control is disappointed but unsurprised.');
+    if (!GOVERNMENT_PROPERTY.has(id)) return print(`${DORK_DATA.items[id].name} is not registered state property. The scanner declines custody.`);
+    state.inventory = state.inventory.filter(item => item !== id);
+    state.flags.returnedAssets = state.flags.returnedAssets || [];
+    if (!state.flags.returnedAssets.includes(id)) state.flags.returnedAssets.push(id);
+    delete state.dropped[id];
+    print(`Returned: ${DORK_DATA.items[id].name}. Asset Control accepts the surrender without forgiving it.`);
+  }
+
+  function returnProperty(text) {
+    if (state.room !== 'asset_control') return print('There is no authorized property-return point here. Dropping things is not the same as compliance.');
+    if (!text || ['all','everything','property','government property','state property'].includes(text)) {
+      const assets = carriedGovernmentProperty();
+      if (!assets.length) return print('The scanner detects no state property in your possession. The east-door indicator turns green.');
+      assets.forEach(id => returnAssetById(id));
+      return;
+    }
+    const id = findInventory(text);
+    returnAssetById(id);
+  }
+
   function move(dir) {
     const room = roomNow();
     const dest = room.exits[dir];
@@ -267,7 +356,16 @@
       if (key === 'tarot' && !state.flags.tarotSolved) return print("The east wall remains a wall. HR considers this a successful boundary.");
       if (key === 'final_seal' && !state.flags.finalOpen) return print("The final door does not open. Boo watches you fail with professional interest.");
     }
-    if (dest === 'subbasement' && (!state.flags.candleLit || !state.inventory.includes('black_candle'))) return die('darkness', 'You descend without a light. Something waits until the stair door closes, because unlike you it understands timing. The sound is brief. The paperwork is not.');
+    if (state.room === 'asset_control' && dir === 'east') {
+      const assets = carriedGovernmentProperty();
+      if (assets.length) return die('property', `The asset scanner identifies unauthorized state property: ${assetList(assets).toUpperCase()}.\n\nA pleasant voice says, "Thank you for self-reporting."\n\nThe parking-garage door opens downward.`);
+    }
+    if (dest === 'subbasement' && (!state.flags.candleLit || !state.inventory.includes('black_candle'))) {
+      const message = state.inventory.includes('black_candle')
+        ? 'You descend with the correct emergency candle still unlit in your pocket. Something in the tunnel appreciates your commitment to owning the proper equipment without using it.'
+        : 'You descend without a light. Something waits until the stair door closes, because unlike you it understands timing. The sound is brief. The paperwork is not.';
+      return die('darkness', message);
+    }
     state.previousRoom = state.room;
     state.room = dest;
     if (!state.visited.includes(dest)) state.visited.push(dest);
@@ -277,17 +375,20 @@
 
   function page64Text() {
     if (state.flags.objectionFiled || state.flags.procured)
-      return 'Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. Procurement has filed the waiver with Form 66-B; the acrylic box is empty.';
-    if (state.flags.stampTaken)
-      return 'Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. You have already removed the stamp from the acrylic box.';
-    return 'Page sixty-four is the refusal clause: Waiver Stamp 4C records your refusal. The stamp is locked in the acrylic box.';
+      return 'Page sixty-four is the detachable refusal clause, Waiver Form 4C. Procurement has filed the stamped waiver with Form 66-B; the acrylic stamp box is empty.';
+    if (state.flags.waiverStamped)
+      return 'Page sixty-four is the detachable refusal clause, Waiver Form 4C. You stamped it DECLINED WITH PREJUDICE; it is ready for Procurement.';
+    if (state.inventory.includes('waiver_form') || state.taken.includes('waiver_form'))
+      return 'Page sixty-four is the detachable refusal clause, Waiver Form 4C. You removed it from beneath the contract, but its certification box still needs Waiver Stamp 4C.';
+    return 'Page sixty-four is the detachable refusal clause, labeled WAIVER FORM 4C. Stamp that paper with Waiver Stamp 4C, then submit it to Procurement.';
   }
 
   function examine(text) {
     if (!text) return describeRoom(true);
     if (state.room === 'hr_reliquary' && /^(?:the )?wall$/.test(text)) return examine('east wall');
     if (state.room === 'meeting' && /\bwest door\b/.test(text)) return print('There is no west door anymore. The red EXIT sign points east to the corridor.');
-    if (state.room === 'meeting' && /\b(?:calendar invitation|invitation)\b/.test(text)) return print("The invitation bore the Governor's name and called this an Executive Continuity Review. It said nothing about the missing west door.");
+    if (state.room === 'meeting' && /\b(?:calendar invitation|invitation)\b/.test(text)) return print("The invitation bore the Governor's name and scheduled the Executive Continuity Review for 4:30 to 5:00 PM. The wall clock says 5:17. It said nothing about the missing west door.");
+    if (state.room === 'meeting' && /\b(?:clock|time)\b/.test(text)) return print("The wall clock says 5:17 PM. The invitation was for 4:30 to 5:00. The second hand has stopped, but the after-5:00 break-room policy is definitely in effect.");
     if (state.room === 'meeting' && /\b(?:exit sign|east door)\b/.test(text)) return print('The red EXIT sign points east. The door beneath it leads to the corridor; the west door you entered through is gone.');
     if (state.room === 'records_lobby' && hasWord(text, 'gate')) return print(state.flags.jorgeMoved ? 'Jorge has rolled aside. The southern gate into the stacks is clear.' : 'Jorge and his desk block the southern gate into the stacks. He keeps glancing toward the break room.');
     if (state.room === 'records_lobby' && hasWord(text, 'clipboard')) return print(state.flags.jorgeMoved ? 'Jorge has resumed his clipboard duties. The southern gate is clear.' : "Jorge's clipboard lists a break-room delivery. He glances toward the creamer whenever you look at it.");
@@ -303,17 +404,28 @@
         : "The stair descends into a tunnel where the emergency lights have failed. Luna refuses to approach it; take a lit candle—the black emergency candle is the obvious candidate.");
     if (state.room === 'subbasement' && /\btunnel\b/.test(text))
       return print('The green candle shows a concrete tunnel, dead emergency lights, and a painted arrow pointing east to the Continuity Chamber.');
+    if (state.room === 'archives' && /\b(?:under|beneath) (?:the )?(?:ledger|book)\b/.test(text))
+      return print('The ledger lies flat on the stone reading stand. Luna is beneath the stand, not beneath the book.');
+    if (state.room === 'archives' && /\b(?:under|beneath) (?:the )?(?:stand|reading stand|pedestal)\b/.test(text))
+      return print('Luna watches from the open arch beneath the stone reading stand and declines extraction.');
+    if (state.room === 'asset_control' && /\b(?:scanner|property|assets?)\b/.test(text)) {
+      const assets = carriedGovernmentProperty();
+      return print(assets.length ? `The scanner flags: ${assetList(assets)}. Return them before going east.` : 'The scanner detects no state property. The east-door indicator is green.');
+    }
+    if (state.room === 'asset_control' && /\b(?:bin|return bin)\b/.test(text))
+      return print('The return bin accepts registered state property. RETURN ALL is an approved phrase for once.');
     const scenery = {
-      executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.', lights: 'The fluorescent lights buzz overhead. They illuminate the corridor but offer no route out; Records lies south.' },
+      executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. A marker says YOU ARE HERE — FLOOR 6: EXECUTIVE OFFICES. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.', lights: 'The fluorescent lights buzz overhead. They illuminate the corridor but offer no route out; Records lies south.' },
       records_lobby: { placard: 'JORGE — RECORDS MANAGEMENT SPECIALIST III. His desk blocks the southern gate to the stacks.' },
       records_stacks: { shelves: 'The shelves hold files dated years into the future. Shelf 20 bears a scratched warning beside Ash.', 'shelf 20': DORK_DATA.items.ash_note.desc },
       legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
-      procurement: { slots: 'The brass machine has a FORM slot and a WAIVER slot. Its SOUL slot is taped over.', sign: 'The sign requires documented business necessity for every purchase, including exorcisms. The brass machine wants a form and a waiver.' },
-      hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.', table: 'The orientation table holds THE FOOL, THE TOWER, and THE SUN. Merlin keeps one paw near The Tower.' },
+      procurement: { slots: 'The brass machine has a FORM slot for completed paper and a WAIVER slot for stamped paper. Its SOUL slot is taped over.', sign: 'The sign requires documented business necessity for every purchase, including exorcisms. The brass machine wants completed Form 66-B and a stamped Waiver Form 4C.' },
+      hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.', table: 'HR has arranged three face-up cards as an orientation assessment: THE FOOL, THE TOWER, and THE SUN. Merlin keeps one paw near The Tower.' },
       occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.', desk: 'The desk holds Salem in the empty inbox. The compliance manual and three witness drawings carry the useful clues.', elevator: 'The freight elevator waits to the south. Its doors are open; the Archives are below.' },
-      archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.', cabinets: 'Filing cabinets are mortared into the limestone walls. The ledger on the pedestal is the record you can actually read.' },
+      archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.', cabinets: 'Filing cabinets are mortared into the limestone walls. The ledger on the stone reading stand is the record you can actually read.', 'reading stand': 'The broad stone reading stand is mortared to the floor. An open arch beneath it shelters Luna.', pedestal: 'The broad stone reading stand is mortared to the floor. An open arch beneath it shelters Luna.' },
       subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.', arrow: 'The painted arrow points east to the Continuity Chamber. The parking passage is still blocked by black roots.', sign: 'There is no sign here. A painted arrow points east to the Continuity Chamber; black roots block the parking passage.' },
-      continuity_chamber: { door: state.flags.finalOpen ? 'The eastern door stands open. You can leave.' : state.flags.keyUsed ? 'The key has woken five seals, but the eastern door still waits for their names.' : 'Five seals surround the eastern door. A silver key slot waits beneath them.' }
+      continuity_chamber: { door: state.flags.finalOpen ? 'The eastern door stands open. You can leave.' : state.flags.keyUsed ? 'The silver key rests in its slot. Five awakened seals still wait for names in clockwise order.' : 'Five seals ring the eastern door. An engraved arrow points clockwise, and a silver key slot waits beneath them.' },
+      asset_control: { scanner: 'The scanner compares your inventory against the state asset register.', bin: 'The return bin accepts registered government property.' }
     };
     const detail = Object.entries(scenery[state.room] || {}).find(([phrase]) => hasWord(text, phrase));
     if (detail) return print(detail[1]);
@@ -328,7 +440,10 @@
     discoverLore(id);
   }
 
-  function take(text) {
+  function take(text, raw='') {
+    if (hasWord(text, 'receipt') && state.inventory.includes('procurement_receipt')) return print('You already have the Procurement receipt. It is the employee copy, which is the closest thing here to a gift.');
+    if (hasWord(text, 'key') && state.flags.keyUsed) return print('The silver key is locked into the continuity mechanism. The Agency has retained the asset before you could.');
+    if (hasWord(text, 'candle') && state.inventory.includes('black_candle') && /(?:take|get|pull|bring).+out/i.test(raw)) return print(state.flags.candleLit ? 'You take out the black candle. Its green flame is already lit.' : 'You take out the black candle. Its striker cap remains untwisted; the candle is still unlit.');
     const id = findItem(text, true);
     if (state.room === 'occult_compliance' && hasWord(text, 'inbox')) return print('The inbox is fixed to the desk, and Salem is asleep inside it. The tray contains no useful paperwork.');
     if (state.room === 'legal_annex' && hasWord(text, 'stamp') && state.flags.stampTaken) return print(state.inventory.includes('waiver_stamp') ? 'You already carry Waiver Stamp 4C. The acrylic box is empty.' : 'The acrylic box is open and empty. Waiver Stamp 4C is no longer here.');
@@ -338,7 +453,8 @@
     if (id === 'jorge') return print('You cannot take Jorge. Records has already tried transferring him. The forms came back bitten.');
     if (id === 'tarot_spread') return print('The tarot spread stays on the orientation table. Choose a card; Merlin favors The Tower.');
     if (id === 'drawings') return print("The children's drawings are fixed to the wall. Read their signatures here; the three witnesses matter later.");
-    if (id === 'ledger') return print('The ledger is chained to its pedestal. Read it here before taking the eastern stair.');
+    if (id === 'memo') return print('The break-room memo is laminated and bolted to the wall. It has already exceeded its telework allowance.');
+    if (id === 'ledger') return print('The ledger is chained to the stone reading stand and weighs approximately one unresolved fiscal year. Read it here before taking the eastern stair.');
     if (!item.portable && id === 'water') return print('You lift the glass, but the skin on the water stirs. You set it back on the table.');
     if (!item.portable) return print(`You attempt to take ${item.name}. It declines the transfer.`);
     if (state.inventory.includes(id)) return print(`You already have ${item.name}. Hoarding is not leadership.`);
@@ -363,6 +479,7 @@
 
   function drop(text) {
     const id = findInventory(text); if (!id) return print("You are not carrying that.");
+    if (state.room === 'asset_control' && GOVERNMENT_PROPERTY.has(id)) return returnAssetById(id);
     state.inventory = state.inventory.filter(x => x !== id);
     state.dropped[id] = state.room;
     print(`Dropped: ${DORK_DATA.items[id].name}. You immediately distrust the decision.`);
@@ -388,13 +505,13 @@
   function openThing(text) {
     const id = findInventory(text) || findItem(text);
     if (['ash','merlin','salem','luna','boo','jorge'].includes(id)) return print(`${DORK_DATA.items[id].name} is a living being, not a container. Try talking instead.`);
-    if (['memo','ash_note','contract','compliance_manual','drawings','final_plaque','form66b','napkin'].includes(id)) return examine(text);
+    if (['memo','ash_note','contract','compliance_manual','drawings','final_plaque','form66b','waiver_form','procurement_receipt','napkin'].includes(id)) return examine(text);
     if (id === 'badge') return print('The visitor badge is a solid plastic card. It may still be useful as a pry tool.');
     if (id === 'water') return print('The glass is already open. The skin across the water makes drinking it a separate bad idea.');
     if (id === 'mug') return print('The mug has no lid. Its chipped rim is the least alarming thing in this room.');
     if (id === 'creamer') return print('The creamer cup has a peel-back seal. Jorge in Records is its intended recipient.');
     if (id === 'tarot_spread') return print('The three cards are already laid out. Choose one; Merlin keeps pointing at The Tower.');
-    if (id === 'requisition_machine') return print(state.flags.procured ? 'The requisition drawer stands open and empty. The machine has issued everything it intends to.' : 'The requisition drawer is shut. Feed the FORM and WAIVER slots before expecting a candle or key.');
+    if (id === 'requisition_machine') return print(state.flags.procured ? 'The requisition drawer stands open and empty. The machine has issued everything it intends to.' : 'The requisition drawer is shut. Insert completed Form 66-B into FORM and stamped Waiver Form 4C into WAIVER.');
     if (id === 'fool') return print('The Fool is a flat card, not a door. Its traveler approaches a cliff without reading the signage.');
     if (id === 'tower') return print('The Tower is a flat card. Its lightning-struck building is marked CHANGE MANAGEMENT.');
     if (id === 'sun') return print('The Sun is a flat card. Its cheerful radiance is precisely why it should worry you.');
@@ -414,23 +531,26 @@
     if (/box|stamp/.test(text) && state.room === 'legal_annex') {
       if (state.flags.stampTaken) return print('The acrylic box is already open and, like most safeguards, retrospectively decorative.');
       if (!state.inventory.includes('badge')) return print('The box needs a thin pry tool. Your visitor badge might survive the job.');
-      state.flags.stampTaken = true; state.inventory.push('waiver_stamp'); print("You pry open the cheap acrylic box with the visitor badge. Law school did not teach this, but tuition has finally produced a return.\n\nTaken: Waiver Stamp 4C."); return;
+      state.flags.stampTaken = true; if (!state.inventory.includes('waiver_stamp')) state.inventory.push('waiver_stamp'); if (!state.taken.includes('waiver_stamp')) state.taken.push('waiver_stamp'); print("You pry open the cheap acrylic box with the visitor badge. Law school did not teach this, but tuition has finally produced a return.\n\nTaken: Waiver Stamp 4C."); return;
     }
     if (/door|exit/.test(text)) return print("The relevant door is already participating as much as policy permits. Try a direction.");
     print(`You try to open ${text || 'that'}. Nothing opens except a small space in your schedule where optimism used to be.`);
   }
 
   function useThing(c) {
+    if (/^(?:waiver stamp|stamp 4c|4c)$/.test(c.objectText) && /^(?:waiver|waiver form|waiver form 4c|page 64|refusal form|refusal page)$/.test(c.targetText)) return stampWaiver();
     const a = findInventory(c.objectText) || findItem(c.objectText);
     const b = c.targetText ? (findItem(c.targetText) || specialTarget(c.targetText)) : null;
+    if (state.room === 'asset_control' && b === 'return_bin' && a) return returnAssetById(a);
     if (state.room === 'break_room' && hasWord(c.objectText, 'coffee machine')) return print('The coffee machine wheezes out something dark. The useful hazelnut creamer is reserved for Jorge in Records.');
-    if (state.room === 'procurement' && /^(?:requisition )?machine$/.test(c.objectText)) return print('The requisition machine has FORM and WAIVER slots. Insert Form 66-B and Waiver Stamp 4C to request the candle and key.');
+    if (state.room === 'procurement' && /^(?:requisition )?machine$/.test(c.objectText)) return print('The requisition machine has FORM and WAIVER slots for paper. Insert completed Form 66-B and stamped Waiver Form 4C to request the candle and key.');
 
     if (state.room === 'legal_annex' && a === 'badge' && /box|stamp/.test(c.targetText)) return openThing('box');
 
     const paperwork = new Set([a, b].filter(Boolean));
-    if (state.room !== 'procurement' && paperwork.has('waiver_stamp') && (paperwork.has('contract') || paperwork.has('form66b')))
-      return print('Waiver Stamp 4C and Form 66-B are submitted separately to Procurement. Put the form in the FORM slot and the stamp in the WAIVER slot; do not stamp the contract or form directly.');
+    if (paperwork.has('waiver_stamp') && paperwork.has('waiver_form')) return stampWaiver();
+    if (paperwork.has('waiver_stamp') && paperwork.has('form66b')) return print('Form 66-B is already completed. Use Waiver Stamp 4C on the detachable Waiver Form 4C instead.');
+    if (paperwork.has('waiver_stamp') && paperwork.has('contract')) return print('Do not stamp the contract. Stamp detachable Waiver Form 4C, then submit that paper to Procurement.');
 
     if ((a === 'creamer' || /creamer/.test(c.objectText)) && (b === 'jorge' || state.room === 'records_lobby')) {
       if (state.room !== 'records_lobby') return print('Jorge is in Records. Even the Agency requires you to deliver his creamer in person.');
@@ -440,22 +560,32 @@
       print("You offer Jorge the hazelnut creamer.\n\nHe studies you. Then the creamer. Then you again.\n\n'Approved,' he says.\n\nHe drinks it directly from the little plastic cup without breaking eye contact and rolls his chair six feet sideways, clearing the gate. Nobody involved acknowledges the femur."); return;
     }
 
-    if (state.room === 'procurement' && (a === 'form66b' || a === 'waiver_stamp' || /form|stamp/.test(c.objectText))) {
+    if (state.room === 'procurement' && a === 'waiver_stamp')
+      return print('The rubber stamp is not the form or waiver paperwork. Stamp Waiver Form 4C; submit that paper instead.');
+    if (state.room === 'procurement' && (a === 'form66b' || a === 'waiver_form' || /form|waiver/.test(c.objectText))) {
+      if (state.flags.formInserted && /^(?:form|form 66-b|66-b|66b)$/.test(c.objectText)) return print('The machine already has that. It is unusually possessive about paperwork.');
+      if (state.flags.waiverInserted && /waiver/.test(c.objectText)) return print('The machine already has that. It is unusually possessive about paperwork.');
       if (c.targetText) {
         const destination = c.targetText.replace(/^(?:the|a|an)\s+/, '').trim();
         const machine = /^(?:(?:requisition|brass)\s+)?machine$/.test(destination);
         const correctSlot = a === 'form66b' ? 'form slot' : 'waiver slot';
         if (!machine && destination !== correctSlot) return print(`That is not the ${correctSlot} or the requisition machine. Keep the paperwork.`);
       }
-      if ((hasWord(c.objectText, 'form') && state.flags.formInserted) || (hasWord(c.objectText, 'stamp') && state.flags.stampInserted)) return print('The machine already has that. It is unusually possessive about paperwork.');
-      if (!['form66b','waiver_stamp'].includes(a) || !state.inventory.includes(a)) return print('The machine requires a real form or waiver stamp in your possession. Imaginary paperwork is handled upstairs.');
+      if (a === 'waiver_form' && !state.flags.waiverStamped) return print('The WAIVER slot rejects the blank page. Stamp Waiver Form 4C with Waiver Stamp 4C first.');
+      if ((a === 'form66b' && state.flags.formInserted) || (a === 'waiver_form' && state.flags.waiverInserted)) return print('The machine already has that. It is unusually possessive about paperwork.');
+      if (!['form66b','waiver_form'].includes(a) || !state.inventory.includes(a)) return print('The machine requires the completed form or stamped waiver paper in your possession. Imaginary paperwork is handled upstairs.');
       if (a === 'form66b') state.flags.formInserted = true;
-      if (a === 'waiver_stamp') state.flags.stampInserted = true;
+      if (a === 'waiver_form') state.flags.waiverInserted = true;
       state.inventory = state.inventory.filter(x => x !== a);
       print(`${DORK_DATA.items[a].name} accepted by the requisition machine.`);
-      if (state.flags.formInserted && state.flags.stampInserted && !state.flags.procured) {
-        state.flags.procured = true; state.flags.objectionFiled = true; ['black_candle','silver_key'].forEach(x => state.inventory.push(x));
-        print("The machine groans like a committee reaching consensus. A drawer opens.\n\nIssued: BLACK EMERGENCY CANDLE.\nIssued: SILVER CONTINUITY KEY.\n\nA receipt prints for $0.00 and twelve human years.");
+      if (state.flags.formInserted && state.flags.waiverInserted && !state.flags.procured) {
+        state.flags.procured = true;
+        state.flags.objectionFiled = true;
+        for (const id of ['black_candle','silver_key','procurement_receipt']) {
+          if (!state.inventory.includes(id)) state.inventory.push(id);
+          if (!state.taken.includes(id)) state.taken.push(id);
+        }
+        print("The machine groans like a committee reaching consensus. A drawer opens.\n\nIssued: BLACK EMERGENCY CANDLE.\nIssued: SILVER CONTINUITY KEY.\n\nA receipt prints for $0.00 and twelve human years. It curls directly into your hand before you can decline custody.");
       }
       return;
     }
@@ -473,20 +603,23 @@
     }
 
     if (state.room === 'continuity_chamber' && (a === 'silver_key' || /key/.test(c.objectText))) {
+      if (state.flags.keyUsed) return print('The silver key is already locked into the mechanism. Five lit seals still wait for the five names.');
       if (!state.inventory.includes('silver_key')) return print('You need the silver key in your hand, not merely in a sentence.');
       if (c.targetText && !/^(?:(?:the|a|an) )?(?:five (?:brass )?seals|(?:brass )?seals|key slot|silver key slot|slot(?: beneath (?:the )?(?:five )?seals)?|(?:final |eastern |east )?door)$/.test(c.targetText))
         return print('The key fits the slot beneath the five seals, not that target.');
-      if (state.flags.keyUsed) return print('The silver key is already turned. Five lit seals still wait for the five names.');
       state.flags.keyUsed = true;
+      state.inventory = state.inventory.filter(id => id !== 'silver_key');
       const passwordLine = state.flags.readNapkin
         ? "The napkin's words return: HOME IS A PASSWORD."
         : 'A phrase resolves above the seals: HOME IS A PASSWORD.';
-      print(`Boo lifts one paw with executive reluctance. The silver key fits the slot beneath the five seals and turns once. Five small lights wake above the door.\n\nTheir poses resolve in the light: Boo upright, Salem curled asleep, Ash high on his shelf, Luna peering out, Merlin raising one paw. Not decorations. A household, filed as infrastructure.\n\n${passwordLine} The chamber waits for the five names.`); return;
+      print(`Boo lifts one paw with executive reluctance. The silver key fits the slot beneath the five seals, turns once, and locks in place. Five small lights wake above the door.\n\nStarting at the uppermost seal and following the engraved arrow clockwise, the poses resolve in the light: a huge white cat sitting upright; a black cat curled asleep; a small grey cat crouched high; a black cat peering from concealment; a grey cat with one paw raised. Not decorations. A household, filed as infrastructure.\n\n${passwordLine} The chamber waits for the five names.`); return;
     }
 
     if (a === 'black_candle' || hasWord(c.objectText, 'candle')) {
       if (!state.inventory.includes('black_candle')) return print('There is no candle in your inventory to light.');
-      state.flags.candleLit = true; print("You light the black candle. Its flame is green. The tunnel ahead becomes visible enough to regret."); return;
+      if (state.flags.candleLit) return print('The black emergency candle is already burning with a green flame.');
+      state.flags.candleLit = true;
+      print("You twist the candle's metal striker cap until it clicks. The black candle lights itself. Its flame is green. The tunnel ahead becomes visible enough to regret."); return;
     }
 
     if (a && !c.targetText) {
@@ -503,7 +636,10 @@
         memo: 'Read the memo. Its feeding policy is more useful than it deserves to be.',
         napkin: 'The napkin drawing says HOME IS A PASSWORD. Keep that in mind when you reach the final door.',
         jorge: state.flags.jorgeMoved ? 'Jorge has moved aside. The Records gate is clear; go south.' : 'Jorge is blocking the Records gate. He might accept the creamer from the break room.',
-        form66b: 'Form 66-B belongs in the FORM slot of the Procurement machine, alongside Waiver Stamp 4C.',
+        form66b: 'Form 66-B is already completed and belongs in Procurement\'s FORM slot.',
+        waiver_form: state.flags.waiverStamped ? 'Waiver Form 4C is stamped and belongs in Procurement\'s WAIVER slot.' : 'Waiver Form 4C still needs Waiver Stamp 4C before Procurement will accept it.',
+        waiver_stamp: 'Use Waiver Stamp 4C on the detachable Waiver Form 4C. The rubber stamp itself does not go into Procurement.',
+        procurement_receipt: 'The receipt is the employee copy. Read it or keep it; Asset Control does not want it back.',
         ash_note: 'Read the scratched warning on Shelf 20. Ash may know when to leave.',
         records_file: 'The personnel file is evidence, not equipment. Read what the Agency wrote about Scott.',
         contract: 'The contract wants a signature. Refuse it, then find Waiver Stamp 4C to document that refusal.',
@@ -534,13 +670,13 @@
     const t = `${c.objectText} ${c.targetText}`.trim();
     if (state.room === 'break_room' && hasWord(t, 'jorge')) return print('Jorge is at his Records desk to the south. His creamer is here beneath the JORGE ONLY warning.');
     if (state.room === 'subbasement' && /^(?:for )?(?:directions|way out|exit)$/.test(t)) return print('The painted arrow points east to the Continuity Chamber. Black roots block the parking passage.');
-    if (state.room === 'continuity_chamber' && /^(?:for )?names$|^(?:the )?room about seals$/.test(t)) return print(state.flags.keyUsed ? 'Read the five lit seals from left to right. Their poses match the five cats you met; name each in that order.' : 'The five seals are dark. Use the silver key in the slot beneath them, then read their poses.');
+    if (state.room === 'continuity_chamber' && /^(?:for )?names$|^(?:the )?room about seals$/.test(t)) return print(state.flags.keyUsed ? 'Start at the uppermost of the five lit seals and follow the engraved arrow clockwise. Match each pose to one of the five cats you met.' : 'The five seals are dark. Use the silver key in the visible slot beneath them, then follow the engraved arrow.');
     const names = ['boo','salem','ash','luna','merlin'];
     const allFiveNames = names.every(n => new RegExp(`\\b${n}\\b`).test(t));
     if (state.room === 'continuity_chamber' && allFiveNames && !state.flags.keyUsed)
       return print('You say the five names, but the seals remain dark. Use the silver continuity key first.');
     if (state.room === 'continuity_chamber' && state.flags.keyUsed && allFiveNames) {
-      if (!/\bboo\b.*\bsalem\b.*\bash\b.*\bluna\b.*\bmerlin\b/.test(t)) return print('The five seals flicker, then go dark. Match their poses from left to right.');
+      if (!/\bboo\b.*\bsalem\b.*\bash\b.*\bluna\b.*\bmerlin\b/.test(t)) return print('The five seals flicker, then go dark. Match the poses: start at the uppermost seal and follow the engraved arrow clockwise.');
       state.flags.finalOpen = true;
       print("You name them: BOO. SALEM. ASH. LUNA. MERLIN.\n\nOne by one, the brass seals illuminate. The enormous door unlocks with a sound like five hundred filing cabinets opening at once.\n\nBoo stands, stretches, and moves aside.\n\nFor the first time tonight, you have been cleared to leave."); return;
     }
@@ -548,7 +684,7 @@
     if (state.room === 'records_stacks' && (hasWord(t, 'ash') || hasWord(t, 'cat'))) return print('Ash watches from Shelf 20. He recommends, without words, that you leave before the filing starts.');
     if (state.room === 'hr_reliquary' && /merlin|cat/.test(t)) return print("Merlin taps THE TOWER once with a paw, then looks at you. This is humiliatingly clear guidance.");
     if (state.room === 'occult_compliance' && /salem|cat/.test(t)) return print("Salem opens one eye. 'Mrrp.'\n\nYou have received more actionable guidance from this than from several executive briefings.");
-    if (state.room === 'archives' && /luna|cat/.test(t)) return print("Luna retreats farther beneath the ledger when you mention the stair. Strong no.");
+    if (state.room === 'archives' && /luna|cat/.test(t)) return print("Luna retreats farther into the open arch beneath the stone reading stand when you mention the stair. Strong no.");
     if (state.room === 'continuity_chamber' && /boo|cat/.test(t)) return print(state.flags.keyUsed ? "Boo looks at the five seals, then at you. Naming things is apparently your department now." : "Boo sits beside the key slot and watches you ignore the silver continuity key. Leadership oversight at its purest.");
 
     if (/angela/.test(t) && /julia/.test(t) && /audrey/.test(t)) return print("The three names seem to matter here, but not as the final key. Their drawings were witnesses, not anchors.");
@@ -574,13 +710,14 @@
     if (state.room === 'subbasement' && c.verb === 'use' && hasWord(c.objectText, 'lights')) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'subbasement' && /^(?:turn|switch) on (?:the )?lights$/.test(r)) return print('The emergency lights have failed. Your black candle is the light that still works.');
     if (state.room === 'subbasement' && /^(?:follow|take) (?:the )?(?:painted )?arrow$/.test(r)) return move('east');
-    if (state.room === 'occult_compliance' && c.verb === 'touch' && hasWord(c.objectText, 'drawings')) return print("The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same door; their signatures are the three witnesses.");
+    if (state.room === 'occult_compliance' && c.verb === 'touch' && hasWord(c.objectText, 'drawings')) return print("The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same impossible building; the same marked door dominates all three views, and their signatures remain the three witnesses.");
+    if (state.room === 'archives' && ['push','pull'].includes(c.verb) && /(?:stand|reading stand|pedestal)/.test(c.objectText))
+      return print('The broad stone reading stand is mortared to the floor. Bureaucracy has prepared it for resistance literally.');
     if (state.room === 'archives' && c.verb === 'search' && hasWord(c.objectText, 'cabinets')) return print('The cabinets are mortared shut. The ledger on its pedestal is the record you can actually read.');
     if (c.verb === 'search') return examine(c.objectText);
     if (state.room === 'subbasement' && c.verb === 'listen' && hasWord(c.objectText, 'breathing')) return print('The breathing comes from beyond the collapsed parking passage. The painted arrow points east, away from it.');
-    if (c.verb === 'stamp' && (hasWord(c.objectText, 'contract') || hasWord(c.objectText, 'form') || hasWord(c.objectText, '66-b') || hasWord(c.objectText, '66b')))
-      return print('Waiver Stamp 4C and Form 66-B are submitted separately to Procurement. Put the form in the FORM slot and the stamp in the WAIVER slot; do not stamp the contract or form directly.');
-    if (state.room === 'procurement' && c.verb === 'buy' && hasWord(c.objectText, 'candle')) return print('The requisition machine does not take money. Feed it Form 66-B and Waiver Stamp 4C to receive the black candle.');
+    if (c.verb === 'stamp') return stampThing(c);
+    if (state.room === 'procurement' && c.verb === 'buy' && hasWord(c.objectText, 'candle')) return print('The requisition machine does not take money. Insert completed Form 66-B and stamped Waiver Form 4C to receive the black candle.');
     if (state.room === 'records_lobby' && c.verb === 'push' && hasWord(c.objectText, 'gate')) return move('south');
     if (state.room === 'hr_reliquary' && c.verb === 'shuffle') return print('You shuffle the three cards. Merlin puts a paw on The Tower again. HR calls this a randomized process.');
     if (state.room === 'occult_compliance' && c.verb === 'push' && hasWord(c.objectText, 'elevator button')) return print('The freight elevator is already here with its doors open. Go south or down to reach the Archives.');
@@ -608,7 +745,7 @@
         ash: 'Ash accepts one careful touch from Shelf 20, then resumes supervising your survival from a safer altitude.',
         merlin: 'Merlin leans into your hand and raises one paw. Even the cat is giving clearer direction than HR.',
         salem: 'Salem purrs without opening his eyes. Your performance review remains less favorable.',
-        luna: 'Luna allows a brief touch, then retreats beneath the ledger. She has better instincts than you.',
+        luna: 'Luna allows a brief touch, then retreats into the open arch beneath the stone reading stand. She has better instincts than you.',
         boo: 'Boo accepts your attention as tribute. The door remains unimpressed.'
       };
       return print(lines[id]);
@@ -618,7 +755,7 @@
         ash: {smell: 'Ash smells faintly of dust from Shelf 20.', listen: 'Ash makes a small warning sound from the shelf. Something here frightens him.', lick: 'Ash retreats higher on Shelf 20. That is a reasonable response to your proposal.'},
         merlin: {smell: 'Merlin smells of old paper and the HR table. His paw stays beside The Tower.', listen: 'Merlin purrs, then taps The Tower with one paw.', lick: 'Merlin moves away from your face and points you back toward The Tower.'},
         salem: {smell: 'Salem smells of warm fur and the paper in the nearby inbox.', listen: 'Salem purrs beside the empty inbox. The freight elevator is quieter.', lick: 'Salem withdraws from this terrible plan. The inbox remains available for normal investigation.'},
-        luna: {smell: 'Luna smells of dry paper from beneath the ledger.', listen: 'Luna breathes softly beneath the ledger pedestal. She is hiding from something below.', lick: 'Luna slips farther beneath the ledger. Leave the frightened cat alone.'},
+        luna: {smell: 'Luna smells of dry paper from beneath the stone reading stand.', listen: 'Luna breathes softly in the open arch beneath the stand. She is hiding from something below.', lick: 'Luna slips farther beneath the stand. Leave the frightened cat alone.'},
         boo: {smell: 'Boo smells of clean fur and the cold metal of the chamber door.', listen: 'Boo purrs beside the five seals, then falls silent as you study them.', lick: 'Boo gives you a look that would end a lesser administration.'}
       };
       return print(cats[id][c.verb]);
@@ -639,7 +776,7 @@
         stamp_box: state.flags.stampTaken ? 'The acrylic box is open and empty; the cheap lock hangs loose.' : 'The acrylic is smooth and the lock is cheap. Waiver Stamp 4C is still inside.',
         requisition_machine: 'The brass is cold. Its FORM and WAIVER slots are open; the SOUL slot is taped shut.',
         compliance_manual: 'The manual has stiff pages and a worn spine. Section 8.4 is marked for a reason.',
-        ledger: 'The ledger is heavy and dry beneath your fingers. Luna stays hidden under its pedestal.',
+        ledger: 'The ledger is heavy, dry, and chained to the stone reading stand. Luna stays hidden in the open arch beneath the stand.',
         final_plaque: 'The letters are cut into cold metal. The plaque gives advice, but no way to open the door.'
       };
       if (lines[id]) return print(lines[id]);
@@ -708,13 +845,14 @@
       break_room: "JORGE ONLY is not subtle. Neither is Jorge.",
       records_lobby: state.flags.jorgeMoved ? "Go south before Jorge decides the creamer was inadequate." : "Government runs on incentives. Jorge's incentive is in the break room.",
       records_stacks: "Take the form. Read the file if you enjoy being unsettled.",
-      legal_annex: state.flags.stampTaken ? "Procurement wants a form and a waiver." : "Read the contract. Then acquire the waiver stamp by a method Legal would dislike.",
-      procurement: "Insert Form 66-B and Waiver Stamp 4C into the machine.",
+      legal_annex: state.flags.waiverStamped ? "Take the completed Form 66-B and stamped Waiver Form 4C to Procurement." : state.flags.stampTaken ? "Take Page 64, then use Waiver Stamp 4C on that detachable waiver paper." : "Read the contract. Take detachable Waiver Form 4C, then acquire the rubber stamp by a method Legal would dislike.",
+      procurement: "Insert completed Form 66-B into FORM and stamped Waiver Form 4C into WAIVER.",
       hr_reliquary: "Merlin is looking at the answer. Try to keep up.",
       occult_compliance: "Read the manual. Remember the drawings. Continue south.",
       archives: "Read the ledger. Keep the candle with you. Luna's fear is not decorative.",
       subbasement: "Light was procured for a reason.",
-      continuity_chamber: state.flags.keyUsed ? "Five household anchors. Five cats. Name them all." : "Use the silver key first.",
+      continuity_chamber: state.flags.keyUsed ? "Five household anchors. Follow the engraved arrow clockwise and name the cats by their poses." : "Use the silver key first.",
+      asset_control: "Return every registered state asset before going east. RETURN ALL is accepted.",
       parking_exit: "You won. Please stop requesting assistance."
     };
     print(`MANAGEMENT ASSISTANCE REQUIRED #${meta.hints}: ${hints[state.room]}`);
@@ -726,7 +864,7 @@
   }
 
   function help() {
-    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN DRAWER / READ NOTICE / INVENTORY / LEAVE ROOM\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT, DEATHS, LORE, SAVE, RESTART.\n\nTry unreasonable things. The game has opinions.");
+    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN DRAWER / READ NOTICE / MAKE A JOKE / INVENTORY / LEAVE ROOM\nRETURN ALL works at an authorized property-return station.\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT, DEATHS, LORE, SAVE, RESTART.\n\nTry unreasonable things. The game has opinions.");
   }
 
   function showDeaths() { print(meta.deaths.length ? "PERSONNEL SEPARATION LOG:\n" + meta.deaths.map((d,i)=>`${i+1}. ${d}`).join('\n') : "PERSONNEL SEPARATION LOG: No deaths recorded. This is temporary."); }
@@ -738,6 +876,10 @@
       .filter(id => !state.taken.includes(id) || !DORK_DATA.items[id].portable || state.dropped[id] === state.room);
     if (visible.length) print(`Visible: ${visible.map(id=>DORK_DATA.items[id].name).join(', ')}.`, 'dim');
     const exits = Object.keys(room.exits || {}); if (exits.length) print(`Exits: ${exits.join(', ')}.`, 'dim');
+    if (state.room === 'asset_control') {
+      const assets = carriedGovernmentProperty();
+      print(assets.length ? `SCANNER FLAGS: ${assetList(assets)}.` : 'SCANNER: NO STATE PROPERTY DETECTED. EAST DOOR GREEN.', 'dim');
+    }
     updateStatus();
   }
 
@@ -758,7 +900,7 @@
 
   function die(code, text) {
     print(`\n${text}\n\n*** EMPLOYMENT STATUS: TERMINATED ***`, 'death');
-    const labels = { darkness:'Entered unlit continuity infrastructure', orientation:'Failed mandatory orientation', jorge:'Initiated unauthorized Jorge interaction', cat:'Committed an unforgivable policy violation', contract:'Executed contract without adequate review' };
+    const labels = { darkness:'Entered unlit continuity infrastructure', orientation:'Failed mandatory orientation', jorge:'Initiated unauthorized Jorge interaction', cat:'Committed an unforgivable policy violation', contract:'Executed contract without adequate review', property:'Attempted unauthorized removal of state property' };
     meta.deaths.push(labels[code] || 'Administrative death'); meta.runs++; saveMeta();
     localStorage.removeItem(RUN_KEY);
     print("\nType RESTART to begin a new run. The narrator will remember this.");
