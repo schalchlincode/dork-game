@@ -130,6 +130,11 @@ replace_once(
 )
 replace_once(
     browser_test,
+    '            assert "filed the waiver with Form 66-B" in await review_page.locator("#output p").last.inner_text()',
+    '            assert "filed the stamped waiver with Form 66-B" in await review_page.locator("#output p").last.inner_text()',
+)
+replace_once(
+    browser_test,
     '            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "parking_exit"',
     '            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "asset_control"',
 )
