@@ -66,16 +66,6 @@ const DorkUI = (() => {
       }
       input.focus(); input.setSelectionRange(input.value.length,input.value.length);
     }
-    function casePanel() {
-      body.append(element('p','Memory survives death. Carried items, opened doors, and completed procedures do not. Only observed material is recorded.','tool-intro'));
-      for (const section of api.casebook()) {
-        const details = document.createElement('details');
-        details.open = ['CURRENT RUN','OPEN QUESTIONS','COMPLETED THIS RUN'].includes(section.title);
-        details.append(element('summary',section.title));
-        for (const entry of section.entries) details.append(element('p',entry));
-        body.append(details);
-      }
-    }
     function mapPanel() {
       body.append(element('p','Only rooms visited during this run are mapped. An unexplored connection does not reveal its destination. Blocked routes remain marked.','tool-intro'));
       for (const room of api.map()) {
@@ -136,8 +126,8 @@ const DorkUI = (() => {
     function open(name, source=null) {
       activePanel=name; trigger=source || document.activeElement;
       body.replaceChildren();
-      title.textContent={casebook:'INVESTIGATIVE CASEBOOK',map:'DISCOVERED BUILDING',settings:'TERMINAL TOOLS'}[name] || 'TOOLS';
-      ({casebook:casePanel,map:mapPanel,settings:settingsPanel}[name] || settingsPanel)();
+      title.textContent={map:'DISCOVERED BUILDING',settings:'TERMINAL TOOLS'}[name] || 'TOOLS';
+      ({map:mapPanel,settings:settingsPanel}[name] || settingsPanel)();
       if(!dialog.open) dialog.showModal();
       body.scrollTop=0;
       dialog.querySelector('[data-close]').focus();

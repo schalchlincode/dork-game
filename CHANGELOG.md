@@ -1,5 +1,12 @@
 # Dork changelog
 
+## 2026-10-13 - Remove Casebook; preserve LORE
+
+- Remove the Casebook button, panel, command aliases, summary generator, and remaining player-facing references. Do not replace it with another objectives or interaction catalog.
+- Preserve the original LORE, JOURNAL, and ARCHIVE commands, discovered entries, save format, and internal observations used by puzzles.
+- Keep Map, Tools, hints, death callbacks, and both game routes. Move their shared support code out of the removed casebook module.
+- Add regression coverage for old saves, unchanged lore output, death/restart/reload, backup export/import, and the published interface.
+
 ## 2026-10-13 - Preserve discovery; remove PACK and HELP spoilers
 
 - Remove PACK and its carried/visible-object insertion menu completely. Keep the ordinary INVENTORY, INV, and I commands and button.

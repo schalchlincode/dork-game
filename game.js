@@ -64,7 +64,7 @@
     print(`You are Scott. Somewhere, trouble has already completed the necessary forms.`);
     if (meta.deaths.length) print(`The system remembers ${meta.deaths.length} prior separation event${meta.deaths.length === 1 ? '' : 's'}. It is trying not to look pleased.`, 'dim');
     const report = meta.reports[meta.reports.length - 1];
-    if (report && DorkJournal.callbacks[report.code]) print(DorkJournal.callbacks[report.code], 'dim');
+    if (report && DorkSupport.callbacks[report.code]) print(DorkSupport.callbacks[report.code], 'dim');
     describeRoom(true);
     updateStatus();
     if (storageFailed) ui.notifyStorage();
@@ -106,7 +106,7 @@
       restartPending = false;
       return print('Type RESTART by itself if you want to begin again.');
     }
-    const utilities = ['restart','deaths','lore','help','casebook','map','save','tools','settings','export','history'];
+    const utilities = ['restart','deaths','lore','help','map','save','tools','settings','export','history'];
     if (state.dead && !utilities.includes(cmd.verb)) return print('You are dead. Even state government has limits. Type RESTART.');
     if (state.won && ![...utilities,'look','inventory'].includes(cmd.verb)) return print("You've already left. The Agency cannot approve further activity from outside its walls.");
     const objectVerbs = ['examine','look','search','take','drop','open','close','use','give','touch','burn','push','pull','attack','wear','throw','stamp','returnProperty','reclaim'];
@@ -196,7 +196,6 @@
     },
     deaths: showDeaths,
     lore: showLore,
-    casebook: () => { ui.open('casebook'); print('Casebook opened. Prior-run memory is labeled separately from this run.'); },
     map: () => { ui.open('map'); print('Discovered map opened. Unexplored destinations remain unnamed.'); },
     reclaim: (c) => reclaimProperty(c.objectText),
     tools: () => ui.open('settings'),
@@ -749,8 +748,8 @@
   }
 
   function hint() {
-    if(state.dead || state.won) return print('This run is complete. The casebook and death reports remain available.');
-    const hint = DorkJournal.hint(state,meta);
+    if(state.dead || state.won) return print('This run is complete. LORE and DEATHS remain available.');
+    const hint = DorkSupport.hint(state,meta);
     const step = Math.min(3,(state.hintSteps[hint.key] || 0)+1);
     state.hintSteps[hint.key]=step;
     meta.hints++; saveMeta();
@@ -763,7 +762,7 @@
   }
 
   function help() {
-    print("DORK understands commands such as VERB OBJECT or VERB OBJECT ON/TO TARGET.\nThe examples below use imaginary objects and people. They are not clues.\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN SUITCASE / READ POSTCARD / MAKE A JOKE / INVENTORY / LEAVE ROOM\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nINVENTORY (or INV / I) lists only what you are carrying.\nHELP explains commands. HINT offers optional, increasingly explicit puzzle assistance.\nOther commands: DEATHS, LORE, CASEBOOK, MAP, SAVE, RESTART.\nTOOLS contains display settings, command history, save import/export, and transcript export.\n\nTry unreasonable things. The game has opinions.");
+    print("DORK understands commands such as VERB OBJECT or VERB OBJECT ON/TO TARGET.\nThe examples below use imaginary objects and people. They are not clues.\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN SUITCASE / READ POSTCARD / MAKE A JOKE / INVENTORY / LEAVE ROOM\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nINVENTORY (or INV / I) lists only what you are carrying.\nHELP explains commands. HINT offers optional, increasingly explicit puzzle assistance.\nOther commands: DEATHS, LORE, MAP, SAVE, RESTART.\nTOOLS contains display settings, command history, save import/export, and transcript export.\n\nTry unreasonable things. The game has opinions.");
   }
 
   function showDeaths() { print(meta.deaths.length ? "PERSONNEL SEPARATION LOG:\n" + meta.deaths.map((d,i)=>`${i+1}. ${d}`).join('\n') : "PERSONNEL SEPARATION LOG: No deaths recorded. This is temporary."); }
@@ -773,7 +772,7 @@
     const room = roomNow();
     const remembered = meta.knownRooms.includes(state.room);
     if (!remembered) meta.knownRooms.push(state.room);
-    for(const id of room.items || []) if(DorkJournal.catFacts[id]) observe(id);
+    for(const id of room.items || []) if(DorkSupport.catFacts[id]) observe(id);
     const description = !force && remembered && ui?.preferences.brief ? briefDescription(room) : roomDescription(room);
     print(`\n[${room.name.toUpperCase()}]\n${description}`);
     const visible = visibleItems();
@@ -831,7 +830,7 @@
     print(`\n${text}\n\n*** EMPLOYMENT STATUS: TERMINATED ***`, 'death');
     const labels = { electrical:'Fitted a fuse into live service infrastructure', consent:'Reinstated consent by occupying the identity chair', darkness:'Entered unlit continuity infrastructure', orientation:'Failed mandatory orientation', jorge:'Initiated unauthorized Jorge interaction', cat:'Committed an unforgivable policy violation', contract:'Executed contract without adequate review', property:'Attempted unauthorized removal of state property' };
     const warningSeen = ({darkness:state.observed.includes('luna') || state.visited.includes('archives'), orientation:state.visited.includes('hr_reliquary'), contract:state.observed.includes('contract'), property:state.visited.includes('asset_control'), electrical:state.visited.includes('relay_chamber') || state.observed.includes('relay_instructions'), consent:state.visited.includes('below'), cat:true, jorge:true})[code] === true;
-    meta.reports.push({code,room:state.room,command:currentCommand,lesson:DorkJournal.lessons[code] || 'Review the last action and the available warnings.',warningSeen,run:meta.runs});
+    meta.reports.push({code,room:state.room,command:currentCommand,lesson:DorkSupport.lessons[code] || 'Review the last action and the available warnings.',warningSeen,run:meta.runs});
     meta.deaths.push(labels[code] || 'Administrative death'); meta.runs++; saveMeta();
     if(!rejectedSave) store.remove(RUN_KEY);
     print("\nType RESTART to begin a new run. The narrator will remember this.");
@@ -846,7 +845,7 @@
     restartPending = false;
     if(!state.dead) {meta.runs++; saveMeta();}
     state = newRun(); pendingClarification=null; saveRun(); print("\n--- NEW RUN ---\nThe building has reset. Your dignity has not.\n");
-    const report=meta.reports[meta.reports.length-1]; if(report && DorkJournal.callbacks[report.code]) print(DorkJournal.callbacks[report.code],'dim');
+    const report=meta.reports[meta.reports.length-1]; if(report && DorkSupport.callbacks[report.code]) print(DorkSupport.callbacks[report.code],'dim');
     describeRoom(true);
   }
 
@@ -899,7 +898,7 @@
     if(!state.observed.includes(id)) state.observed.push(id);
     if(!meta.observations.includes(id)) meta.observations.push(id);
     expansion.onObserve(id);
-    const evidence=DorkJournal.catFacts[id] || expansion.specialDescription(id) || DorkWorld.description(id,state) || flagDescription(DORK_DATA.items[id]);
+    const evidence=DorkSupport.catFacts[id] || expansion.specialDescription(id) || DorkWorld.description(id,state) || flagDescription(DORK_DATA.items[id]);
     state.evidence[id]=evidence; meta.evidence[id]=evidence;
   }
   function reclaimProperty(text) {
@@ -926,8 +925,7 @@
     };
     return line+'\n\n'+scenes[id];
   }
-  function casebookSections(){ return DorkJournal.sections(state,meta,DORK_DATA); }
-  function mapEntries(){ return DorkJournal.map(state,meta,DORK_DATA,id=>expansion.exits(id,DORK_DATA.rooms[id].exits || {}),(id,dir)=>{
+  function mapEntries(){ return DorkSupport.map(state,meta,DORK_DATA,id=>expansion.exits(id,DORK_DATA.rooms[id].exits || {}),(id,dir)=>{
     const key=DORK_DATA.rooms[id].blocked?.[dir];
     if(!key) return '';
     if(key==='jorge') return !state.flags.jorgeMoved;
@@ -944,6 +942,6 @@
     scrollBottom(true);
   }
   const expansion = DorkExpansion.create({state:()=>state,meta:()=>meta,print,observe,resolve:findItem,take,die,move});
-  ui=DorkUI.create({state:()=>state,meta:()=>meta,data:DORK_DATA,store,casebook:casebookSections,map:mapEntries,backup,importBackup,rejectedSave:()=>rejectedSave,rejectedMeta:()=>loadedMeta});
+  ui=DorkUI.create({state:()=>state,meta:()=>meta,data:DORK_DATA,store,map:mapEntries,backup,importBackup,rejectedSave:()=>rejectedSave,rejectedMeta:()=>loadedMeta});
   boot(); saveRun(); saveMeta();
 })();

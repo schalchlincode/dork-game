@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = 'https://schalchlincode.github.io/dork-game/'
 RESULTS = ROOT / 'test-results'
 ASSETS = ['index.html', 'style.css', 'engine-core.js', 'parser.js', 'game-data.js',
-          'expansion-data.js', 'world-content.js', 'expansion.js', 'casebook.js',
+          'expansion-data.js', 'world-content.js', 'expansion.js', 'game-support.js',
           'interface.js', 'game.js']
 
 
@@ -52,6 +52,10 @@ async def play_routes():
                 page.on('console', lambda message: errors.append(message.text) if message.type == 'error' and 'DORK action failed' in message.text else None)
                 await page.goto(SITE, wait_until='networkidle')
                 assert await page.evaluate('DorkCore.VERSION') == '2.0.0'
+                assert await page.locator('[data-panel="casebook"]').count() == 0
+                assert await page.locator('[data-panel]').count() == 2
+                assert 'CASEBOOK' not in (await command(page, 'help')).upper()
+                assert 'DISCOVERED ARCHIVE:' in await command(page, 'lore')
                 for text in route:
                     await command(page, text)
                 saved = await run_state(page)
@@ -59,6 +63,8 @@ async def play_routes():
                 if name == 'expanded':
                     assert len(saved['visited']) == 23 and saved['flags']['identityReleased'], saved
                 await page.reload(wait_until='networkidle')
+                assert (await run_state(page))['won']
+                assert 'DISCOVERED ARCHIVE:' in await command(page, 'lore')
                 assert (await run_state(page))['won']
                 assert not errors, errors
                 await page.screenshot(path=str(RESULTS / ('published-' + name + '.png')))

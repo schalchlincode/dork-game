@@ -117,10 +117,9 @@ async def browser_suite(browser, browser_name):
         assert not (await meta_state(p))['deaths']
         await p.reload()
         assert (await run_state(p))['flags']['identityReleased']
-        await p.locator('[data-panel="casebook"]').click()
-        assert 'unsupported identity claim revoked' in (await p.locator('.tool-body').inner_text()).lower()
-        await p.screenshot(path=str(RESULTS / f'{browser_name}-casebook.png'))
-        await close_panel(p)
+        reply=await command(p,'lore')
+        assert 'DISCOVERED ARCHIVE:' in reply and 'personnel file' in reply
+        await p.screenshot(path=str(RESULTS / f'{browser_name}-lore.png'))
         await p.locator('[data-panel="map"]').click()
         assert await p.locator('.map-room').count()==23
         await p.screenshot(path=str(RESULTS / f'{browser_name}-map.png'))
@@ -178,10 +177,8 @@ async def browser_suite(browser, browser_name):
 
     async def clues_and_hint_levels():
         p=await page()
-        await p.locator('[data-panel="casebook"]').click()
-        text=await p.locator('.tool-body').inner_text()
-        assert 'TICKET SCOTT' not in text and 'Merlin —' not in text and 'BOO, SALEM' not in text
-        await close_panel(p)
+        text=await command(p,'lore')
+        assert text=='DISCOVERED ARCHIVE: Empty. Ignorance remains your most complete record.'
         await p.locator('[data-panel="map"]').click()
         text=await p.locator('.tool-body').inner_text()
         assert 'Executive Corridor' not in text and 'Unexplored' in text
@@ -200,11 +197,9 @@ async def browser_suite(browser, browser_name):
         s=await run_state(p)
         assert not s['inventory'] and not s['flags']
         assert 'records_file' in (await meta_state(p))['observations']
-        await p.locator('[data-panel="casebook"]').click()
-        await p.get_by_text('OBSERVED FACTS & EXCERPTS',exact=True).click()
-        assert 'prior-run memory' in await p.locator('.tool-body').inner_text()
+        assert 'personnel file' in await command(p,'lore')
         await p.close()
-    await check('No unobserved casebook/map spoilers; three-stage hints reset with puzzle progress', clues_and_hint_levels)
+    await check('Lore and map preserve discovery; three-stage hints reset with puzzle progress', clues_and_hint_levels)
 
     async def reclaim_and_hazards():
         p=await page()
@@ -250,7 +245,7 @@ async def browser_suite(browser, browser_name):
         p=await page()
         assert await p.locator('[data-panel="inventory"]').count()==0
         assert await p.get_by_role('button',name='PACK',exact=True).count()==0
-        assert await p.locator('[data-panel]').count()==3
+        assert await p.locator('[data-panel]').count()==2
         await command(p,'look')
         before=await run_state(p)
         for text in ['take vis','examine wall','examine age']:
@@ -279,7 +274,7 @@ async def browser_suite(browser, browser_name):
         assert await p.locator('#commandInput').input_value()=='take vis'
         forbidden=['TAROT','TOWER','THE FOOL','THE SUN','JORGE','MERLIN','WAIVER','CANDLE',
                    'KEY SLOT','SEALS','RETURN ALL','PROPERTY-RETURN','REVOCATION','RELAY',
-                   'DUPLICATE','PACK','CERTIFICATION']
+                   'DUPLICATE','PACK','CASEBOOK','CERTIFICATION']
         for room in ['meeting','hr_reliquary','asset_control']:
             await seed(p,room)
             await command(p,'look')
@@ -298,6 +293,57 @@ async def browser_suite(browser, browser_name):
         await p.screenshot(path=str(RESULTS/f'{browser_name}-spoiler-free-help.png'))
         await p.close()
     await check('No PACK or surroundings completion; inventory-only recall and spoiler-free HELP aliases', discovery_and_help)
+
+    async def lore_without_casebook():
+        p=await page()
+        assert await p.locator('[data-panel="casebook"]').count()==0
+        assert await p.get_by_role('button',name='CASEBOOK',exact=True).count()==0
+        assert await p.locator('script[src="casebook.js"]').count()==0
+        await command(p,'look')
+        before=await run_state(p); previous=await meta_state(p)
+        for text in ['casebook','notes','notebook']:
+            await command(p,text)
+            assert not await p.locator('#toolDialog').evaluate('(d)=>d.open')
+            assert await run_state(p)==before and await meta_state(p)==previous
+        for alias in ['lore','journal','archive']:
+            reply=await command(p,alias)
+            assert reply=='DISCOVERED ARCHIVE: Empty. Ignorance remains your most complete record.'
+            assert await run_state(p)==before and await meta_state(p)==previous
+        await seed(p,'records_stacks')
+        # An existing save with old observation fields must load without losing lore.
+        remembered=["Scott's personnel file was created before his law-school graduation."]
+        old=await meta_state(p)
+        old.update(lore=remembered,observations=['records_file'],evidence={'records_file':'Previously examined record.'})
+        await p.evaluate("v=>localStorage.setItem('dork_meta_v1',JSON.stringify(v))",old)
+        await p.reload()
+        before=await run_state(p); previous=await meta_state(p)
+        for alias in ['lore','journal','archive']:
+            assert await command(p,alias)=='DISCOVERED ARCHIVE:\n1. '+remembered[0]
+            assert await run_state(p)==before and await meta_state(p)==previous
+            assert not await p.locator('#toolDialog').evaluate('(d)=>d.open')
+        await command(p,'read file')
+        assert (await meta_state(p))['lore']==remembered
+        await command(p,'attack ash')
+        assert await run_state(p) is None
+        assert remembered[0] in await command(p,'lore')
+        await command(p,'restart')
+        assert (await meta_state(p))['lore']==remembered
+        assert not (await run_state(p))['inventory'] and not (await run_state(p))['flags']
+        await p.reload()
+        assert remembered[0] in await command(p,'lore')
+        await p.locator('[data-panel="settings"]').click()
+        async with p.expect_download() as event:
+            await p.get_by_role('button',name='EXPORT SAVE',exact=True).click()
+        download=await event.value; path=RESULTS/f'{browser_name}-lore-save.json'
+        await download.save_as(str(path))
+        assert json.loads(path.read_text())['meta']['lore']==remembered
+        await p.locator('#importSave').set_input_files(str(path))
+        await p.get_by_role('button',name='CONFIRM REPLACE',exact=True).click()
+        assert (await meta_state(p))['lore']==remembered
+        assert remembered[0] in await command(p,'lore')
+        assert 'casebook' not in (await command(p,'help')).lower()
+        await p.close()
+    await check('Casebook removed; existing lore survives aliases, death, restart, reload, and backup import', lore_without_casebook)
 
     async def ui_tools_and_files():
         p=await page()
@@ -394,10 +440,8 @@ async def browser_suite(browser, browser_name):
         assert 'blank' in (await run_state(p))['evidence']['waiver_form']
         await command(p,'stamp waiver form');await command(p,'read waiver form')
         assert 'DECLINED WITH PREJUDICE' in (await run_state(p))['evidence']['waiver_form']
-        await p.locator('[data-panel="casebook"]').click()
-        await p.get_by_text('OBSERVED FACTS & EXCERPTS',exact=True).click()
-        assert 'DECLINED WITH PREJUDICE' in await p.locator('.tool-body').inner_text()
-        await close_panel(p)
+        await p.reload()
+        assert 'DECLINED WITH PREJUDICE' in (await meta_state(p))['evidence']['waiver_form']
         await seed(p,'hr_reliquary')
         await command(p,'choose tower')
         assert 'east' in (await run_state(p))['knownExits']['hr_reliquary']
@@ -428,7 +472,7 @@ async def browser_suite(browser, browser_name):
             out=await p.locator('#output').bounding_box()
             assert out and out['height']>24,(width,height,out)
             assert await p.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,height)
-            await p.locator('[data-panel="casebook"]').click()
+            await p.locator('[data-panel="map"]').click()
             dialog=await p.locator('#toolDialog').bounding_box()
             assert dialog and dialog['y']>=0 and dialog['y']+dialog['height']<=height+1,(width,height,dialog)
             await p.keyboard.press('Escape')

@@ -113,7 +113,7 @@ const DorkExpansion = (() => {
       if (at('investigations') && (/^(?:compare|connect|assemble|review) (?:the )?(?:evidence|board|evidence board|clues)$/.test(r) || (a === 'evidence_board' && ['use','push'].includes(v)))) {
         if (flag('evidenceCompared')) return say('The contradiction is already recorded. The southern evidence-room door is open.');
         const need = [['audit_dossier','the audit dossier here'],['agenda','the agenda in the original meeting room'],['records_file','Scott\'s personnel file in Records'],['drawings','the three drawings in Occult Compliance']].filter(([id]) => !known(id));
-        if (need.length) return say('The board cannot compare evidence you have not examined. Missing: ' + need.map(x => x[1]).join('; ') + '. Copies are unnecessary; observed evidence or your casebook\'s prior-run observations are admissible.');
+        if (need.length) return say('The board cannot compare evidence you have not examined. Missing: ' + need.map(x => x[1]).join('; ') + '. Copies are unnecessary; observed evidence or your prior-run recollections are admissible.');
         set('evidenceCompared');
         return say('You compare authority, chronology, and witnesses.\n\nThe invitation brought Scott into the building. The file already existed. The children witnessed a door, not a consent agreement.\n\nThe official account cannot make those dates occur in its preferred order. The board stamps its own cover sheet: MATERIAL CONTRADICTION.\n\nThe southern evidence-room door opens. For once, a government office has been moved by evidence.');
       }

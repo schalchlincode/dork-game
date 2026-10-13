@@ -147,6 +147,6 @@ east
 
 At Asset Control, RECLAIM CANDLE retrieves a surrendered emergency candle before backtracking. The game stops an unlit return into the tunnel rather than killing you for a previously surrendered light. Other returned state assets can also be reclaimed there. Return them again before leaving.
 
-Signing the Legal contract, attacking Jorge or a cat, selecting a wrong tarot card, deliberately entering the dark tunnel without a light, leaving with state property, servicing live equipment, and submitting to the unresolved consent chair can end the run. Hints, inspection, casebook reading, map reading, and unresolved parser clarification do not cause those actions.
+Signing the Legal contract, attacking Jorge or a cat, selecting a wrong tarot card, deliberately entering the dark tunnel without a light, leaving with state property, servicing live equipment, and submitting to the unresolved consent chair can end the run. Hints, inspection, reading LORE, map reading, and unresolved parser clarification do not cause those actions.
 
 An ambiguous noun produces a clarification. Reply with the exact name or displayed number, or CANCEL. A different command abandons the pending action. TAKE, GRAB, FETCH, and other taking aliases consistently refuse to pocket all three tarot cards; CHOOSE or SELECT commits the assessment.

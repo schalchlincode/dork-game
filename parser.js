@@ -46,7 +46,6 @@ const DorkParser = (() => {
     refuse: ['refuse','reject','decline'],
     deaths: ['deaths','deathlog','obituary'],
     lore: ['lore','journal','archive'],
-    casebook: ['casebook','notes','notebook'],
     map: ['map'],
     reclaim: ['reclaim','recover'],
     save: ['save'],
