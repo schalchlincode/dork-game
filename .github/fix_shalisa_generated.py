@@ -41,6 +41,16 @@ replace_once(
     "The brass machine has a FORM paper slot and a WAIVER paper slot. Its SOUL slot is taped over.",
     "The brass machine has a FORM slot for completed paper and a WAIVER slot for stamped paper. Its SOUL slot is taped over.",
 )
+replace_once(
+    game,
+    "The requisition machine has FORM and WAIVER paper slots. Insert completed Form 66-B and stamped Waiver Form 4C to request the candle and key.",
+    "The requisition machine has FORM and WAIVER slots for paper. Insert completed Form 66-B and stamped Waiver Form 4C to request the candle and key.",
+)
+replace_once(
+    game,
+    "The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same impossible building; the same marked door dominates all three views.",
+    "The frames are cold beneath your fingers. Angela, Julia, and Audrey each drew the same impossible building; the same marked door dominates all three views, and their signatures remain the three witnesses.",
+)
 
 browser_test = Path("browser_test.py")
 replace_once(
@@ -66,6 +76,21 @@ replace_once(
     '''            await command(fix_page, "insert form into machine")
             await command(fix_page, "insert Form 66-B into machine")
             assert "already has that" in await fix_page.locator("#output p").last.inner_text()''',
+)
+replace_once(
+    browser_test,
+    '            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "parking_exit"',
+    '            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "asset_control"',
+)
+replace_once(
+    browser_test,
+    '("procurement", "buy candle", "Form 66-B and Waiver Stamp 4C"),',
+    '("procurement", "buy candle", "stamped Waiver Form 4C"),',
+)
+replace_once(
+    browser_test,
+    '("archives", "take ledger", "chained to its pedestal", {}),',
+    '("archives", "take ledger", "chained to the stone reading stand", {}),',
 )
 
 print("Generated Shalisa files normalized.")
