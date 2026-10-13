@@ -17,5 +17,32 @@
     "part-02.b64": [["HEktxtVLch","HEktxtxVLch"]],
     "part-07.b64": [["62rs7v3XFV","62rs7vV3XFV"]]
   },
-  "acceptance_sha256": "37935ba2350411324f5a60dffcd06961bca41a32c63393e4b83d539d5ee91b04"
+  "acceptance_sha256": "37935ba2350411324f5a60dffcd06961bca41a32c63393e4b83d539d5ee91b04",
+  "post_apply": {
+    "tests/expanded_test.py": {
+      "edits": [
+        ["from playwright.async_api import async_playwright", "from playwright.async_api import async_playwright, expect"],
+        ["        assert 'Import rejected' in await p.locator('.import-feedback').inner_text()", "        await expect(p.locator('.import-feedback')).to_contain_text('Import rejected')"],
+        ["        assert 'badge' not in (await run_state(p))['inventory']\n        await p.get_by_role('button',name='CONFIRM REPLACE',exact=True).click()", "        assert 'badge' not in (await run_state(p))['inventory']\n        await p.get_by_role('button',name='CANCEL',exact=True).click()\n        await expect(p.locator('.import-feedback')).to_contain_text('Import canceled')\n        assert 'badge' not in (await run_state(p))['inventory']\n        await p.locator('#importSave').set_input_files(str(path))\n        await p.get_by_role('button',name='CONFIRM REPLACE',exact=True).click()"],
+        ["        assert await run_state(p)==previous\n        await close_panel(p);await p.reload()", "        assert await run_state(p)==previous\n        # A slow, earlier selection must never replace feedback for the latest file.\n        await p.evaluate(\"\"\"() => {\n            window.originalFileText=File.prototype.text;\n            File.prototype.text=function() {\n                if(this.name==='slow.json') return new Promise(resolve=>{window.releaseOldImport=resolve;});\n                return window.originalFileText.call(this);\n            };\n        }\"\"\")\n        await p.locator('#importSave').set_input_files({'name':'slow.json','mimeType':'application/json','buffer':path.read_bytes()})\n        await p.wait_for_function(\"typeof window.releaseOldImport==='function'\")\n        await p.locator('#importSave').set_input_files({'name':'latest-invalid.json','mimeType':'application/json','buffer':b'not json'})\n        await expect(p.locator('.import-feedback')).to_contain_text('Import rejected')\n        await p.evaluate(\"text=>{window.releaseOldImport(text);File.prototype.text=window.originalFileText;}\",path.read_text())\n        await p.evaluate(\"()=>new Promise(resolve=>setTimeout(resolve,0))\")\n        await expect(p.locator('.import-feedback')).to_contain_text('Import rejected')\n        assert await p.get_by_role('button',name='CONFIRM REPLACE',exact=True).count()==0\n        assert await run_state(p)==previous\n        await close_panel(p);await p.reload()"]
+      ],
+      "sha256": "9094354142ac2cf0e498d2e48f03325cb3e8bece94ae6c327e507fcb76f72a0a"
+    },
+    "interface.js": {
+      "edits": [
+        ["      file.addEventListener('change',async () => {\n        feedback.replaceChildren();", "      let importRevision=0;\n      file.addEventListener('change',async () => {\n        const revision=++importRevision;\n        feedback.replaceChildren();"],
+        ["          const decoded=DorkCore.decodeBackup(await chosen.text(),api.data);", "          const text=await chosen.text();\n          if(revision!==importRevision) return;\n          const decoded=DorkCore.decodeBackup(text,api.data);"],
+        ["        } catch(error) { feedback.append(element('p',`Import rejected: ${error.message} Your current run is unchanged.`)); }", "        } catch(error) { if(revision===importRevision) feedback.append(element('p',`Import rejected: ${error.message} Your current run is unchanged.`)); }"]
+      ],
+      "sha256": "6b5ce3591a3fefaa534efea20af2a9b1b5d3c16dd7f666bb476a6ce526f8a663"
+    },
+    "engine-core.js": {
+      "edits": [["    if (!Number.isInteger(v.schemaVersion) || v.schemaVersion > SAVE_VERSION || v.schemaVersion < 1) throw new Error('Unsupported save version.');", "    if (!Number.isInteger(v.schemaVersion) || v.schemaVersion > SAVE_VERSION || v.schemaVersion < 1 || Number(v.run.schemaVersion) > SAVE_VERSION || Number(v.meta.schemaVersion) > SAVE_VERSION) throw new Error('Unsupported save version.');"]],
+      "sha256": "c7446dc30d91ee10738d06f3ba1c9170f03248694668ef4b5f117217527b64b9"
+    },
+    "tests/core_test.js": {
+      "edits": [["JSON.stringify({format:'dork-backup',schemaVersion:99,run:{},meta:{}})", "JSON.stringify({format:'dork-backup',schemaVersion:99,run:{},meta:{}}),JSON.stringify({format:'dork-backup',schemaVersion:2,run:{schemaVersion:99},meta:{}}),JSON.stringify({format:'dork-backup',schemaVersion:2,run:{},meta:{schemaVersion:99}})"]],
+      "sha256": "b982f07c4dfb274e2abad1245f85b47549ef843ee6b4d056434bcf08e289fcc8"
+    }
+  }
 }
