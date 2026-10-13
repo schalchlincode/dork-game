@@ -36,6 +36,11 @@ replace_once(
     "The five seals flicker, then go dark. Start at the uppermost seal and follow the engraved arrow clockwise.",
     "The five seals flicker, then go dark. Match the poses: start at the uppermost seal and follow the engraved arrow clockwise.",
 )
+replace_once(
+    game,
+    "The brass machine has a FORM paper slot and a WAIVER paper slot. Its SOUL slot is taped over.",
+    "The brass machine has a FORM slot for completed paper and a WAIVER slot for stamped paper. Its SOUL slot is taped over.",
+)
 
 browser_test = Path("browser_test.py")
 replace_once(
