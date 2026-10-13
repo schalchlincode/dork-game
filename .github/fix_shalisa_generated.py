@@ -31,6 +31,11 @@ replace_once(
       if (state.flags.waiverInserted && /waiver/.test(c.objectText)) return print('The machine already has that. It is unusually possessive about paperwork.');
       if (a === 'waiver_stamp') return print('The machine accepts waiver paperwork, not the rubber stamp itself. Stamp Waiver Form 4C first.');""",
 )
+replace_once(
+    game,
+    "The five seals flicker, then go dark. Start at the uppermost seal and follow the engraved arrow clockwise.",
+    "The five seals flicker, then go dark. Match the poses: start at the uppermost seal and follow the engraved arrow clockwise.",
+)
 
 browser_test = Path("browser_test.py")
 replace_once(
