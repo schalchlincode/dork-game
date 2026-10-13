@@ -35,10 +35,11 @@ replace_once(
     game,
     """    if (state.room === 'procurement' && (a === 'form66b' || a === 'waiver_form' || /form|waiver/.test(c.objectText))) {
       if (a === 'waiver_stamp') return print('The machine accepts waiver paperwork, not the rubber stamp itself. Stamp Waiver Form 4C first.');""",
-    """    if (state.room === 'procurement' && (a === 'form66b' || a === 'waiver_form' || /form|waiver/.test(c.objectText))) {
+    """    if (state.room === 'procurement' && a === 'waiver_stamp')
+      return print('The rubber stamp is not the form or waiver paperwork. Stamp Waiver Form 4C; submit that paper instead.');
+    if (state.room === 'procurement' && (a === 'form66b' || a === 'waiver_form' || /form|waiver/.test(c.objectText))) {
       if (state.flags.formInserted && /^(?:form|form 66-b|66-b|66b)$/.test(c.objectText)) return print('The machine already has that. It is unusually possessive about paperwork.');
-      if (state.flags.waiverInserted && /waiver/.test(c.objectText)) return print('The machine already has that. It is unusually possessive about paperwork.');
-      if (a === 'waiver_stamp') return print('The machine accepts waiver paperwork, not the rubber stamp itself. Stamp Waiver Form 4C first.');""",
+      if (state.flags.waiverInserted && /waiver/.test(c.objectText)) return print('The machine already has that. It is unusually possessive about paperwork.');""",
 )
 replace_once(
     game,
@@ -95,6 +96,36 @@ replace_once(
     '''            await command(fix_page, "insert form into machine")
             await command(fix_page, "insert Form 66-B into machine")
             assert "already has that" in await fix_page.locator("#output p").last.inner_text()''',
+)
+replace_once(
+    browser_test,
+    '''            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['form66b','waiver_stamp'], taken:['form66b','waiver_stamp'], dropped:{}, flags:{}, visited:['procurement'], dead:false, won:false}))")
+            await alias_page.reload()
+            for phrase in ("insert form into waiver slot", "put stamp in form slot", "use form on silver key"):
+                await command(alias_page, phrase)
+                assert "not the" in await alias_page.locator("#output p").last.inner_text(), phrase
+                assert await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == ['form66b','waiver_stamp'], phrase
+                assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted"), phrase
+            await command(alias_page, "insert form into form slot")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted")
+            await command(alias_page, "insert stamp into waiver slot")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("procured")''',
+    '''            await alias_page.evaluate("localStorage.setItem('dork_run_v1', JSON.stringify({room:'procurement', inventory:['form66b','waiver_stamp','waiver_form'], taken:['form66b','waiver_stamp','waiver_form'], dropped:{}, flags:{stampTaken:true}, visited:['procurement'], dead:false, won:false}))")
+            await alias_page.reload()
+            for phrase in ("insert form into waiver slot", "put stamp in form slot", "use form on silver key"):
+                await command(alias_page, phrase)
+                assert "not the" in await alias_page.locator("#output p").last.inner_text(), phrase
+                assert await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == ['form66b','waiver_stamp','waiver_form'], phrase
+                assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted"), phrase
+            await command(alias_page, "insert form into form slot")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted")
+            await command(alias_page, "use waiver stamp on waiver form")
+            assert (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("waiverStamped")
+            await command(alias_page, "insert waiver into waiver slot")
+            alias_run = await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1)")
+            assert alias_run['flags'].get('procured')
+            assert 'form66b' not in alias_run['inventory'] and 'waiver_form' not in alias_run['inventory']
+            assert 'waiver_stamp' in alias_run['inventory'] and 'silver_key' in alias_run['inventory'] and 'procurement_receipt' in alias_run['inventory']''',
 )
 replace_once(
     browser_test,
