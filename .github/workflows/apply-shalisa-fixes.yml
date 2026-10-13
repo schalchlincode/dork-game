@@ -36,10 +36,7 @@ jobs:
           from pathlib import Path
           path = Path('game.js')
           text = path.read_text(encoding='utf-8')
-          text = text.replace(
-              "form66b: 'Form 66-B is already completed and belongs in Procurement's FORM slot.',",
-              'form66b: "Form 66-B is already completed and belongs in Procurement\'s FORM slot.",'
-          )
+          text = text.replace("Procurement's", "Procurement\\'s")
           path.write_text(text, encoding='utf-8')
           PY
 
