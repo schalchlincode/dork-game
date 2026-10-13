@@ -38,6 +38,11 @@ replace_once(
 )
 replace_once(
     game,
+    "Start at the uppermost lit seal and follow the engraved arrow clockwise. Match each pose to one of the five cats you met.",
+    "Start at the uppermost of the five lit seals and follow the engraved arrow clockwise. Match each pose to one of the five cats you met.",
+)
+replace_once(
+    game,
     "The brass machine has a FORM paper slot and a WAIVER paper slot. Its SOUL slot is taped over.",
     "The brass machine has a FORM slot for completed paper and a WAIVER slot for stamped paper. Its SOUL slot is taped over.",
 )
