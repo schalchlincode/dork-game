@@ -70,6 +70,11 @@ replace_once(
 )
 replace_once(
     browser_test,
+    '("hr_reliquary", "look at the table", "orientation table"),',
+    '("hr_reliquary", "look at the table", "orientation assessment"),',
+)
+replace_once(
+    browser_test,
     '''            await command(fix_page, "insert form into machine")
             await command(fix_page, "insert form into machine")
             assert "already has that" in await fix_page.locator("#output p").last.inner_text()''',
