@@ -30,14 +30,23 @@ jobs:
       - name: Apply Shalisa playtest fixes
         run: python .github/apply_shalisa_fixes.py
 
-      - name: Normalize generated JavaScript quoting
+      - name: Normalize generated files
         run: |
           python - <<'PY'
           from pathlib import Path
-          path = Path('game.js')
-          text = path.read_text(encoding='utf-8')
-          text = text.replace("Procurement's", "Procurement\\'s")
-          path.write_text(text, encoding='utf-8')
+
+          game = Path('game.js')
+          game_text = game.read_text(encoding='utf-8')
+          game_text = game_text.replace("Procurement's", "Procurement\\'s")
+          game.write_text(game_text, encoding='utf-8')
+
+          tests = Path('browser_test.py')
+          test_text = tests.read_text(encoding='utf-8')
+          old = '            assert "There is nothing portable left" in (await page.locator("#output").inner_text())[-500:]'
+          new = '            assert "waiver_form" in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")'
+          if old not in test_text:
+              raise SystemExit('Expected legal-annex take-all assertion was not found')
+          tests.write_text(test_text.replace(old, new, 1), encoding='utf-8')
           PY
 
       - name: Validate JavaScript syntax
