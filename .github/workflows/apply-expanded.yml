@@ -1,0 +1,96 @@
+name: Integrate expanded edition
+
+on:
+  push:
+    branches: [dork-expanded-edition-2026-10-13]
+    paths: ['_delivery/ready.json']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dork-expanded-integration
+  cancel-in-progress: false
+
+jobs:
+  integrate:
+    if: github.ref == 'refs/heads/dork-expanded-edition-2026-10-13'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dork-expanded-edition-2026-10-13
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and apply exact source patch
+        run: |
+          python - <<'PY'
+          import base64, gzip, hashlib, json, subprocess
+          from pathlib import Path
+          manifest=json.loads(Path('_delivery/ready.json').read_text())
+          chunks=[]
+          for name in manifest['parts']:
+              path=Path('_delivery')/name
+              if path.parent != Path('_delivery') or not name.endswith('.b64'): raise ValueError('Invalid part path')
+              chunks.append(path.read_text().strip())
+          patch=gzip.decompress(base64.b64decode(''.join(chunks),validate=True))
+          if hashlib.sha256(patch).hexdigest()!=manifest['sha256']: raise ValueError('Patch checksum mismatch')
+          Path('/tmp/expanded.patch').write_bytes(patch)
+          subprocess.run(['git','apply','--check','--index','/tmp/expanded.patch'],check=True)
+          subprocess.run(['git','apply','--index','/tmp/expanded.patch'],check=True)
+          print('Verified patch:',manifest['sha256'])
+          PY
+      - name: Syntax and invariants
+        run: |
+          find . -maxdepth 2 -name '*.js' -not -path './node_modules/*' -exec node --check {} \;
+          node tests/core_test.js
+      - name: Install test browsers
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          python -m playwright install --with-deps msedge chromium webkit
+      - name: Original Edge regression
+        run: python browser_test.py
+      - name: Alias equivalence and varied route
+        run: |
+          python input_audit_matrix.py
+          python input_audit_playthrough.py
+      - name: Chromium and WebKit expanded acceptance
+        run: python tests/expanded_test.py
+      - name: Commit validated implementation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -r _delivery
+          git commit -m 'Implement DORK 2.0 Expanded Edition with complete cross-browser regression'
+          git push origin HEAD:dork-expanded-edition-2026-10-13
+          git rev-parse HEAD > test-results/validated-commit.txt
+      - name: Package playable source
+        run: |
+          python - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          files=[Path(p) for p in subprocess.check_output(['git','ls-files'],text=True).splitlines() if not p.startswith(('_delivery/','.github/'))]
+          manifest={'version':'2.0.0','commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'files':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files if p.is_file()}}
+          with ZipFile('/tmp/DORK-2.0.0-Expanded-Edition.zip','w',ZIP_DEFLATED) as archive:
+              for p in files:
+                  if p.is_file(): archive.write(p)
+              archive.writestr('RELEASE-MANIFEST.json',json.dumps(manifest,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dork-playable-source
+          path: /tmp/DORK-2.0.0-Expanded-Edition.zip
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dork-test-evidence
+          path: test-results/
+          if-no-files-found: ignore
