@@ -42,3 +42,7 @@ Mobile-size emulation and WebKit rendering are tested. Physical iPhone hardware,
 ## Maintenance
 
 Keep exact actions and their narrated consequences aligned. Add new objects/scenery to the shared resolver rather than inventing another substring lookup. New departments should remain data plus explicit puzzle transitions. Add a test for every irreversible action, every new state flag, its restart behavior, and its saved-state migration. Preserve the authored narrator and single true ending.
+
+## Discovery-focused interface revision (2026-10-13)
+
+PACK and its object-insertion menu have been removed at the author's request. The ordinary inventory command remains. Tab completion is restricted to carried items; it must not reveal an environmental object list. HELP now contains imaginary syntax examples only, without tarot or property-return instructions. Casebook, Map, Tools, the world, puzzle rules, and save data were not removed or altered by this revision. Cross-browser acceptance includes these discovery constraints.

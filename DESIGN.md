@@ -41,6 +41,8 @@ Support:
 
 Avoid endless "I don't understand" responses.
 
+Discovery must not become an interaction menu. Do not add a PACK panel, clickable surroundings catalog, or environmental-name autocomplete. INVENTORY lists possessions only; Tab completion is limited to carried objects. HELP is a syntax reference using imaginary examples, never real puzzle objects, hazards, answers, or checkpoint-specific commands. Actual guidance belongs in the world or in deliberately requested HINT responses.
+
 ## Mobile design
 iPhone is a first-class target:
 - responsive CRT bezel

@@ -1,5 +1,13 @@
 # Dork changelog
 
+## 2026-10-13 - Preserve discovery; remove PACK and HELP spoilers
+
+- Remove PACK and its carried/visible-object insertion menu completely. Keep the ordinary INVENTORY, INV, and I commands and button.
+- Limit Tab completion to carried items so it cannot become a replacement catalog of nearby interactions.
+- Rewrite HELP as a syntax reference with imaginary examples; remove tarot instructions and the property-return checkpoint command.
+- Keep Casebook, Map, Tools, game content, puzzle logic, and saves unchanged pending separate design decisions.
+- Extend Chromium/WebKit acceptance coverage for absent PACK controls, carried-only completion, HELP aliases, and neutral HELP across early and late rooms.
+
 ## 2026-10-13 — Expanded Edition 2.0.0
 
 - Unify object resolution, ask about ambiguity, and make all tarot-taking synonyms consistently nonlethal. Preserve explicit target and possession checks.

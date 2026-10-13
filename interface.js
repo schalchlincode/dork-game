@@ -66,22 +66,6 @@ const DorkUI = (() => {
       }
       input.focus(); input.setSelectionRange(input.value.length,input.value.length);
     }
-    function inventoryPanel() {
-      const groups = [['CARRYING',api.state().inventory],['VISIBLE HERE',api.visible().filter(id => !api.state().inventory.includes(id))]];
-      body.append(element('p','Names insert into the command field; EXAMINE prepares a command. Nothing executes until you submit it.','tool-intro'));
-      for (const [heading, ids] of groups) {
-        body.append(element('h3',heading));
-        if (!ids.length) body.append(element('p','Nothing recorded.'));
-        for (const id of ids) {
-          const item = api.data.items[id];
-          if (!item) continue;
-          const row = element('div','','inventory-item');
-          row.append(button(item.name,() => insert(item.name),'item-name'));
-          row.append(button('EXAMINE',() => insert(`examine ${item.name}`,true)));
-          body.append(row);
-        }
-      }
-    }
     function casePanel() {
       body.append(element('p','Memory survives death. Carried items, opened doors, and completed procedures do not. Only observed material is recorded.','tool-intro'));
       for (const section of api.casebook()) {
@@ -146,14 +130,14 @@ const DorkUI = (() => {
       });
       label.append(file); body.append(label,feedback);
       body.append(element('h3','COMMAND HISTORY'));
-      body.append(element('p','Up/Down recalls recent commands. Tab completes a visible or carried object name. Choosing a history entry only fills the field.'));
+      body.append(element('p','Up/Down recalls recent commands. Tab completes only carried object names; it does not reveal your surroundings. Choosing a history entry only fills the field.'));
       for (const text of history.slice(-12).reverse()) body.append(button(text,() => insert(text,true),'history-command'));
     }
     function open(name, source=null) {
       activePanel=name; trigger=source || document.activeElement;
       body.replaceChildren();
-      title.textContent={inventory:'INVENTORY & SURROUNDINGS',casebook:'INVESTIGATIVE CASEBOOK',map:'DISCOVERED BUILDING',settings:'TERMINAL TOOLS'}[name] || 'TOOLS';
-      ({inventory:inventoryPanel,casebook:casePanel,map:mapPanel,settings:settingsPanel}[name] || settingsPanel)();
+      title.textContent={casebook:'INVESTIGATIVE CASEBOOK',map:'DISCOVERED BUILDING',settings:'TERMINAL TOOLS'}[name] || 'TOOLS';
+      ({casebook:casePanel,map:mapPanel,settings:settingsPanel}[name] || settingsPanel)();
       if(!dialog.open) dialog.showModal();
       body.scrollTop=0;
       dialog.querySelector('[data-close]').focus();
@@ -168,7 +152,7 @@ const DorkUI = (() => {
       if(e.key==='Tab' && !e.shiftKey && input.value.trim()){
         const text=input.value.toLowerCase(); const boundary=text.lastIndexOf(' '); const prefix=text.slice(boundary+1);
         if(!prefix) return;
-        const matches=[...new Set([...api.visible(),...api.state().inventory])].filter(id=>api.data.items[id]).map(id=>api.data.items[id].name).filter(name=>name.toLowerCase().startsWith(prefix));
+        const matches=[...new Set(api.state().inventory)].filter(id=>api.data.items[id]).map(id=>api.data.items[id].name).filter(name=>name.toLowerCase().startsWith(prefix));
         if(matches.length===1){e.preventDefault();input.value=text.slice(0,boundary+1)+matches[0];}
       }
     });
