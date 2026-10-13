@@ -38,6 +38,14 @@ jobs:
           game = Path('game.js')
           game_text = game.read_text(encoding='utf-8')
           game_text = game_text.replace("Procurement's", "Procurement\\'s")
+          old_use = """  function useThing(c) {
+    const a = findInventory(c.objectText) || findItem(c.objectText);"""
+          new_use = """  function useThing(c) {
+    if (/^(?:waiver stamp|stamp 4c|4c)$/.test(c.objectText) && /^(?:waiver|waiver form|waiver form 4c|page 64|refusal form|refusal page)$/.test(c.targetText)) return stampWaiver();
+    const a = findInventory(c.objectText) || findItem(c.objectText);"""
+          if old_use not in game_text:
+              raise SystemExit('Expected useThing header was not found')
+          game_text = game_text.replace(old_use, new_use, 1)
           game.write_text(game_text, encoding='utf-8')
 
           tests = Path('browser_test.py')
