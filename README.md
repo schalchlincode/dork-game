@@ -10,11 +10,11 @@ The original escape route remains intact. The expanded edition adds eight interc
 
 ### Controls
 
-Type a command and press Enter or the submit button. LOOK, EXAMINE, TAKE, DROP, USE, GIVE, TALK, and N/S/E/W are useful starting points. HELP gives neutral examples. HINT offers three deliberate stages of assistance for the current puzzle. Equivalent taking verbs do not secretly choose a fatal tarot card; selection is a separate action.
+Type a command and press Enter or the submit button. LOOK, EXAMINE, TAKE, DROP, USE, GIVE, TALK, and N/S/E/W are useful starting points. HELP gives neutral examples. HINT offers three deliberate stages of assistance for the current puzzle. HELP teaches syntax with imaginary examples, not actual puzzles or their special commands.
 
-PACK lists carried and visible objects. Its buttons only insert names or prepare EXAMINE commands; they do not execute actions. CASEBOOK keeps observed evidence, current procedures, questions, known hazards, and prior-run death reports separate. MAP reveals visited rooms and marks unexplored or blocked connections without exposing their destinations.
+INVENTORY (INV / I) lists only carried items in the transcript. There is no PACK panel or clickable surroundings catalog; discover interactions by reading and experimenting. CASEBOOK keeps observed evidence, current procedures, questions, known hazards, and prior-run death reports separate. MAP reveals visited rooms and marks unexplored or blocked connections without exposing their destinations.
 
-TOOLS contains readable display, larger text, reduced animation, brief revisits, history, save import/export, and transcript export. Up/Down recalls commands and preserves an unfinished draft. Tab can complete a single unambiguous known object name. Escape closes a panel. LOOK always gives the full room description, even when brief revisits are enabled.
+TOOLS contains readable display, larger text, reduced animation, brief revisits, history, save import/export, and transcript export. Up/Down recalls commands and preserves an unfinished draft. Tab can complete a single unambiguous carried object name, never a nearby or undiscovered object. Escape closes a panel. LOOK always gives the full room description, even when brief revisits are enabled.
 
 ### Saves and permadeath
 

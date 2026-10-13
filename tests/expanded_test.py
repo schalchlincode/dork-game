@@ -246,6 +246,59 @@ async def browser_suite(browser, browser_name):
         await p.close()
     await check('Topic-aware dialogue and all optional progression gates enforce prerequisites', converse_and_guardrails)
 
+    async def discovery_and_help():
+        p=await page()
+        assert await p.locator('[data-panel="inventory"]').count()==0
+        assert await p.get_by_role('button',name='PACK',exact=True).count()==0
+        assert await p.locator('[data-panel]').count()==3
+        await command(p,'look')
+        before=await run_state(p)
+        for text in ['take vis','examine wall','examine age']:
+            await p.locator('#commandInput').fill(text)
+            await p.locator('#commandInput').press('Tab')
+            assert await p.locator('#commandInput').input_value()==text
+        assert await run_state(p)==before
+        await command(p,'pack')
+        assert not await p.locator('#toolDialog').evaluate('(d)=>d.open')
+        assert await run_state(p)==before
+        await command(p,'take badge')
+        before=await run_state(p)
+        for alias in ['inventory','inv','i']:
+            reply=await command(p,alias)
+            assert 'visitor badge' in reply and 'agenda folder' not in reply and 'wall clock' not in reply
+            assert 'VISIBLE HERE' not in reply
+            assert not await p.locator('#toolDialog').evaluate('(d)=>d.open')
+        assert await run_state(p)==before
+        await p.locator('#commandInput').fill('use vis')
+        await p.locator('#commandInput').press('Tab')
+        assert await p.locator('#commandInput').input_value()=='use visitor badge'
+        assert await run_state(p)==before
+        await command(p,'drop badge')
+        await p.locator('#commandInput').fill('take vis')
+        await p.locator('#commandInput').press('Tab')
+        assert await p.locator('#commandInput').input_value()=='take vis'
+        forbidden=['TAROT','TOWER','THE FOOL','THE SUN','JORGE','MERLIN','WAIVER','CANDLE',
+                   'KEY SLOT','SEALS','RETURN ALL','PROPERTY-RETURN','REVOCATION','RELAY',
+                   'DUPLICATE','PACK','CERTIFICATION']
+        for room in ['meeting','hr_reliquary','asset_control']:
+            await seed(p,room)
+            await command(p,'look')
+            before=await run_state(p)
+            for alias in ['help','commands','verbs','?','instructions','show commands','ask for help']:
+                reply=await command(p,alias)
+                for spoiler in forbidden: assert spoiler not in reply.upper(), (alias,spoiler,reply)
+                assert 'PENCIL' in reply and 'RECEPTIONIST' in reply and 'imaginary' in reply
+                assert await run_state(p)==before
+            await p.locator('[data-command="help"]').click()
+            reply=await p.locator('#output p').last.inner_text()
+            for spoiler in forbidden: assert spoiler not in reply.upper(), (spoiler,reply)
+            assert await run_state(p)==before
+        await seed(p,'meeting')
+        await p.locator('[data-command="help"]').click()
+        await p.screenshot(path=str(RESULTS/f'{browser_name}-spoiler-free-help.png'))
+        await p.close()
+    await check('No PACK or surroundings completion; inventory-only recall and spoiler-free HELP aliases', discovery_and_help)
+
     async def ui_tools_and_files():
         p=await page()
         await command(p,'take badge')
@@ -256,9 +309,9 @@ async def browser_suite(browser, browser_name):
         assert await p.locator('#commandInput').input_value()=='draft command'
         await p.locator('#commandInput').fill('')
         before=await run_state(p)
-        await p.locator('[data-panel="inventory"]').click()
-        await p.get_by_role('button',name='visitor badge',exact=True).click()
-        assert await p.locator('#commandInput').input_value()=='visitor badge'
+        await p.locator('#commandInput').fill('use vis')
+        await p.locator('#commandInput').press('Tab')
+        assert await p.locator('#commandInput').input_value()=='use visitor badge'
         assert await run_state(p)==before
         await p.locator('[data-panel="settings"]').click()
         await p.locator('#setting-readable').check();await p.locator('#setting-largeText').check();await p.locator('#setting-reducedMotion').check()

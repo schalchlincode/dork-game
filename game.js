@@ -763,7 +763,7 @@
   }
 
   function help() {
-    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN DRAWER / READ NOTICE / MAKE A JOKE / INVENTORY / LEAVE ROOM\nRETURN ALL works at an authorized property-return station.\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT (three levels), DEATHS, LORE, CASEBOOK, MAP, SAVE, RESTART.\nPACK and TOOLS provide inventory insertion, command history, display settings, save export/import, and transcript export.\nTaking or grabbing a tarot card does not select it. Use CHOOSE for a binding choice.\n\nTry unreasonable things. The game has opinions.");
+    print("DORK understands commands such as VERB OBJECT or VERB OBJECT ON/TO TARGET.\nThe examples below use imaginary objects and people. They are not clues.\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN SUITCASE / READ POSTCARD / MAKE A JOKE / INVENTORY / LEAVE ROOM\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nINVENTORY (or INV / I) lists only what you are carrying.\nHELP explains commands. HINT offers optional, increasingly explicit puzzle assistance.\nOther commands: DEATHS, LORE, CASEBOOK, MAP, SAVE, RESTART.\nTOOLS contains display settings, command history, save import/export, and transcript export.\n\nTry unreasonable things. The game has opinions.");
   }
 
   function showDeaths() { print(meta.deaths.length ? "PERSONNEL SEPARATION LOG:\n" + meta.deaths.map((d,i)=>`${i+1}. ${d}`).join('\n') : "PERSONNEL SEPARATION LOG: No deaths recorded. This is temporary."); }
@@ -944,6 +944,6 @@
     scrollBottom(true);
   }
   const expansion = DorkExpansion.create({state:()=>state,meta:()=>meta,print,observe,resolve:findItem,take,die,move});
-  ui=DorkUI.create({state:()=>state,meta:()=>meta,data:DORK_DATA,store,visible:visibleItems,casebook:casebookSections,map:mapEntries,backup,importBackup,rejectedSave:()=>rejectedSave,rejectedMeta:()=>loadedMeta});
+  ui=DorkUI.create({state:()=>state,meta:()=>meta,data:DORK_DATA,store,casebook:casebookSections,map:mapEntries,backup,importBackup,rejectedSave:()=>rejectedSave,rejectedMeta:()=>loadedMeta});
   boot(); saveRun(); saveMeta();
 })();
