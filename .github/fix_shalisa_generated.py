@@ -135,6 +135,11 @@ replace_once(
 )
 replace_once(
     browser_test,
+    '            drawing_text = await review_page.locator("#output p").last.inner_text()',
+    '            drawing_text = " ".join((await review_page.locator("#output p").all_inner_texts())[-2:])',
+)
+replace_once(
+    browser_test,
     '            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "parking_exit"',
     '            assert await fix_page.evaluate("JSON.parse(localStorage.dork_run_v1).room") == "asset_control"',
 )
