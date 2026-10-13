@@ -6,6 +6,7 @@ on:
       - shalisa-playtest-fixes-2026-10-12
     paths:
       - .github/apply_shalisa_fixes.py
+      - .github/fix_shalisa_generated.py
       - .github/workflows/apply-shalisa-fixes.yml
 
 permissions:
@@ -31,31 +32,7 @@ jobs:
         run: python .github/apply_shalisa_fixes.py
 
       - name: Normalize generated files
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          game = Path('game.js')
-          game_text = game.read_text(encoding='utf-8')
-          game_text = game_text.replace("Procurement's", "Procurement\\'s")
-          old_use = """  function useThing(c) {
-    const a = findInventory(c.objectText) || findItem(c.objectText);"""
-          new_use = """  function useThing(c) {
-    if (/^(?:waiver stamp|stamp 4c|4c)$/.test(c.objectText) && /^(?:waiver|waiver form|waiver form 4c|page 64|refusal form|refusal page)$/.test(c.targetText)) return stampWaiver();
-    const a = findInventory(c.objectText) || findItem(c.objectText);"""
-          if old_use not in game_text:
-              raise SystemExit('Expected useThing header was not found')
-          game_text = game_text.replace(old_use, new_use, 1)
-          game.write_text(game_text, encoding='utf-8')
-
-          tests = Path('browser_test.py')
-          test_text = tests.read_text(encoding='utf-8')
-          old = '            assert "There is nothing portable left" in (await page.locator("#output").inner_text())[-500:]'
-          new = '            assert "waiver_form" in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")'
-          if old not in test_text:
-              raise SystemExit('Expected legal-annex take-all assertion was not found')
-          tests.write_text(test_text.replace(old, new, 1), encoding='utf-8')
-          PY
+        run: python .github/fix_shalisa_generated.py
 
       - name: Validate JavaScript syntax
         run: node --check game.js
@@ -71,6 +48,7 @@ jobs:
       - name: Commit verified changes
         run: |
           rm .github/apply_shalisa_fixes.py
+          rm .github/fix_shalisa_generated.py
           rm .github/workflows/apply-shalisa-fixes.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
