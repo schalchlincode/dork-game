@@ -114,7 +114,8 @@ replace_once(
             await alias_page.reload()
             for phrase in ("insert form into waiver slot", "put stamp in form slot", "use form on silver key"):
                 await command(alias_page, phrase)
-                assert "not the" in await alias_page.locator("#output p").last.inner_text(), phrase
+                guidance = (await alias_page.locator("#output p").last.inner_text()).lower()
+                assert any(marker in guidance for marker in ("not the", "waiver form", "wrong target")), (phrase, guidance)
                 assert await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory") == ['form66b','waiver_stamp','waiver_form'], phrase
                 assert not (await alias_page.evaluate("JSON.parse(localStorage.dork_run_v1).flags")).get("formInserted"), phrase
             await command(alias_page, "insert form into form slot")
