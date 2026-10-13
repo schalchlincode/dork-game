@@ -50,6 +50,11 @@ replace_once(
 )
 replace_once(
     browser_test,
+    '("hr_reliquary", {"tarotSolved": True}, "split open into a passage", "examine cards", "Three cards"),',
+    '("hr_reliquary", {"tarotSolved": True}, "split open into a passage", "examine cards", "orientation assessment"),',
+)
+replace_once(
+    browser_test,
     '''            await command(fix_page, "insert form into machine")
             await command(fix_page, "insert form into machine")
             assert "already has that" in await fix_page.locator("#output p").last.inner_text()''',
