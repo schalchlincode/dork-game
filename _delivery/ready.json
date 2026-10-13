@@ -1,0 +1,21 @@
+{
+  "parts": ["part-01.b64","part-02.b64","part-03.b64","part-04.b64","part-05.b64","part-06.b64","part-07.b64","part-08.b64","part-09.b64"],
+  "sha256": "2511e0c25999612db1984fbf6b61ba4302f2b83644a21d8ecb272b69fb017104",
+  "part_sha256": {
+    "part-01.b64": "f05217873092c47fb4b5d400845a6e7834333eda4613ed717f31c34a48cdf326",
+    "part-02.b64": "80fd385dfe6d6ca38be2a38275bbc9985388213904949c3a5e6119dbb9e22041",
+    "part-03.b64": "4106d23c40989c2e5fa51a3800a2724802ae7607dda7bc91669ebd923d94b9f3",
+    "part-04.b64": "3eb0b157bc4f57c4f0d77b6c61c3d3a1ec5ebc17fecdf9aed87eb85f110f94dd",
+    "part-05.b64": "d4947d1c7529b156df3a801e3376028ca8c8856b91b39f0ea229811f20250e41",
+    "part-06.b64": "2890060ed216ca63029dce5c9c46863c2a3439273f1382a56e261c84a5207e82",
+    "part-07.b64": "18d83503188bb040305da2472e0bb60308d40c343ec20288dda3e89b9076297a",
+    "part-08.b64": "0eeaead902776e24e9febc191ecb3ca28a29f11822ceb1a55e105d6dfb55c70f",
+    "part-09.b64": "ed2db3f64d9f3d2cd549dcfc490c37011fe4944b3aadd5816d6ac7c3205fbee6"
+  },
+  "repairs": {
+    "part-01.b64": [["RMPDS6U6Kk","RMPDS6Kk"]],
+    "part-02.b64": [["HEktxtVLch","HEktxtxVLch"]],
+    "part-07.b64": [["62rs7v3XFV","62rs7vV3XFV"]]
+  },
+  "acceptance_sha256": "37935ba2350411324f5a60dffcd06961bca41a32c63393e4b83d539d5ee91b04"
+}
