@@ -23,10 +23,16 @@ replace_once(
     const a = findInventory(c.objectText) || findItem(c.objectText);""",
 )
 
+browser_test = Path("browser_test.py")
 replace_once(
-    Path("browser_test.py"),
+    browser_test,
     '            assert "There is nothing portable left" in (await page.locator("#output").inner_text())[-500:]',
     '            assert "waiver_form" in await page.evaluate("JSON.parse(localStorage.dork_run_v1).inventory")',
+)
+replace_once(
+    browser_test,
+    '            assert "Three cards" in await fix_page.locator("#output p").last.inner_text()',
+    '            assert "orientation assessment" in await fix_page.locator("#output p").last.inner_text()',
 )
 
 print("Generated Shalisa files normalized.")
