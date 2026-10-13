@@ -1,59 +1,75 @@
 # DORK — A Scott Adventure
 
-A mobile-first, Zork-inspired dark-comedy parser adventure built as a static web game.
+## Expanded Edition · 2.0.0
 
-## Play locally
-Open `index.html` in a modern browser.
+A mobile-first, Zork-inspired dark-comedy parser adventure. Escape an occult state agency using observation, paperwork, and a household the Agency has badly misunderstood.
 
-Run the browser regression check from the MechaJeeves root with
-`.venv\Scripts\python.exe projects\dork_release\browser_test.py`.
-It uses the installed Playwright and Edge browser; the game itself needs neither.
+**Play:** open `index.html` in a modern browser, or play the GitHub Pages deployment. Keep the JavaScript and CSS files beside the page. The game needs no server, installation, account, API key, package manager, or network connection after the files have loaded. A downloaded copy and the hosted site have separate browser saves.
 
-For a reproducible sample of player-facing replies, run
-`.venv\Scripts\python.exe projects\dork_release\response_inventory.py`.
-The generated `RESPONSE_INVENTORY.json` records actual Edge input and replies
-for ten verbs against each listed room item in a fresh isolated room state.
-It is a sample, not a count of every possible command or authored response.
+The original escape route remains intact. The expanded edition adds eight interconnected optional rooms, department puzzles, a repaired service-lift loop, a deeper investigation, and a playable Below. There is still one true ending. Knowledge survives death; items and solved puzzles do not.
 
-## True ending path
-See `SOLUTION.md` for the spoiler walkthrough.
+### Controls
 
-## Publish on GitHub Pages
-1. Create a new GitHub repository, e.g. `dork-game`.
-2. Upload every file in this folder to the repository root.
-3. In GitHub: **Settings → Pages**.
-4. Under **Build and deployment**, choose **Deploy from a branch**.
-5. Choose branch `main` and folder `/ (root)`, then Save.
-6. GitHub will provide the public URL after deployment.
+Type a command and press Enter or the submit button. LOOK, EXAMINE, TAKE, DROP, USE, GIVE, TALK, and N/S/E/W are useful starting points. HELP gives neutral examples. HINT offers three deliberate stages of assistance for the current puzzle. Equivalent taking verbs do not secretly choose a fatal tarot card; selection is a separate action.
 
-No server, database, API key, build process, npm package, or framework is required.
+PACK lists carried and visible objects. Its buttons only insert names or prepare EXAMINE commands; they do not execute actions. CASEBOOK keeps observed evidence, current procedures, questions, known hazards, and prior-run death reports separate. MAP reveals visited rooms and marks unexplored or blocked connections without exposing their destinations.
 
-## Files
-- `index.html` — page shell and CRT terminal markup
-- `style.css` — responsive retro monitor / iPhone UI
-- `game-data.js` — rooms, objects, descriptions, world content
-- `game.js` — parser, game state, puzzles, permadeath, persistence
-- `DESIGN.md` — design rules for future expansion
-- `CODEX_PROMPT.txt` — prompt for MechaJeeves/Codex to audit and extend the project safely
+TOOLS contains readable display, larger text, reduced animation, brief revisits, history, save import/export, and transcript export. Up/Down recalls commands and preserves an unfinished draft. Tab can complete a single unambiguous known object name. Escape closes a panel. LOOK always gives the full room description, even when brief revisits are enabled.
 
-## Current mechanics
-- Permadeath with persistent death log
-- Persistent discovered lore
-- Narrator remembers prior runs
-- Optional insulting hint system
-- Broad parser synonyms plus dozens of novelty verbs
-- Object-specific interactions and generic responses
-- Inventory and puzzle state
-- Local autosave between browser sessions
-- Clear true ending
-- Touch-friendly command buttons
-- iPhone safe-area support and responsive portrait/landscape layouts
+### Saves and permadeath
 
-## Reset all persistent data
-In Safari/Chrome, clear site data for the GitHub Pages site. For development, browser DevTools can run:
+Autosave retains the existing `dork_run_v1` and `dork_meta_v1` browser keys so older saves migrate in place. The payload now has an explicit schema version. Invalid collections are sanitized; future-version saves are preserved, not overwritten. TOOLS can export the preserved original before replacing it deliberately.
+
+If browser storage is denied or full, the current tab continues in memory and displays a warning. Export a backup before closing it. A save import is validated and previewed; it only replaces the current run after CONFIRM REPLACE. Importing a backup can restore an earlier run, so treat backups as portability/recovery tools rather than part of the intended permadeath challenge.
+
+Death clears the run and records a cause-specific separation report. RESTART begins with empty inventory and puzzle flags. Read evidence, learned warnings, and narrator callbacks remain. Returning property at Asset Control is reversible through its recovery hatch, but reclaimed state property must be returned again before departure.
+
+### Walkthrough and engineering notes
+
+See `SOLUTION.md` for the spoiler walkthrough. `EXPANDED_EDITION.md` describes the architecture, acceptance criteria, deliberate behavior changes, and testing limits. Earlier audit Markdown/JSON/CSV files are retained as historical snapshots, not current exhaustive coverage reports.
+
+### Run the tests
+
+The game has no runtime dependencies. Development tests require Node and Python with Playwright:
+
+```sh
+python -m pip install -r requirements-dev.txt
+python -m playwright install --with-deps msedge chromium webkit
+node tests/core_test.js
+python browser_test.py
+python input_audit_matrix.py
+python input_audit_playthrough.py
+python tests/expanded_test.py
+```
+
+`browser_test.py` retains the original Edge regression. The expanded suite runs Chromium and WebKit, checks both complete routes, and exercises failure paths, save migrations, real file exports/imports, narrow portrait/landscape layouts, and focus behavior. Test evidence is written to `test-results/` and uploaded by CI. WebKit/device-size emulation is not a substitute for a physical iPhone keyboard check.
+
+`DORK_BROWSER_EXECUTABLE` selects an installed Chromium executable for local tests. `DORK_TEST_URL` can target a deployed page instead of a local file. To regenerate a sampled response inventory, run `python response_inventory.py --output test-results/current-response-inventory.json`.
+
+### Source layout
+
+| File | Responsibility |
+| --- | --- |
+| `engine-core.js` | Pure object resolution, validated/versioned state, resilient storage, backup decoding |
+| `parser.js` | Shared verb vocabulary and command grammar |
+| `game-data.js` | Original rooms and objects |
+| `expansion-data.js` | Optional departments, objects, clues, and room connections |
+| `world-content.js` | Registered scenery and state-aware descriptions |
+| `expansion.js` | Department puzzle rules, conversations, scenes, and ending callbacks |
+| `casebook.js` | Evidence presentation, discovered map, graduated hints, death lessons |
+| `interface.js` | Accessible panels, history, settings, downloads, confirmed imports |
+| `game.js` | Core puzzle actions, command dispatch, narration, run lifecycle |
+| `index.html`, `style.css` | Responsive CRT presentation and readable display |
+
+### Deployment
+
+GitHub Pages serves `main` at the repository root. No build step is needed. Test a feature branch before merging; the expanded validation workflow publishes a downloadable source archive and test evidence. A release should pass the original regression, parser invariants, equivalence matrix, varied-command route, and Chromium/WebKit acceptance suite.
+
+### Reset all local data
+
+Export a backup first. Clear the site's browser data, or use DevTools:
 
 ```js
-localStorage.removeItem('dork_meta_v1');
-localStorage.removeItem('dork_run_v1');
+['dork_meta_v1', 'dork_run_v1', 'dork_preferences_v2'].forEach(key => localStorage.removeItem(key));
 location.reload();
 ```

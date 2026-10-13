@@ -14,17 +14,19 @@
     <div class="monitor-shell">
       <div class="brand-row">
         <span>DORK SYSTEMS</span>
-        <span>MODEL 1984-S</span>
+        <span>EXPANDED EDITION · 2.0</span>
       </div>
       <section class="crt" id="crt">
         <div class="scanlines"></div>
         <div class="vignette"></div>
         <div class="screen-content">
-          <div id="output" class="output" aria-live="polite"></div>
+          <div id="storageNotice" role="status" hidden></div>
+          <div id="output" class="output" role="log" aria-live="polite" aria-relevant="additions" tabindex="0" aria-label="Game transcript"></div>
+          <button id="newOutput" type="button" hidden>NEW OUTPUT ↓</button>
           <form id="commandForm" class="command-row" autocomplete="off">
             <label for="commandInput" aria-label="Command">&gt;</label>
             <input id="commandInput" type="text" inputmode="text" autocapitalize="none" autocomplete="off" spellcheck="false" aria-label="Type a command" />
-            <span class="cursor" aria-hidden="true"></span>
+            <button class="submit-command" type="submit" aria-label="Submit command">↵</button>
           </form>
         </div>
       </section>
@@ -38,6 +40,12 @@
         <button data-command="hint">HINT</button>
         <button data-command="help">HELP</button>
       </div>
+      <nav class="utility-controls" aria-label="Game tools">
+        <button type="button" data-panel="inventory">PACK</button>
+        <button type="button" data-panel="casebook">CASEBOOK</button>
+        <button type="button" data-panel="map">MAP</button>
+        <button type="button" data-panel="settings">TOOLS</button>
+      </nav>
       <div class="statusline">
         <span id="runStatus">RUN 1</span>
         <span id="roomStatus">EXECUTIVE CONTINUITY REVIEW</span>
@@ -45,7 +53,18 @@
     </div>
   </main>
 
+  <dialog id="toolDialog" aria-labelledby="toolTitle">
+    <header class="tool-header"><h2 id="toolTitle">TOOLS</h2><button type="button" data-close aria-label="Close panel">CLOSE</button></header>
+    <div class="tool-body"></div>
+  </dialog>
+  <script src="engine-core.js"></script>
   <script src="game-data.js"></script>
+  <script src="expansion-data.js"></script>
+  <script src="world-content.js"></script>
+  <script src="parser.js"></script>
+  <script src="casebook.js"></script>
+  <script src="interface.js"></script>
+  <script src="expansion.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

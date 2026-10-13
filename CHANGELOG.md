@@ -1,5 +1,18 @@
 # Dork changelog
 
+## 2026-10-13 — Expanded Edition 2.0.0
+
+- Unify object resolution, ask about ambiguity, and make all tarot-taking synonyms consistently nonlethal. Preserve explicit target and possession checks.
+- Add a persistent observation-only casebook, recorded document excerpts, three-stage state-aware hints for all rooms, and a discovered-area map.
+- Add eight connected optional rooms across IT, Facilities, Investigations, and Below. Implement duplicate-ticket resolution, a safely isolated relay repair, lift shortcuts, a four-source evidence comparison, and identity-lease revocation.
+- Add topic-aware Jorge conversations, five cat scenes, cause-specific death reports and narrator callbacks, brief revisits, and optional investigation payoffs in the existing true ending.
+- Make returned state assets reclaimable and protect backtracking after candle surrender.
+- Add accessible PACK/CASEBOOK/MAP/TOOLS panels, history, known-name insertion, readable/large-text/reduced-motion settings, a real input caret, versioned transcript exports, and confirmed save imports.
+- Validate and migrate saves; continue in memory when storage is unavailable; preserve unsupported future saves without overwriting them.
+- Separate parser, core state, scenery, expansion rules, journal, and interface modules while retaining static/offline deployment.
+- Extend regression coverage with pure invariants, the updated varied-input route, and Chromium/WebKit acceptance tests including the complete 23-room investigation.
+
+
 ## 2026-10-12 - Shalisa playtest revision
 
 - Establish the 4:30–5:00 meeting schedule and the stopped 5:17 wall clock; mark the Executive Corridor as Floor 6.

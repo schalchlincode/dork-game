@@ -1,5 +1,6 @@
 """Compare each added action/target alias and grammar template in real Edge input."""
 import asyncio
+import os
 import csv
 from pathlib import Path
 
@@ -85,7 +86,8 @@ async def main():
             cases.append(("examine " + row["addition"], "examine " + obj, "meeting", [], {}))
     cases += PATTERN_EQUIVALENTS
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True, channel="msedge")
+        executable = os.environ.get("DORK_BROWSER_EXECUTABLE")
+        browser = await playwright.chromium.launch(headless=True, **({"executable_path": executable, "args": ["--no-sandbox"]} if executable else {"channel": "msedge"}))
         try:
             page = await browser.new_page()
             await page.goto((ROOT / "index.html").as_uri())

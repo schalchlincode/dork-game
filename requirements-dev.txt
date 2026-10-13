@@ -1,0 +1,2 @@
+# Test-only dependency; the game itself has none.
+playwright==1.57.0

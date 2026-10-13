@@ -9,79 +9,24 @@
   const META_KEY = 'dork_meta_v1';
   const RUN_KEY = 'dork_run_v1';
 
-  const meta = Object.assign({ runs: 1, deaths: [], lore: [], hints: 0, won: false }, load(META_KEY, {}));
-  const legacyLore = {
-    "Scott's personnel file predates his involvement with the Agency.": "Scott's personnel file was created before his law-school graduation.",
-    "Five household anchors must be named to release a Continuity seal.": "Five household anchors must be named in the correct sequence to release a Continuity seal."
-  };
-  meta.lore = [...new Set((meta.lore || []).map(entry => legacyLore[entry] || entry))];
-  let state = Object.assign(newRun(), load(RUN_KEY, {}));
+  let ui = null;
+  let storageFailed = false;
+  const store = DorkCore.storage(() => { storageFailed = true; ui?.notifyStorage(); });
+  const loadedMeta = store.read(META_KEY, {});
+  let meta = DorkCore.validateMeta(loadedMeta);
+  let state;
+  let rejectedSave = null;
+  const loadedRun = store.read(RUN_KEY, {});
+  try {
+    if (Number(loadedMeta?.schemaVersion) > DorkCore.SAVE_VERSION) throw new Error('Newer DORK memory format.');
+    state = DorkCore.validateRun(loadedRun, DORK_DATA);
+  }
+  catch (error) { state = newRun(); rejectedSave = loadedRun; storageFailed = true; }
   let restartPending = false;
-  if (!DORK_DATA.rooms[state.room]) state = newRun();
-  if (!state.dropped || typeof state.dropped !== 'object') state.dropped = {};
-  if (!state.flags || typeof state.flags !== 'object') state.flags = {};
-  if (!Array.isArray(state.inventory)) state.inventory = [];
-  if (!Array.isArray(state.taken)) state.taken = [];
-  if (state.flags.procured) state.flags.objectionFiled = true;
-  if (state.flags.stampInserted && !state.flags.waiverInserted) {
-    state.flags.waiverInserted = true;
-    state.flags.waiverStamped = true;
-    delete state.flags.stampInserted;
-  }
-  if (state.flags.keyUsed) state.inventory = state.inventory.filter(id => id !== 'silver_key');
-  if (state.flags.procured && !state.taken.includes('procurement_receipt')) {
-    state.taken.push('procurement_receipt');
-    if (!state.inventory.includes('procurement_receipt')) state.inventory.push('procurement_receipt');
-  }
-  saveMeta();
+  let pendingClarification = null;
+  let currentCommand = '';
+  const verbMap = DorkParser.verbMap;
 
-  const verbMap = buildVerbMap({
-    look: ['look','l','observe','view','see','survey','glance','peer','stare'],
-    examine: ['examine','x','inspect','study','check','investigate','analyze','analyse','read','review','scrutinize','scrutinise','peruse','scan'],
-    take: ['take','get','grab','pick','pickup','collect','yoink','acquire','obtain','snag','steal','retrieve','fetch','lift'],
-    drop: ['drop','discard','ditch','release','deposit'],
-    leave: ['leave','exit','depart'],
-    inventory: ['inventory','inv','i','items','stuff','possessions','belongings'],
-    open: ['open','unseal','unlock','pry'],
-    close: ['close','shut','seal'],
-    use: ['use','apply','operate','activate','insert','put','place','select','choose','present','show'],
-    give: ['give','offer','hand','feed','deliver'],
-    talk: ['talk','speak','chat','address','greet','say','ask','tell','converse','name'],
-    attack: ['attack','hit','punch','kick','fight','stab','kill','murder','smack','strike','bash'],
-    touch: ['touch','feel','poke','prod','pet','stroke','hug','pat'],
-    lick: ['lick','taste','tongue'],
-    smell: ['smell','sniff'],
-    listen: ['listen','hear'],
-    push: ['push','shove','press','move'],
-    pull: ['pull','yank','tug'],
-    break: ['break','smash','destroy','crush','wreck'],
-    burn: ['burn','ignite','light','torch','incinerate','strike','twist'],
-    eat: ['eat','chew','bite','consume'],
-    drink: ['drink','sip','gulp','swig','slurp'],
-    wear: ['wear','puton','don'],
-    throw: ['throw','toss','hurl','chuck','fling','lob'],
-    climb: ['climb','scale','ascend'],
-    hide: ['hide','conceal','duck'],
-    sit: ['sit','rest'],
-    pray: ['pray','worship','invoke','beg'],
-    threaten: ['threaten','intimidate','menace'],
-    flatter: ['flatter','compliment','praise','commend'],
-    dance: ['dance','boogie'],
-    sing: ['sing','hum'],
-    jump: ['jump','leap','hop'],
-    wait: ['wait','z'],
-    joke: ['joke'],
-    stamp: ['stamp'],
-    help: ['help','commands','verbs','?','instructions'],
-    hint: ['hint','clue','assist'],
-    restart: ['restart'],
-    sign: ['sign','autograph','initial'],
-    refuse: ['refuse','reject','decline'],
-    deaths: ['deaths','deathlog','obituary'],
-    lore: ['lore','journal','archive'],
-    save: ['save'],
-    north: ['north','n'], south: ['south','s'], east: ['east','e'], west: ['west','w']
-  });
 
   const generic = {
     touch: ["You touch {o}. It does not improve the situation.", "{O} tolerates this briefly."],
@@ -95,7 +40,7 @@
     eat: ["You consider eating {o}. This thought is permitted to pass without action."],
     drink: ["Drinking {o} would be medically uninteresting and administratively inconvenient."],
     wear: ["You try to wear {o}. It does not become fashion through confidence alone."],
-    throw: ["You throw {o}. It lands with the dignity of a midyear performance review."],
+    throw: ["You throw nothing. Moving {o} without a receiving department would be an unauthorized transfer. It stays where it is."],
     climb: ["You assess {o} for climbability. Your assessment is negative."],
     hide: ["You attempt to hide near {o}. You are a grown executive crouching in a government building. Reflect on this."],
     sit: ["You sit near {o}. The building continues without your leadership."],
@@ -112,127 +57,90 @@
     'agenda', 'badge', 'mug', 'memo', 'form66b', 'waiver_form', 'waiver_stamp',
     'records_file', 'compliance_manual', 'black_candle', 'silver_key'
   ]);
-
-  boot();
+  for (const [id,item] of Object.entries(DORK_DATA.items)) if(item.government) GOVERNMENT_PROPERTY.add(id);
 
   function boot() {
     print(`<div class="title">DORK</div><div class="dim">A SCOTT ADVENTURE</div>`, '', true);
     print(`You are Scott. Somewhere, trouble has already completed the necessary forms.`);
     if (meta.deaths.length) print(`The system remembers ${meta.deaths.length} prior separation event${meta.deaths.length === 1 ? '' : 's'}. It is trying not to look pleased.`, 'dim');
-    describeRoom();
+    const report = meta.reports[meta.reports.length - 1];
+    if (report && DorkJournal.callbacks[report.code]) print(DorkJournal.callbacks[report.code], 'dim');
+    describeRoom(true);
     updateStatus();
-    input.focus();
+    if (storageFailed) ui.notifyStorage();
+    if (rejectedSave) print('The stored run requires a newer DORK version. It has been preserved without modification. TOOLS can export that original save; this temporary run will not overwrite it.','dim');
+    if (state.dead) print('This imported run ended in termination. Type RESTART.');
+    if (matchMedia('(pointer: fine)').matches) input.focus();
     requestAnimationFrame(() => { out.scrollTop = 0; });
   }
 
   form.addEventListener('submit', (e) => { e.preventDefault(); const c = input.value.trim(); input.value = ''; if (c) execute(c); });
   document.querySelectorAll('[data-command]').forEach(b => b.addEventListener('click', () => { execute(b.dataset.command); input.focus(); }));
-  document.addEventListener('click', (e) => { if (!e.target.closest('button')) input.focus(); });
 
   function execute(raw) {
+    raw = String(raw).trim();
+    if (!raw) return;
+    currentCommand = raw;
+    ui.command(raw);
     print(`> ${raw}`, 'dim');
     if (restartPending && raw.toLowerCase().trim() !== 'restart') restartPending = false;
-    const cmd = parse(raw);
-    if (!cmd) return print("That sentence has defeated both you and the parser. Rephrase it with fewer ambitions.");
+    let cmd = parse(raw);
+    if (pendingClarification) {
+      const pending = pendingClarification;
+      const numbered = /^\d+$/.test(raw) ? pending.matches[Number(raw)-1] : null;
+      const named = DorkCore.resolve(raw, pending.matches, DORK_DATA.items).id;
+      if (numbered || named) {
+        const id = numbered || named;
+        cmd = {...pending.command, [pending.field]: DORK_DATA.items[id].name};
+        pendingClarification = null;
+      } else if (DorkCore.normalize(raw) === 'cancel') {
+        pendingClarification = null;
+        return print('Canceled. No action was taken.');
+      } else {
+        pendingClarification = null;
+        // A new command abandons the pending action rather than accidentally completing it.
+      }
+    }
+    if (!cmd) return print('That sentence has defeated both you and the parser. Rephrase it with fewer ambitions.');
     if (cmd.verb === 'restart' && raw.toLowerCase().trim() !== 'restart') {
       restartPending = false;
       return print('Type RESTART by itself if you want to begin again.');
     }
-    if (state.dead && !['restart','deaths','lore','help'].includes(cmd.verb)) {
-      return print("You are dead. Even state government has limits. Type RESTART.");
+    const utilities = ['restart','deaths','lore','help','casebook','map','save','tools','settings','export','history'];
+    if (state.dead && !utilities.includes(cmd.verb)) return print('You are dead. Even state government has limits. Type RESTART.');
+    if (state.won && ![...utilities,'look','inventory'].includes(cmd.verb)) return print("You've already left. The Agency cannot approve further activity from outside its walls.");
+    const objectVerbs = ['examine','look','search','take','drop','open','close','use','give','touch','burn','push','pull','attack','wear','throw','stamp','returnProperty','reclaim'];
+    if (objectVerbs.includes(cmd.verb)) {
+      for (const field of ['objectText','targetText']) {
+        if (!cmd[field] || ['all','everything'].includes(cmd[field])) continue;
+        const scope = field === 'objectText' && ['drop','returnProperty'].includes(cmd.verb) ? state.inventory : scopedItems();
+        const resolution = DorkCore.resolve(cmd[field],scope,DORK_DATA.items);
+        if (resolution.matches.length > 1) {
+          pendingClarification = {command:cmd,field,matches:resolution.matches};
+          return print('Which object? The Agency has spent considerable money ensuring there are several.\n' + resolution.matches.map((id,i)=>`${i+1}. ${DORK_DATA.items[id].name}`).join('\n') + '\nType its name or number, or CANCEL.');
+        }
+      }
     }
-    if (state.won && !['restart','deaths','lore','help','look','inventory'].includes(cmd.verb)) {
-      return print("You've already left. The Agency cannot approve further activity from outside its walls.");
+    const before = JSON.stringify(state), metaBefore = JSON.stringify(meta);
+    try {
+      if (['north','south','east','west'].includes(cmd.verb)) move(cmd.verb);
+      else if (!expansion.handle(cmd)) {
+        const fn = actions[cmd.verb];
+        if (fn) fn(cmd); else genericAction(cmd);
+      }
+      // Count only world-changing actions, not failed wording or reading time.
+      if (!utilities.includes(cmd.verb) && !['hint','inventory'].includes(cmd.verb) && JSON.stringify(state) !== before) state.turns++;
+      refreshObservedExits(); saveRun(); saveMeta(); updateStatus(); ui.refresh(); scrollBottom(true);
+    } catch (error) {
+      state = JSON.parse(before); meta = JSON.parse(metaBefore);
+      pendingClarification = null;
+      saveRun(); saveMeta(); updateStatus();
+      console.error('DORK action failed:', error);
+      print('That command encountered an internal error. Its state changes were rolled back. Export the transcript from TOOLS to report it.');
     }
-    if (['north','south','east','west'].includes(cmd.verb)) {
-      move(cmd.verb);
-      saveRun(); updateStatus(); scrollBottom();
-      return;
-    }
-    const fn = actions[cmd.verb];
-    if (fn) fn(cmd);
-    else genericAction(cmd);
-    saveRun(); updateStatus(); scrollBottom();
   }
 
-  function parse(raw) {
-    const cleaned = raw.trim() === '?' ? 'help' : raw.toLowerCase().replace(/[!?.,]/g,' ').replace(/\s+/g,' ').trim().replace(/^(?:please\s+|could you\s+|can you\s+)+/,'').replace(/\s+please$/,'');
-    if (!cleaned) return null;
-    if (/\b(?:not|never|dont|don't)\b/.test(cleaned)) return null;
-    if (/^(?:what time is it|what is the time|tell me the time|check the time)$/.test(cleaned))
-      return {verb:'examine', objectText:'clock', targetText:'', raw, verbToken:'check'};
-    const jokePhrase = cleaned.match(/^(?:make|tell|crack)(?: me)? (?:a )?joke(?: about (.+))?$/);
-    if (jokePhrase) return {verb:'joke', objectText:jokePhrase[1] || '', targetText:'', raw, verbToken:'joke'};
-    const takeOut = cleaned.match(/^(?:take|get|pull|bring) (?:the )?(.+?) out$/);
-    if (takeOut) return {verb:'take', objectText:takeOut[1], targetText:'', raw, verbToken:'take out'};
-    if (state.room === 'asset_control') {
-      if (/^(?:return|surrender|deposit)(?: all| everything| all property| government property| state property| all government property| all state property)$/.test(cleaned))
-        return {verb:'returnProperty', objectText:'all', targetText:'', raw, verbToken:'return'};
-      const returnOne = cleaned.match(/^(?:return|surrender|deposit) (?:the )?(.+?)(?: (?:in|into|to) (?:the )?(?:return )?bin)?$/);
-      if (returnOne) return {verb:'returnProperty', objectText:returnOne[1], targetText:'', raw, verbToken:'return'};
-    }
-    let sensory = cleaned.match(/^take\s+a\s+(?:sip|swig|slurp)\s+of\s+(.+)$/);
-    if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
-    sensory = cleaned.match(/^take\s+a\s+(?:sniff|whiff)\s+of\s+(.+)$/);
-    if (sensory) return {verb:'smell', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'smell'};
-    sensory = cleaned.match(/^(?:gulp|slurp)\s+down\s+(.+)$/);
-    if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
-    sensory = cleaned.match(/^(?:gulp|slurp)\s+(.+?)\s+down$/);
-    if (sensory) return {verb:'drink', objectText:sensory[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'drink'};
-    let phrase = cleaned.match(/^(?:open\s+up\s+(.+)|open\s+(.+?)\s+up)$/);
-    if (phrase) return {verb:'open', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'open up'};
-    phrase = cleaned.match(/^check\s+out\s+(.+)$/);
-    if (phrase) return {verb:'examine', objectText:phrase[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'check out'};
-    phrase = cleaned.match(/^pick\s+(.+?)\s+up$/);
-    if (phrase) return {verb:'take', objectText:phrase[1].replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'pick up'};
-    phrase = cleaned.match(/^(?:put\s+down\s+(.+)|put\s+(.+?)\s+down)$/);
-    if (phrase) return {verb:'drop', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:'put down'};
-    phrase = cleaned.match(/^(?:(set|lay)\s+down\s+(.+)|(set|lay)\s+(.+?)\s+down)$/);
-    if (phrase) return {verb:'drop', objectText:(phrase[2] || phrase[4]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:'', raw, verbToken:`${phrase[1] || phrase[3]} down`};
-    phrase = cleaned.match(/^(?:hand\s+over\s+(.+?)|hand\s+(.+?)\s+over)\s+to\s+(.+)$/);
-    if (phrase) return {verb:'give', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:phrase[3].replace(/^(?:the|a|an)\s+/,'').trim(), raw, verbToken:'hand over'};
-    phrase = cleaned.match(/^(?:hand\s+off\s+(.+?)|hand\s+(.+?)\s+off)\s+to\s+(.+)$/);
-    if (phrase) return {verb:'give', objectText:(phrase[1] || phrase[2]).replace(/^(?:the|a|an)\s+/,'').trim(), targetText:phrase[3].replace(/^(?:the|a|an)\s+/,'').trim(), raw, verbToken:'hand off'};
-    if (/^(?:look around|look room|look here|look at room|examine room|survey)$/.test(cleaned)) return {verb:'look', objectText:'', targetText:'', raw};
-    if (/^(?:check inventory|look in bag|check my stuff|show (?:my )?(?:inventory|belongings)|what am i carrying)$/.test(cleaned)) return {verb:'inventory', objectText:'', targetText:'', raw};
-    if (/^show (?:me )?(?:the )?(?:commands|instructions)$/.test(cleaned)) return {verb:'help', objectText:'', targetText:'', raw};
-    if (/^give me (?:a )?(?:hint|clue)$/.test(cleaned)) return {verb:'hint', objectText:'', targetText:'', raw};
-    if (/^(?:ask for help|ask for a hint)$/.test(cleaned)) return {verb:cleaned.endsWith('hint') ? 'hint' : 'help', objectText:'', targetText:'', raw};
-    if (/^(?:take all items|grab all of it)$/.test(cleaned)) return {verb:'take', objectText:'all', targetText:'', raw};
-    if (/^(?:get out(?: of here)?|go out(?:side)?|go out (?:the )?door|walk out(?: (?:the )?door)?|exit)$/.test(cleaned)) return {verb:'leave', objectText:'', targetText:'', raw};
-    if (/^(?:enter|step through) (?:the )?gate$/.test(cleaned)) return {verb:'exitAlias', objectText:'gate', targetText:'', raw};
-    if (/^(?:call|summon) (?:the )?elevator$/.test(cleaned)) return {verb:'push', objectText:'elevator button', targetText:'', raw};
-    if (/^(?:shuffle|mix) (?:the )?(?:cards|tarot|tarot spread)$/.test(cleaned)) return {verb:'shuffle', objectText:'tarot spread', targetText:'', raw};
-    const through = cleaned.match(/^(?:go|walk|move|head|step|travel|proceed)\s+(?:through|into|to)\s+(?:the\s+)?(.+)$/);
-    if (through) {
-      const route = through[1].replace(/\s+(?:door|passage|exit|way)$/,'');
-      const direction = verbMap[route];
-      if (['north','south','east','west'].includes(direction)) return {verb:direction, objectText:'', targetText:'', raw};
-      return {verb:'exitAlias', objectText:route, targetText:'', raw};
-    }
-    if (/^(?:back|go back|return)$/.test(cleaned)) return {verb:'back', objectText:'', targetText:'', raw};
-    if (/^(?:ride|enter|step into) (?:the )?elevator$/.test(cleaned)) return {verb:'exitAlias', objectText:'elevator', targetText:'', raw};
-    if (/^(?:go|walk|move|head) down (?:the )?elevator$/.test(cleaned)) return {verb:'exitAlias', objectText:'elevator', targetText:'', raw};
-    if (/^(?:(?:go|walk|move|head|take|use|climb)\s+)?(?:down|up|downstairs|upstairs|stairs|elevator)$/.test(cleaned) || cleaned === 'descend') {
-      const alias = /elevator/.test(cleaned) ? 'elevator' : /stairs/.test(cleaned) && !/downstairs|upstairs/.test(cleaned) ? 'stairs' : /up/.test(cleaned) ? 'up' : 'down';
-      return {verb:'exitAlias', objectText:alias, targetText:'', raw};
-    }
-    if (/^(?:go|walk|move|head|step|climb)\s+(?:down|up)\s+(?:the\s+)?stairs?$/.test(cleaned))
-      return {verb:'exitAlias', objectText:/\bup\b/.test(cleaned) ? 'up' : 'down', targetText:'', raw};
-    const words = cleaned.split(' ');
-    let verbToken = words.shift();
-    if (verbToken === 'pick' && words[0] === 'up') { words.shift(); verbToken = 'pickup'; }
-    if (verbToken === 'put' && words[0] === 'on') { words.shift(); verbToken = 'puton'; }
-    if (['go','walk','move','travel','head','proceed','step'].includes(verbToken) && words.length) {
-      const d = verbMap[words[0]] || words[0];
-      if (['north','south','east','west'].includes(d)) return { verb:d, objectText:'', targetText:'', raw, verbToken };
-    }
-    const verb = verbMap[verbToken] || verbToken;
-    let rest = words.join(' ').replace(/^(the|a|an)\s+/,'').replace(/^at\s+/,'');
-    if (['listen', 'pray'].includes(verb)) rest = rest.replace(/^to\s+/,'');
-    const split = rest.split(/\s+(?:on|with|to|into|in|at|using)\s+/);
-    return { verb, objectText: split[0] || '', targetText: split[1] || '', raw, verbToken };
-  }
+  function parse(raw) { return DorkParser.parse(raw, state); }
 
     const actions = {
     look: (c) => c.objectText ? examine(c.objectText) : describeRoom(true),
@@ -261,7 +169,7 @@
     open: (c) => openThing(c.objectText),
     use: (c) => chooseCard(c) || useThing(c),
     burn: (c) => {
-      if (hasWord(c.objectText, 'candle')) return useThing({objectText:c.objectText,targetText:'',raw:c.raw});
+      if (hasWord(c.objectText, 'candle')) return useThing(c);
       genericAction(c);
     },
     give: useThing,
@@ -288,7 +196,15 @@
     },
     deaths: showDeaths,
     lore: showLore,
-    save: () => { saveRun(); print('Run state saved locally. Even bureaucracy occasionally works.'); }
+    casebook: () => { ui.open('casebook'); print('Casebook opened. Prior-run memory is labeled separately from this run.'); },
+    map: () => { ui.open('map'); print('Discovered map opened. Unexplored destinations remain unnamed.'); },
+    reclaim: (c) => reclaimProperty(c.objectText),
+    tools: () => ui.open('settings'),
+    settings: () => ui.open('settings'),
+    history: () => ui.open('settings'),
+    export: () => ui.open('settings'),
+    save: () => { const saved=saveRun(); print(saved ? 'Run state saved locally. Even bureaucracy occasionally works.' : 'Saving is unavailable. This tab still works; export a backup from TOOLS before closing it.'); }
+
   };
 
   function joke() {
@@ -308,12 +224,13 @@
   }
 
   function stampThing(c) {
-    const target = `${c.objectText} ${c.targetText}`.trim();
-    if (hasWord(target, 'waiver') || hasWord(target, 'page 64') || hasWord(target, 'refusal form')) return stampWaiver();
-    if (hasWord(target, 'form 66-b') || hasWord(target, '66-b') || hasWord(target, '66b'))
-      return print('Form 66-B is already completed. Stamp the detachable Waiver Form 4C instead.');
-    if (hasWord(target, 'contract')) return print('Do not stamp the contract. Stamp detachable Waiver Form 4C, then submit that paper to Procurement.');
-    print('Stamp what? Legal requires the detachable Waiver Form 4C, not a general display of force.');
+    const subject=findItem(c.objectText);
+    const instrument=c.targetText ? findItem(c.targetText) : null;
+    if(c.targetText && instrument!=='waiver_stamp') return print('Use Waiver Stamp 4C as the instrument. That target cannot certify the document; nothing is stamped.');
+    if(subject==='waiver_form' || /^(?:the )?(?:waiver|waiver form|waiver form 4c|page 64|refusal form|refusal page)$/.test(c.objectText)) return stampWaiver();
+    if(subject==='form66b') return print('Form 66-B is already completed. Stamp the detachable Waiver Form 4C instead.');
+    if(subject==='contract') return print('Do not stamp the contract. Stamp detachable Waiver Form 4C, then submit that paper to Procurement.');
+    print('Stamp what? Name the detachable Waiver Form 4C. Naming a stamp does not authorize stamping an unrelated object.');
   }
 
   function carriedGovernmentProperty() {
@@ -352,6 +269,8 @@
     if (!dest) return print(`There is no useful way ${dir}. There may be a useless one.`);
     if (room.blocked && room.blocked[dir]) {
       const key = room.blocked[dir];
+      const denial = expansion.blocked(key);
+      if (denial) return print(denial);
       if (key === 'jorge' && !state.flags.jorgeMoved) return print("Jorge occupies the southern gate with the passive completeness of a collapsed bridge.");
       if (key === 'tarot' && !state.flags.tarotSolved) return print("The east wall remains a wall. HR considers this a successful boundary.");
       if (key === 'final_seal' && !state.flags.finalOpen) return print("The final door does not open. Boo watches you fail with professional interest.");
@@ -361,6 +280,7 @@
       if (assets.length) return die('property', `The asset scanner identifies unauthorized state property: ${assetList(assets).toUpperCase()}.\n\nA pleasant voice says, "Thank you for self-reporting."\n\nThe parking-garage door opens downward.`);
     }
     if (dest === 'subbasement' && (!state.flags.candleLit || !state.inventory.includes('black_candle'))) {
+      if (state.flags.returnedAssets?.includes('black_candle')) return print('Your candle is in Asset Control. Do not reenter the dark tunnel without it. Return to the vestibule and RECLAIM CANDLE; the hatch permits a temporary checkout.');
       const message = state.inventory.includes('black_candle')
         ? 'You descend with the correct emergency candle still unlit in your pocket. Something in the tunnel appreciates your commitment to owning the proper equipment without using it.'
         : 'You descend without a light. Something waits until the stair door closes, because unlike you it understands timing. The sound is brief. The paperwork is not.';
@@ -385,6 +305,8 @@
 
   function examine(text) {
     if (!text) return describeRoom(true);
+    const observedId = findItem(text);
+    if (observedId) observe(observedId);
     if (state.room === 'hr_reliquary' && /^(?:the )?wall$/.test(text)) return examine('east wall');
     if (state.room === 'meeting' && /\bwest door\b/.test(text)) return print('There is no west door anymore. The red EXIT sign points east to the corridor.');
     if (state.room === 'meeting' && /\b(?:calendar invitation|invitation)\b/.test(text)) return print("The invitation bore the Governor's name and scheduled the Executive Continuity Review for 4:30 to 5:00 PM. The wall clock says 5:17. It said nothing about the missing west door.");
@@ -413,28 +335,13 @@
       return print(assets.length ? `The scanner flags: ${assetList(assets)}. Return them before going east.` : 'The scanner detects no state property. The east-door indicator is green.');
     }
     if (state.room === 'asset_control' && /\b(?:bin|return bin)\b/.test(text))
-      return print('The return bin accepts registered state property. RETURN ALL is an approved phrase for once.');
-    const scenery = {
-      executive_corridor: { directory: 'The directory lists ordinary floors, two basements, and BELOW. A marker says YOU ARE HERE — FLOOR 6: EXECUTIVE OFFICES. The elevator is out of service; Records lies south.', 'elevator button': 'The elevator call button is dark. The brass doors open east onto a car that goes nowhere.', lights: 'The fluorescent lights buzz overhead. They illuminate the corridor but offer no route out; Records lies south.' },
-      records_lobby: { placard: 'JORGE — RECORDS MANAGEMENT SPECIALIST III. His desk blocks the southern gate to the stacks.' },
-      records_stacks: { shelves: 'The shelves hold files dated years into the future. Shelf 20 bears a scratched warning beside Ash.', 'shelf 20': DORK_DATA.items.ash_note.desc },
-      legal_annex: { sign: 'SIGNATURE REQUIRED, says the sign. The contract itself explains that refusal needs Waiver Stamp 4C.' },
-      procurement: { slots: 'The brass machine has a FORM slot for completed paper and a WAIVER slot for stamped paper. Its SOUL slot is taped over.', sign: 'The sign requires documented business necessity for every purchase, including exorcisms. The brass machine wants completed Form 66-B and a stamped Waiver Form 4C.' },
-      hr_reliquary: { 'east wall': state.flags.tarotSolved ? 'The east wall has split open. A passage leads into Occult Compliance.' : 'The east wall is solid, though cold air slips through. Merlin keeps pointing at The Tower.', table: 'HR has arranged three face-up cards as an orientation assessment: THE FOOL, THE TOWER, and THE SUN. Merlin keeps one paw near The Tower.' },
-      occult_compliance: { inbox: 'Salem sleeps in the inbox tray marked ITEMS REQUIRING IMMEDIATE ACTION. The tray contains no useful paperwork.', desk: 'The desk holds Salem in the empty inbox. The compliance manual and three witness drawings carry the useful clues.', elevator: 'The freight elevator waits to the south. Its doors are open; the Archives are below.' },
-      archives: { stair: 'The narrow stair descends east into darkness. Luna hides from it; take a lit candle with you.', cabinets: 'Filing cabinets are mortared into the limestone walls. The ledger on the stone reading stand is the record you can actually read.', 'reading stand': 'The broad stone reading stand is mortared to the floor. An open arch beneath it shelters Luna.', pedestal: 'The broad stone reading stand is mortared to the floor. An open arch beneath it shelters Luna.' },
-      subbasement: { roots: 'Black roots have collapsed the parking passage. The marked way forward is east to the Continuity Chamber.', lights: 'The emergency lights are dead. Your black candle is the only useful light here.', arrow: 'The painted arrow points east to the Continuity Chamber. The parking passage is still blocked by black roots.', sign: 'There is no sign here. A painted arrow points east to the Continuity Chamber; black roots block the parking passage.' },
-      continuity_chamber: { door: state.flags.finalOpen ? 'The eastern door stands open. You can leave.' : state.flags.keyUsed ? 'The silver key rests in its slot. Five awakened seals still wait for names in clockwise order.' : 'Five seals ring the eastern door. An engraved arrow points clockwise, and a silver key slot waits beneath them.' },
-      asset_control: { scanner: 'The scanner compares your inventory against the state asset register.', bin: 'The return bin accepts registered government property.' }
-    };
-    const detail = Object.entries(scenery[state.room] || {}).find(([phrase]) => hasWord(text, phrase));
-    if (detail) return print(detail[1]);
+      return print('The return bin accepts registered state property. RETURN ALL is an approved phrase for once. RECLAIM CANDLE checks out a surrendered light for backtracking; return it again before departure.');
     const id = findItem(text);
     if (!id) {
       if (/jorge/.test(text) && state.room === 'records_lobby') return print("Jorge is at least seven feet tall when seated, which raises questions you do not have clearance to ask. His smile contains excellent dental benefits.");
       return print(`You examine ${text}. It remains disappointingly nonspecific.`);
     }
-    const item = DORK_DATA.items[id]; print(flagDescription(item));
+    const item = DORK_DATA.items[id]; print(expansion.specialDescription(id) || DorkWorld.description(id,state) || flagDescription(item));
     if (id === 'records_file') state.flags.readPersonnelFile = true;
     if (id === 'napkin') state.flags.readNapkin = true;
     discoverLore(id);
@@ -444,9 +351,9 @@
     if (hasWord(text, 'receipt') && state.inventory.includes('procurement_receipt')) return print('You already have the Procurement receipt. It is the employee copy, which is the closest thing here to a gift.');
     if (hasWord(text, 'key') && state.flags.keyUsed) return print('The silver key is locked into the continuity mechanism. The Agency has retained the asset before you could.');
     if (hasWord(text, 'candle') && state.inventory.includes('black_candle') && /(?:take|get|pull|bring).+out/i.test(raw)) return print(state.flags.candleLit ? 'You take out the black candle. Its green flame is already lit.' : 'You take out the black candle. Its striker cap remains untwisted; the candle is still unlit.');
-    const id = findItem(text, true);
+    const id = findItem(text, true) || findInventory(text);
     if (state.room === 'occult_compliance' && hasWord(text, 'inbox')) return print('The inbox is fixed to the desk, and Salem is asleep inside it. The tray contains no useful paperwork.');
-    if (state.room === 'legal_annex' && hasWord(text, 'stamp') && state.flags.stampTaken) return print(state.inventory.includes('waiver_stamp') ? 'You already carry Waiver Stamp 4C. The acrylic box is empty.' : 'The acrylic box is open and empty. Waiver Stamp 4C is no longer here.');
+    if (state.room === 'legal_annex' && hasWord(text, 'stamp') && state.flags.stampTaken && state.dropped.waiver_stamp !== state.room) return print(state.inventory.includes('waiver_stamp') ? 'You already carry Waiver Stamp 4C. The acrylic box is empty.' : 'The acrylic box is open and empty. Waiver Stamp 4C is no longer here.');
     if (state.room === 'legal_annex' && hasWord(text, 'stamp') && !state.flags.stampTaken) return print('Waiver Stamp 4C is locked in the acrylic box. Your visitor badge might pry it open.');
     if (!id) return print(`You cannot find ${text || 'that'} here. This is one of your better outcomes tonight.`);
     const item = DORK_DATA.items[id];
@@ -496,14 +403,14 @@
     if (c.targetText && findItem(c.targetText, true) !== 'tarot_spread' && !/^(?:the )?(?:orientation )?table$/.test(c.targetText)) {
       print('That is not the tarot spread. The card stays where it is.'); return true;
     }
-    if (c.verb === 'take' && c.verbToken === 'take' && id !== 'tower') {
+    if (c.verb === 'take') {
       print('Choose a card. Do not pocket it.'); return true;
     }
     useThing({...c, objectText:id}); return true;
   }
 
   function openThing(text) {
-    const id = findInventory(text) || findItem(text);
+    const id = findItem(text);
     if (['ash','merlin','salem','luna','boo','jorge'].includes(id)) return print(`${DORK_DATA.items[id].name} is a living being, not a container. Try talking instead.`);
     if (['memo','ash_note','contract','compliance_manual','drawings','final_plaque','form66b','waiver_form','procurement_receipt','napkin'].includes(id)) return examine(text);
     if (id === 'badge') return print('The visitor badge is a solid plastic card. It may still be useful as a pry tool.');
@@ -539,7 +446,7 @@
 
   function useThing(c) {
     if (/^(?:waiver stamp|stamp 4c|4c)$/.test(c.objectText) && /^(?:waiver|waiver form|waiver form 4c|page 64|refusal form|refusal page)$/.test(c.targetText)) return stampWaiver();
-    const a = findInventory(c.objectText) || findItem(c.objectText);
+    const a = findItem(c.objectText);
     const b = c.targetText ? (findItem(c.targetText) || specialTarget(c.targetText)) : null;
     if (state.room === 'asset_control' && b === 'return_bin' && a) return returnAssetById(a);
     if (state.room === 'break_room' && hasWord(c.objectText, 'coffee machine')) return print('The coffee machine wheezes out something dark. The useful hazelnut creamer is reserved for Jorge in Records.');
@@ -590,6 +497,8 @@
       return;
     }
 
+    if (state.room === 'hr_reliquary' && state.flags.tarotSolved && ['tower','fool','sun'].includes(a))
+      return print('Orientation is already complete. The eastern passage is open; the cards stay on the table.');
     if (state.room === 'hr_reliquary' && (a === 'tower' || /tower/.test(c.objectText))) {
       if (c.targetText && b !== 'tarot_spread' && !/^(?:the )?(?:orientation )?table$/.test(c.targetText))
         return print('That is not the tarot spread. The card stays where it is.');
@@ -603,7 +512,7 @@
     }
 
     if (state.room === 'continuity_chamber' && (a === 'silver_key' || /key/.test(c.objectText))) {
-      if (state.flags.keyUsed) return print('The silver key is already locked into the mechanism. Five lit seals still wait for the five names.');
+      if (state.flags.keyUsed) return print(state.flags.finalOpen ? 'The silver key remains locked into the mechanism. The household door is already open.' : 'The silver key is already locked into the mechanism. Five lit seals still wait for the five names.');
       if (!state.inventory.includes('silver_key')) return print('You need the silver key in your hand, not merely in a sentence.');
       if (c.targetText && !/^(?:(?:the|a|an) )?(?:five (?:brass )?seals|(?:brass )?seals|key slot|silver key slot|slot(?: beneath (?:the )?(?:five )?seals)?|(?:final |eastern |east )?door)$/.test(c.targetText))
         return print('The key fits the slot beneath the five seals, not that target.');
@@ -616,15 +525,16 @@
     }
 
     if (a === 'black_candle' || hasWord(c.objectText, 'candle')) {
+      if (c.targetText) return print('The candle lights with its own striker cap; it is not used on that target. Nothing changes.');
       if (!state.inventory.includes('black_candle')) return print('There is no candle in your inventory to light.');
       if (state.flags.candleLit) return print('The black emergency candle is already burning with a green flame.');
       state.flags.candleLit = true;
-      print("You twist the candle's metal striker cap until it clicks. The black candle lights itself. Its flame is green. The tunnel ahead becomes visible enough to regret."); return;
+      print("You twist the candle's metal striker cap until it clicks. The black candle lights itself. Its flame is green. You now have a working light, not merely the correct equipment."); return;
     }
 
     if (a && !c.targetText) {
       if (a === 'napkin') {
-        state.flags.readNapkin = true;
+        observe('napkin'); state.flags.readNapkin = true;
         return print('The napkin drawing says HOME IS A PASSWORD. Keep that in mind when you reach the final door.');
       }
       const replies = {
@@ -667,7 +577,7 @@
   }
 
   function talkThing(c) {
-    const t = `${c.objectText} ${c.targetText}`.trim();
+    const t = `${c.objectText} ${c.targetText}${c.topic ? ' about '+c.topic : ''}`.trim().replace(/\s+/g,' ');
     if (state.room === 'break_room' && hasWord(t, 'jorge')) return print('Jorge is at his Records desk to the south. His creamer is here beneath the JORGE ONLY warning.');
     if (state.room === 'subbasement' && /^(?:for )?(?:directions|way out|exit)$/.test(t)) return print('The painted arrow points east to the Continuity Chamber. Black roots block the parking passage.');
     if (state.room === 'continuity_chamber' && /^(?:for )?names$|^(?:the )?room about seals$/.test(t)) return print(state.flags.keyUsed ? 'Start at the uppermost of the five lit seals and follow the engraved arrow clockwise. Match each pose to one of the five cats you met.' : 'The five seals are dark. Use the silver key in the visible slot beneath them, then follow the engraved arrow.');
@@ -675,8 +585,9 @@
     const allFiveNames = names.every(n => new RegExp(`\\b${n}\\b`).test(t));
     if (state.room === 'continuity_chamber' && allFiveNames && !state.flags.keyUsed)
       return print('You say the five names, but the seals remain dark. Use the silver continuity key first.');
+    if (state.room === 'continuity_chamber' && state.flags.finalOpen && allFiveNames) return print('The household door is already open. Repeating the names does not create a second exit.');
     if (state.room === 'continuity_chamber' && state.flags.keyUsed && allFiveNames) {
-      if (!/\bboo\b.*\bsalem\b.*\bash\b.*\bluna\b.*\bmerlin\b/.test(t)) return print('The five seals flicker, then go dark. Match the poses: start at the uppermost seal and follow the engraved arrow clockwise.');
+      if (!/\bboo\b.*\bsalem\b.*\bash\b.*\bluna\b.*\bmerlin\b/.test(t)) return print('The five seals flicker without opening the door. They remain awake. Match the poses: start at the uppermost seal and follow the engraved arrow clockwise.');
       state.flags.finalOpen = true;
       print("You name them: BOO. SALEM. ASH. LUNA. MERLIN.\n\nOne by one, the brass seals illuminate. The enormous door unlocks with a sound like five hundred filing cabinets opening at once.\n\nBoo stands, stretches, and moves aside.\n\nFor the first time tonight, you have been cleared to leave."); return;
     }
@@ -728,7 +639,7 @@
     if (state.room === 'continuity_chamber' && /boo.*salem.*ash.*luna.*merlin/.test(r) && state.flags.keyUsed) return talkThing({objectText:r,targetText:''});
     if (/\bread\b/.test(r)) return examine(c.objectText);
     if (/coffee/.test(r) && state.room === 'break_room') return print("The coffee machine produces a liquid that is technically darker than the cup. You decide Jorge deserves the creamer more than you deserve this.");
-    const id = findItem(c.objectText) || findInventory(c.objectText);
+    const id = findItem(c.objectText);
     if (id === 'jorge') {
       const responses = {
         touch: 'Jorge permits one finger on his sleeve. The fabric is warm. He was not.',
@@ -748,7 +659,7 @@
         luna: 'Luna allows a brief touch, then retreats into the open arch beneath the stone reading stand. She has better instincts than you.',
         boo: 'Boo accepts your attention as tribute. The door remains unimpressed.'
       };
-      return print(lines[id]);
+      return print(catScene(id,lines[id]));
     }
     if (['smell', 'listen', 'lick'].includes(c.verb) && ['ash','merlin','salem','luna','boo'].includes(id)) {
       const cats = {
@@ -838,24 +749,12 @@
   }
 
   function hint() {
+    if(state.dead || state.won) return print('This run is complete. The casebook and death reports remain available.');
+    const hint = DorkJournal.hint(state,meta);
+    const step = Math.min(3,(state.hintSteps[hint.key] || 0)+1);
+    state.hintSteps[hint.key]=step;
     meta.hints++; saveMeta();
-    const hints = {
-      meeting: "The badge is more useful than the water. This is the only normal sentence the game will give you.",
-      executive_corridor: "Records is blocked by someone with a clearly documented preference.",
-      break_room: "JORGE ONLY is not subtle. Neither is Jorge.",
-      records_lobby: state.flags.jorgeMoved ? "Go south before Jorge decides the creamer was inadequate." : "Government runs on incentives. Jorge's incentive is in the break room.",
-      records_stacks: "Take the form. Read the file if you enjoy being unsettled.",
-      legal_annex: state.flags.waiverStamped ? "Take the completed Form 66-B and stamped Waiver Form 4C to Procurement." : state.flags.stampTaken ? "Take Page 64, then use Waiver Stamp 4C on that detachable waiver paper." : "Read the contract. Take detachable Waiver Form 4C, then acquire the rubber stamp by a method Legal would dislike.",
-      procurement: "Insert completed Form 66-B into FORM and stamped Waiver Form 4C into WAIVER.",
-      hr_reliquary: "Merlin is looking at the answer. Try to keep up.",
-      occult_compliance: "Read the manual. Remember the drawings. Continue south.",
-      archives: "Read the ledger. Keep the candle with you. Luna's fear is not decorative.",
-      subbasement: "Light was procured for a reason.",
-      continuity_chamber: state.flags.keyUsed ? "Five household anchors. Follow the engraved arrow clockwise and name the cats by their poses." : "Use the silver key first.",
-      asset_control: "Return every registered state asset before going east. RETURN ALL is accepted.",
-      parking_exit: "You won. Please stop requesting assistance."
-    };
-    print(`MANAGEMENT ASSISTANCE REQUIRED #${meta.hints}: ${hints[state.room]}`);
+    print(`MANAGEMENT ASSISTANCE REQUIRED #${meta.hints} — HINT ${step}/3:\n${hint.steps[step-1]}${step < 3 ? '\nAsk HINT again for a more explicit level.' : ''}`);
   }
 
   function inventory() {
@@ -864,23 +763,51 @@
   }
 
   function help() {
-    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN DRAWER / READ NOTICE / MAKE A JOKE / INVENTORY / LEAVE ROOM\nRETURN ALL works at an authorized property-return station.\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT, DEATHS, LORE, SAVE, RESTART.\n\nTry unreasonable things. The game has opinions.");
+    print("DORK understands a broad parser vocabulary. Useful examples:\n\nLOOK / EXAMINE POSTER / TAKE PENCIL / DROP PENCIL\nN, S, E, W or NORTH, SOUTH, EAST, WEST\nUSE SCREWDRIVER ON PANEL / GIVE PARCEL TO RECEPTIONIST\nTALK TO RECEPTIONIST / ASK RECEPTIONIST ABOUT HOURS\nOPEN DRAWER / READ NOTICE / MAKE A JOKE / INVENTORY / LEAVE ROOM\nRETURN ALL works at an authorized property-return station.\nLICK, SMELL, TOUCH, PUSH, PULL, BREAK, BURN, EAT, DRINK, THROW, HIDE, PRAY, THREATEN, FLATTER, etc.\n\nMeta commands: HINT (three levels), DEATHS, LORE, CASEBOOK, MAP, SAVE, RESTART.\nPACK and TOOLS provide inventory insertion, command history, display settings, save export/import, and transcript export.\nTaking or grabbing a tarot card does not select it. Use CHOOSE for a binding choice.\n\nTry unreasonable things. The game has opinions.");
   }
 
   function showDeaths() { print(meta.deaths.length ? "PERSONNEL SEPARATION LOG:\n" + meta.deaths.map((d,i)=>`${i+1}. ${d}`).join('\n') : "PERSONNEL SEPARATION LOG: No deaths recorded. This is temporary."); }
   function showLore() { print(meta.lore.length ? "DISCOVERED ARCHIVE:\n" + meta.lore.map((x,i)=>`${i+1}. ${x}`).join('\n') : "DISCOVERED ARCHIVE: Empty. Ignorance remains your most complete record."); }
 
   function describeRoom(force=false) {
-    const room = roomNow(); print(`\n[${room.name.toUpperCase()}]\n${flagDescription(room)}`);
-    const visible = [...(room.items || []), ...Object.keys(state.dropped).filter(id => state.dropped[id] === state.room)]
-      .filter(id => !state.taken.includes(id) || !DORK_DATA.items[id].portable || state.dropped[id] === state.room);
+    const room = roomNow();
+    const remembered = meta.knownRooms.includes(state.room);
+    if (!remembered) meta.knownRooms.push(state.room);
+    for(const id of room.items || []) if(DorkJournal.catFacts[id]) observe(id);
+    const description = !force && remembered && ui?.preferences.brief ? briefDescription(room) : roomDescription(room);
+    print(`\n[${room.name.toUpperCase()}]\n${description}`);
+    const visible = visibleItems();
     if (visible.length) print(`Visible: ${visible.map(id=>DORK_DATA.items[id].name).join(', ')}.`, 'dim');
-    const exits = Object.keys(room.exits || {}); if (exits.length) print(`Exits: ${exits.join(', ')}.`, 'dim');
+    const exits = Object.keys(room.exits || {});
+    if (exits.length) print(`Exits: ${exits.join(', ')}.`, 'dim');
+    refreshObservedExits();
+    const extra=expansion.roomExtra(); if(extra) print(extra,'dim');
     if (state.room === 'asset_control') {
       const assets = carriedGovernmentProperty();
       print(assets.length ? `SCANNER FLAGS: ${assetList(assets)}.` : 'SCANNER: NO STATE PROPERTY DETECTED. EAST DOOR GREEN.', 'dim');
     }
     updateStatus();
+  }
+  function refreshObservedExits() {
+    state.knownExits[state.room]=Object.keys(roomNow().exits || {}).filter(d=>!(state.room==='hr_reliquary' && d==='east' && !state.flags.tarotSolved));
+  }
+  function roomDescription(room) {
+    let description=flagDescription(room);
+    const here=visibleItems();
+    if(state.room==='meeting' && !['agenda','badge'].every(id=>here.includes(id))) {
+      const table=['agenda','badge','water'].filter(id=>here.includes(id)).map(id=>DORK_DATA.items[id].name);
+      description=description.replace(/On the table:.*$/, 'On the table: '+table.join(', ')+'.');
+    }
+    if(state.room==='break_room') {
+      if(!here.includes('creamer')) description=description.replace(/A jar of hazelnut creamer sits beneath a handwritten warning: 'JORGE ONLY.'/, 'A handwritten JORGE ONLY warning marks the creamer’s now-empty place.');
+      if(!here.includes('napkin')) description=description.replace(/Someone has drawn three little stick figures on a napkin and labeled them ANGELA, JULIA, and AUDREY\./, 'The napkin drawing has been removed from the counter.');
+    }
+    if(state.room==='legal_annex' && !here.includes('waiver_form')) description=description.replace('A detachable Page 64 labeled WAIVER FORM 4C is tucked underneath it.', 'The detachable Waiver Form 4C has been removed from beneath it.');
+    return description;
+  }
+  function briefDescription(room) {
+    const changed = Object.entries(room.descByFlag || {}).find(([flag])=>state.flags[flag]);
+    return changed ? changed[1] : room.brief || room.desc.split('\n\n')[0];
   }
 
   function flagDescription(entry) {
@@ -895,14 +822,18 @@
     const fileCallback = state.flags.readPersonnelFile
       ? "\n\nThe file you read in Records was dated before your law-school graduation. Outside, that fact feels less like a clue than an accusation the Agency can no longer answer."
       : '';
+    const expansionEnding = expansion.ending();
+    if(expansionEnding) print(expansionEnding);
     print(`\n*** TRUE ENDING: RELEASED FROM CONTINUITY ***\n\nScott has escaped the Agency. The Agency has not escaped Scott.${fileCallback}\n\nYour run is complete. Type DEATHS, LORE, or RESTART if you have learned nothing.`, 'death');
   }
 
   function die(code, text) {
     print(`\n${text}\n\n*** EMPLOYMENT STATUS: TERMINATED ***`, 'death');
-    const labels = { darkness:'Entered unlit continuity infrastructure', orientation:'Failed mandatory orientation', jorge:'Initiated unauthorized Jorge interaction', cat:'Committed an unforgivable policy violation', contract:'Executed contract without adequate review', property:'Attempted unauthorized removal of state property' };
+    const labels = { electrical:'Fitted a fuse into live service infrastructure', consent:'Reinstated consent by occupying the identity chair', darkness:'Entered unlit continuity infrastructure', orientation:'Failed mandatory orientation', jorge:'Initiated unauthorized Jorge interaction', cat:'Committed an unforgivable policy violation', contract:'Executed contract without adequate review', property:'Attempted unauthorized removal of state property' };
+    const warningSeen = ({darkness:state.observed.includes('luna') || state.visited.includes('archives'), orientation:state.visited.includes('hr_reliquary'), contract:state.observed.includes('contract'), property:state.visited.includes('asset_control'), electrical:state.visited.includes('relay_chamber') || state.observed.includes('relay_instructions'), consent:state.visited.includes('below'), cat:true, jorge:true})[code] === true;
+    meta.reports.push({code,room:state.room,command:currentCommand,lesson:DorkJournal.lessons[code] || 'Review the last action and the available warnings.',warningSeen,run:meta.runs});
     meta.deaths.push(labels[code] || 'Administrative death'); meta.runs++; saveMeta();
-    localStorage.removeItem(RUN_KEY);
+    if(!rejectedSave) store.remove(RUN_KEY);
     print("\nType RESTART to begin a new run. The narrator will remember this.");
     state.dead = true;
   }
@@ -913,31 +844,23 @@
       return print('RESTART will erase this run. Type RESTART again as your next command to confirm.');
     }
     restartPending = false;
-    state = newRun(); saveRun(); print("\n--- NEW RUN ---\nThe building has reset. Your dignity has not.\n"); describeRoom();
+    if(!state.dead) {meta.runs++; saveMeta();}
+    state = newRun(); pendingClarification=null; saveRun(); print("\n--- NEW RUN ---\nThe building has reset. Your dignity has not.\n");
+    const report=meta.reports[meta.reports.length-1]; if(report && DorkJournal.callbacks[report.code]) print(DorkJournal.callbacks[report.code],'dim');
+    describeRoom(true);
   }
 
-  function findItem(text, roomOnly=false) {
-    const t = (text||'').toLowerCase().replace(/^(the|a|an)\s+/,'');
-    const here = [...(roomNow().items || []), ...Object.keys(state.dropped).filter(id => state.dropped[id] === state.room)];
-    const candidates = roomOnly ? here : [...here, ...state.inventory];
-    const matches = [];
-    for (const [priority, id] of candidates.entries()) {
-      const it = DORK_DATA.items[id]; if (!it) continue;
-      if (state.taken.includes(id) && it.portable && !state.inventory.includes(id) && state.dropped[id] !== state.room) continue;
-      const aliasLength = Math.max(0, ...it.aliases.filter(a => hasWord(t, a)).map(a => a.length));
-      if (aliasLength) matches.push({ id, aliasLength, priority });
-    }
-    matches.sort((a, b) => b.aliasLength - a.aliasLength || a.priority - b.priority);
-    return matches[0]?.id || null;
+  function visibleItems() {
+    return [...new Set([...(roomNow().items || []), ...Object.keys(state.dropped).filter(id=>state.dropped[id]===state.room)])]
+      .filter(id=>DORK_DATA.items[id] && (!state.taken.includes(id) || !DORK_DATA.items[id].portable || state.dropped[id]===state.room));
   }
-  function findInventory(text) {
-    const t = (text || '').toLowerCase();
-    return state.inventory.find(id => DORK_DATA.items[id].aliases.some(a => hasWord(t, a))) || null;
+  function scopedItems(roomOnly=false) {
+    return [...new Set([...visibleItems(),...(roomNow().scenery || []),...(roomOnly ? [] : state.inventory)])];
   }
-  function hasWord(text, phrase) {
-    const escaped = String(phrase).toLowerCase().trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
-    return !!escaped && new RegExp(`(?:^|\\b)${escaped}(?:$|\\b)`, 'i').test(String(text || '').toLowerCase());
-  }
+  function findItem(text, roomOnly=false) { return DorkCore.resolve(text,scopedItems(roomOnly),DORK_DATA.items).id; }
+  function findInventory(text) { return DorkCore.resolve(text,state.inventory,DORK_DATA.items).id; }
+  function hasWord(text, phrase) { return DorkCore.hasWord(text,phrase); }
+
   function specialTarget(t) { return hasWord(t, 'jorge') ? 'jorge' : null; }
 
   function discoverLore(id) {
@@ -951,16 +874,76 @@
     if (loreMap[id] && !meta.lore.includes(loreMap[id])) { meta.lore.push(loreMap[id]); saveMeta(); print("[ARCHIVE UPDATED]", 'dim'); }
   }
 
-  function roomNow(){ return DORK_DATA.rooms[state.room]; }
-  function newRun(){ return { room:DORK_DATA.startRoom, previousRoom:null, inventory:[], taken:[], dropped:{}, flags:{}, visited:[DORK_DATA.startRoom], dead:false, won:false }; }
-  function saveRun(){ if (!state.dead) localStorage.setItem(RUN_KEY, JSON.stringify(state)); }
-  function saveMeta(){ localStorage.setItem(META_KEY, JSON.stringify(meta)); }
-  function load(k,f){ try { return JSON.parse(localStorage.getItem(k)) || f; } catch { return f; } }
-  function buildVerbMap(groups){ const m={}; Object.entries(groups).forEach(([k,arr])=>arr.forEach(v=>m[v]=k)); return m; }
+  function roomNow(){
+    const base=DORK_DATA.rooms[state.room];
+    return {...base,exits:expansion.exits(state.room,base.exits || {}),exitAliases:expansion.aliases(state.room,base.exitAliases || {})};
+  }
+  function newRun(){ return DorkCore.newRun(DORK_DATA); }
+  function saveRun(){ return state.dead ? true : rejectedSave ? false : store.write(RUN_KEY,state); }
+  function saveMeta(){ return rejectedSave ? false : store.write(META_KEY,meta); }
   function hash(s){ let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h)+s.charCodeAt(i)|0; return h; }
   function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-  function print(content, cls='', trusted=false){ const p=document.createElement('p'); if(cls) p.className=cls; p.innerHTML=trusted ? content : escapeText(content); out.appendChild(p); scrollBottom(); }
-  function escapeText(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
-  function scrollBottom(){ requestAnimationFrame(()=>{ out.scrollTop=out.scrollHeight; }); }
-  function updateStatus(){ runStatus.textContent=`RUN ${meta.runs} · DEATHS ${meta.deaths.length} · HINTS ${meta.hints}`; roomStatus.textContent=roomNow().name.toUpperCase(); }
+  function print(content, cls='', trusted=false){
+    const follow=out.scrollHeight-out.clientHeight-out.scrollTop < 80;
+    const p=document.createElement('p'); if(cls) p.className=cls;
+    if(trusted) p.innerHTML=content; else p.textContent=String(content);
+    out.appendChild(p);
+    ui?.record(trusted ? p.textContent : content, cls==='dim' && String(content).startsWith('> ') ? 'command' : 'response');
+    while(out.children.length > 900) out.firstElementChild.remove();
+    if(follow) scrollBottom(true); else ui?.hasNewOutput();
+  }
+  function scrollBottom(force=false){ if(force) requestAnimationFrame(()=>{ out.scrollTop=out.scrollHeight; }); }
+  function updateStatus(){ runStatus.textContent=`RUN ${meta.runs} · DEATHS ${meta.deaths.length} · HINTS ${meta.hints}`; roomStatus.textContent=DORK_DATA.rooms[state.room].name.toUpperCase(); }
+  function observe(id) {
+    if(!DORK_DATA.items[id]) return;
+    if(!state.observed.includes(id)) state.observed.push(id);
+    if(!meta.observations.includes(id)) meta.observations.push(id);
+    expansion.onObserve(id);
+    const evidence=DorkJournal.catFacts[id] || expansion.specialDescription(id) || DorkWorld.description(id,state) || flagDescription(DORK_DATA.items[id]);
+    state.evidence[id]=evidence; meta.evidence[id]=evidence;
+  }
+  function reclaimProperty(text) {
+    if(state.room!=='asset_control') return print('Asset Control’s recovery hatch is the authorized place to reclaim returned property.');
+    const returned=state.flags.returnedAssets || [];
+    const result=DorkCore.resolve(text,returned,DORK_DATA.items);
+    if(result.matches.length>1) return print('Name the returned asset precisely: '+result.matches.map(id=>DORK_DATA.items[id].name).join(', ')+'.');
+    const id=result.id;
+    if(!id) return print('That asset is not in the recovery hatch. Only property you returned can be reclaimed.');
+    state.flags.returnedAssets=returned.filter(x=>x!==id);
+    if(!state.inventory.includes(id)) state.inventory.push(id);
+    print(`Reclaimed: ${DORK_DATA.items[id].name}. The scanner flags it again. Return it before leaving the Agency.`);
+  }
+  function catScene(id,line) {
+    observe(id);
+    const key=id+'Scene';
+    if(state.flags[key] || id==='ash') return line;
+    state.flags[key]=true;
+    const scenes={
+      merlin:'He places his raised paw on your hand, then beside The Tower. Not a trick. A patient animal trying to be understood in a room designed for the opposite.',
+      salem:'For a moment the inbox stops trembling. He curls back into the same sleeping shape beneath the three drawings. The building can file a household, but it has not learned how to be one.',
+      luna:state.flags.candleLit && state.inventory.includes('black_candle') ? 'The green candlelight reaches beneath the stand. Luna edges forward far enough for you to see her black fur, then retreats. She does not need to accompany you for the warning to matter.' : 'She looks from your empty light to the stair and presses herself deeper beneath the stand. Only her eyes remain visible. She has not been hiding from you.',
+      boo:state.flags.finalOpen ? 'He stretches, then sits upright again beside the open doorway. His work appears complete. Yours involves a scanner.' : 'Boo sits upright again, white and immense. The brass outline above the door echoes his posture. He is not blocking a solution; he is part of what the solution describes.'
+    };
+    return line+'\n\n'+scenes[id];
+  }
+  function casebookSections(){ return DorkJournal.sections(state,meta,DORK_DATA); }
+  function mapEntries(){ return DorkJournal.map(state,meta,DORK_DATA,id=>expansion.exits(id,DORK_DATA.rooms[id].exits || {}),(id,dir)=>{
+    const key=DORK_DATA.rooms[id].blocked?.[dir];
+    if(!key) return '';
+    if(key==='jorge') return !state.flags.jorgeMoved;
+    if(key==='tarot') return !state.flags.tarotSolved;
+    if(key==='final_seal') return !state.flags.finalOpen;
+    return expansion.blocked(key);
+  }); }
+  function backup(){ return {format:'dork-backup',schemaVersion:DorkCore.SAVE_VERSION,gameVersion:DorkCore.VERSION,exportedAt:new Date().toISOString(),run:JSON.parse(JSON.stringify(state)),meta:JSON.parse(JSON.stringify(meta))}; }
+  function importBackup(decoded){
+    state=decoded.run; meta=decoded.meta; pendingClarification=null; restartPending=false; rejectedSave=null;
+    if(state.dead) store.remove(RUN_KEY); else saveRun(); saveMeta();
+    out.replaceChildren(); print('BACKUP IMPORTED. Current run and accumulated knowledge replaced.');
+    describeRoom(true); if(state.dead) print('This imported run ended in termination. Type RESTART.');
+    scrollBottom(true);
+  }
+  const expansion = DorkExpansion.create({state:()=>state,meta:()=>meta,print,observe,resolve:findItem,take,die,move});
+  ui=DorkUI.create({state:()=>state,meta:()=>meta,data:DORK_DATA,store,visible:visibleItems,casebook:casebookSections,map:mapEntries,backup,importBackup,rejectedSave:()=>rejectedSave,rejectedMeta:()=>loadedMeta});
+  boot(); saveRun(); saveMeta();
 })();

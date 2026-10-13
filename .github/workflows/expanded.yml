@@ -1,0 +1,64 @@
+name: Expanded edition validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax and pure engine invariants
+        run: |
+          find . -maxdepth 2 -name '*.js' -not -path './node_modules/*' -exec node --check {} \;
+          node tests/core_test.js
+      - name: Install browser test dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          python -m playwright install --with-deps msedge chromium webkit
+      - name: Original Edge browser regression
+        run: python browser_test.py
+      - name: Command equivalence and varied-input ending
+        run: |
+          python input_audit_matrix.py
+          python input_audit_playthrough.py
+      - name: Expanded Chromium and WebKit acceptance suite
+        run: python tests/expanded_test.py
+      - name: Package validated playable source
+        run: |
+          python - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          files = [Path(p) for p in subprocess.check_output(['git','ls-files'],text=True).splitlines() if not p.startswith(('_delivery/','.github/'))]
+          hashes = {str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files if p.is_file()}
+          manifest = {'version':'2.0.0','commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'files':hashes}
+          with ZipFile('/tmp/DORK-2.0.0-Expanded-Edition.zip','w',ZIP_DEFLATED) as archive:
+              for p in files:
+                  if p.is_file(): archive.write(p)
+              archive.writestr('RELEASE-MANIFEST.json',json.dumps(manifest,indent=2))
+          PY
+      - name: Upload playable release
+        uses: actions/upload-artifact@v4
+        with:
+          name: dork-playable-source
+          path: /tmp/DORK-2.0.0-Expanded-Edition.zip
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dork-test-evidence
+          path: test-results/
+          if-no-files-found: ignore

@@ -6,6 +6,7 @@ Run from the repository root with Python and pass --url to sample Pages.
 
 import argparse
 import asyncio
+import os
 import json
 from pathlib import Path
 
@@ -19,7 +20,8 @@ VERBS = ("look at", "read", "open", "take", "use", "touch", "search", "smell", "
 async def collect(url):
     rows = []
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True, channel="msedge")
+        executable = os.environ.get("DORK_BROWSER_EXECUTABLE")
+        browser = await playwright.chromium.launch(headless=True, **({"executable_path": executable, "args": ["--no-sandbox"]} if executable else {"channel": "msedge"}))
         try:
             page = await browser.new_page()
             errors = []

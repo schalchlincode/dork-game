@@ -1,0 +1,43 @@
+name: Published game check
+
+on:
+  workflow_run:
+    workflows: ['pages build and deployment']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dork-published-check
+  cancel-in-progress: true
+
+jobs:
+  published:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test dependencies
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          python -m playwright install --with-deps chromium
+      - name: Verify deployed files and play both complete routes
+        env:
+          TESTED_COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: python tests/deployed_smoke.py
+      - name: Upload publication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-game-evidence
+          path: test-results/
+          if-no-files-found: ignore
